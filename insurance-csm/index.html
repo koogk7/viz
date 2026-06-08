@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>보험 CSM · 수익인식 계산기 (IFRS 17)</title>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#1a2029; --line:#2a323d; --txt:#e6e9ee; --muted:#8b97a7;
+    --claim:#5b8def; --ra:#f0b429; --csm:#27ae60; --bad:#e05c5c; --accent:#4dd0a7;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif;
+    line-height:1.5;padding:24px;max-width:920px;margin:0 auto}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 20px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .panel h2{font-size:13px;color:var(--muted);margin:0 0 14px;font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+  .ctrl{margin-bottom:16px}
+  .ctrl label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+  .ctrl label b{color:var(--accent);font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;accent-color:var(--accent);height:4px}
+  .kpi{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+  .card{flex:1;min-width:120px;background:#11161d;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .card .v{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+  .card .l{font-size:11px;color:var(--muted);margin-top:2px}
+  .warn{background:#2a1518;border-color:#5c2a2a;color:var(--bad)}
+  .ok{color:var(--csm)}
+  .chart{display:flex;align-items:flex-end;gap:10px;height:220px;padding-top:10px;border-bottom:1px solid var(--line);margin-bottom:8px}
+  .col{flex:1;display:flex;flex-direction:column-reverse;align-items:center;height:100%;position:relative}
+  .bar{width:100%;border-radius:3px 3px 0 0;transition:height .15s}
+  .bar.claim{background:var(--claim)}
+  .bar.ra{background:var(--ra)}
+  .bar.csm{background:var(--csm)}
+  .col .yr{position:absolute;bottom:-22px;font-size:11px;color:var(--muted)}
+  .axis{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:24px}
+  .legend{display:flex;gap:16px;font-size:12px;margin:14px 0 0}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .csmline{display:flex;align-items:flex-end;gap:6px;height:120px;margin-top:10px}
+  .csmcol{flex:1;background:linear-gradient(var(--csm),#1c6b43);border-radius:3px 3px 0 0;position:relative;transition:height .15s;min-height:2px}
+  .csmcol .t{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted)}
+  .formula{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--muted);
+    background:#11161d;border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:14px;white-space:pre-wrap}
+  .note{font-size:12px;color:var(--muted);margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+  <h1>보험 CSM · 수익인식 계산기</h1>
+  <p class="sub">IFRS 17 일반모형(GMM) · 할인 무시 단순화 — 슬라이더를 움직이면 회계 공식이 실시간 재계산됩니다</p>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>입력 (계약 가정)</h2>
+      <div class="ctrl">
+        <label>연 보험료 <b><span id="pV">100</span>만원</b></label>
+        <input type="range" id="p" min="20" max="300" value="100" step="10">
+      </div>
+      <div class="ctrl">
+        <label>납입·보장 기간 <b><span id="nV">5</span>년</b></label>
+        <input type="range" id="n" min="2" max="10" value="5" step="1">
+      </div>
+      <div class="ctrl">
+        <label>예상 보험금 총액 <b><span id="cV">350</span>만원</b></label>
+        <input type="range" id="c" min="50" max="1500" value="350" step="10">
+      </div>
+      <div class="ctrl">
+        <label>위험조정 RA <b><span id="rV">50</span>만원</b></label>
+        <input type="range" id="r" min="0" max="300" value="50" step="10">
+      </div>
+      <div class="formula" id="formula"></div>
+    </div>
+
+    <div class="panel">
+      <h2>결과 (가입 시점)</h2>
+      <div class="kpi">
+        <div class="card" id="csmCard">
+          <div class="v" id="csmV">100</div>
+          <div class="l">CSM (미실현이익 통장)</div>
+        </div>
+        <div class="card">
+          <div class="v" id="premV">500</div>
+          <div class="l">총 보험료 유입</div>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="card">
+          <div class="v ok" id="revV">100</div>
+          <div class="l">연 보험수익</div>
+        </div>
+        <div class="card">
+          <div class="v ok" id="profV">30</div>
+          <div class="l">연 보험손익(이익)</div>
+        </div>
+      </div>
+      <div class="note" id="msg"></div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <h2>연도별 보험수익 구성 (stacked)</h2>
+    <div class="chart" id="chart"></div>
+    <div class="axis"><span>← 보장 제공 →</span><span id="axisMax"></span></div>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--claim)"></i>예상보험금</span>
+      <span><i class="dot" style="background:var(--ra)"></i>RA환입</span>
+      <span><i class="dot" style="background:var(--csm)"></i>CSM상각(이익)</span>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <h2>CSM 잔액 소멸 곡선 — 미실현이익이 매년 실현되는 과정</h2>
+    <div class="csmline" id="csmline"></div>
+    <div class="axis"><span>가입</span><span>만기</span></div>
+  </div>
+
+  <p class="note">
+    핵심: 보험료를 받을 때가 아니라 <b>보장을 제공하는 기간에 걸쳐</b> CSM을 헐어 수익을 인식합니다.
+    예상 보험금+RA가 보험료 유입을 넘어서면 CSM이 음수가 되는데, IFRS 17은 이를 즉시
+    <b style="color:var(--bad)">손실계약(onerous)</b>으로 인식해 그 해에 전액 비용 처리합니다(나쁜 소식은 못 미룸).
+  </p>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const ids = ['p','n','c','r'];
+  ids.forEach(i => $(i).addEventListener('input', render));
+
+  function render(){
+    const P = +$('p').value, N = +$('n').value, C = +$('c').value, RA = +$('r').value;
+    $('pV').textContent = P; $('nV').textContent = N; $('cV').textContent = C; $('rV').textContent = RA;
+
+    const prem = P * N;                  // 총 보험료
+    const csm  = prem - C - RA;          // CSM = 유입 − (보험금 + RA)
+    const onerous = csm < 0;
+
+    // 연 단위 (균등 안분)
+    const claimY = C / N;
+    const raY    = RA / N;
+    const csmY   = Math.max(csm, 0) / N;
+    const revY   = claimY + raY + csmY;            // 연 보험수익
+    const profY  = onerous ? (csm) : (raY + csmY); // 손실계약이면 가입 즉시 전액 손실
+
+    $('premV').textContent = prem;
+    $('csmV').textContent  = csm.toFixed(0);
+    $('revV').textContent  = revY.toFixed(1);
+    $('profV').textContent = onerous ? csm.toFixed(0) : profY.toFixed(1);
+
+    const csmCard = $('csmCard');
+    csmCard.classList.toggle('warn', onerous);
+
+    $('formula').textContent =
+      `CSM = 보험료(${P}×${N}=${prem}) − 보험금(${C}) − RA(${RA})\n    = ${csm}` +
+      (onerous ? '   ⚠ 음수 → 손실계약' : '   → ' + N + '년간 균등 상각');
+
+    $('msg').innerHTML = onerous
+      ? `⚠ <b style="color:var(--bad)">손실계약(onerous)</b> — 예상 보험금+RA가 보험료를 초과. 가입 즉시 손실 <b>${csm}</b>만원 전액 인식, CSM 없음.`
+      : `✅ 5년 누적 이익 <b class="ok">${(profY*N).toFixed(0)}</b>만원 (= CSM ${csm} + RA ${RA}). 매년 <b>${revY.toFixed(1)}</b>의 수익 중 보험금 ${claimY.toFixed(1)}는 비용과 매칭되고, <b class="ok">${profY.toFixed(1)}</b>만 이익으로 남습니다.`;
+
+    // stacked bar
+    const maxBar = onerous ? claimY : revY;
+    $('axisMax').textContent = '연 수익 ' + maxBar.toFixed(0) + '만원';
+    const scale = h => Math.max(0, (h / maxBar) * 190);
+    let html = '';
+    for(let y=1; y<=N; y++){
+      html += `<div class="col">
+        <div class="bar claim" style="height:${scale(claimY)}px"></div>
+        <div class="bar ra" style="height:${scale(raY)}px"></div>
+        <div class="bar csm" style="height:${scale(csmY)}px"></div>
+        <span class="yr">Y${y}</span></div>`;
+    }
+    $('chart').innerHTML = html;
+
+    // CSM 잔액 곡선
+    let line = '';
+    const csm0 = Math.max(csm, 0);
+    for(let y=0; y<=N; y++){
+      const bal = csm0 * (1 - y/N);
+      const h = csm0>0 ? (bal/csm0)*110 : 0;
+      line += `<div class="csmcol" style="height:${Math.max(h,1)}px"><span class="t">${bal.toFixed(0)}</span></div>`;
+    }
+    $('csmline').innerHTML = line;
+  }
+  render();
+</script>
+</body>
+</html>
