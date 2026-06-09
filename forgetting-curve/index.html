@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>망각곡선 · 간격반복 시뮬레이터</title>
+<style>
+  :root{--bg:#0f1419;--panel:#1a2029;--line:#2a323d;--txt:#e6e9ee;--muted:#8b97a7;
+    --accent:#4dd0a7;--a2:#5b8def;--warn:#f0b429;--bad:#e05c5c;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);padding:24px;max-width:920px;margin:0 auto;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif;line-height:1.5}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 20px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .panel h2{font-size:13px;color:var(--muted);margin:0 0 14px;font-weight:600;text-transform:uppercase}
+  .ctrl{margin-bottom:16px}
+  .ctrl label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+  .ctrl label b{color:var(--accent);font-variant-numeric:tabular-nums}
+  .ctrl .hint{font-size:11px;color:var(--muted);margin-top:3px}
+  input[type=range]{width:100%;accent-color:var(--accent);height:4px}
+  .kpi{display:flex;gap:10px;flex-wrap:wrap}
+  .card{flex:1;min-width:110px;background:#11161d;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .card .v{font-size:23px;font-weight:700;font-variant-numeric:tabular-nums}
+  .card .l{font-size:11px;color:var(--muted);margin-top:2px}
+  .chartwrap{margin-top:16px}
+  svg{width:100%;height:auto;display:block}
+  .legend{display:flex;gap:16px;font-size:12px;margin-top:10px;flex-wrap:wrap}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:14px;height:3px;border-radius:2px;display:inline-block}
+  .note{font-size:12px;color:var(--muted);margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+  <h1>망각곡선 · 간격반복 시뮬레이터</h1>
+  <p class="sub">Ebbinghaus 망각곡선 R(t)=e<sup>−t/S</sup>. 적절한 시점의 복습(인출=재공고화)이 안정성 S를 키워 곡선을 평탄하게 만든다.</p>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>입력</h2>
+      <div class="ctrl">
+        <label>초기 안정성 S₀ <b><span id="sV">1.0</span>일</b></label>
+        <input type="range" id="s" min="0.5" max="5" value="1" step="0.5">
+        <div class="hint">처음 학습 후 기억이 버티는 기본 시간</div>
+      </div>
+      <div class="ctrl">
+        <label>복습 임계 (이 정도로 떨어지면 복습) <b><span id="thV">70</span>%</b></label>
+        <input type="range" id="th" min="50" max="90" value="70" step="5">
+        <div class="hint">너무 늦게(낮게) 복습하면 거의 재학습</div>
+      </div>
+      <div class="ctrl">
+        <label>강화계수 f (복습 1회당 S 배수) <b>×<span id="fV">1.8</span></b></label>
+        <input type="range" id="f" min="1.2" max="2.5" value="1.8" step="0.1">
+        <div class="hint">재공고화로 기억이 단단해지는 정도</div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>결과 (60일 구간)</h2>
+      <div class="kpi">
+        <div class="card"><div class="v" id="nRev">—</div><div class="l">복습 횟수</div></div>
+        <div class="card"><div class="v ok" id="finalS" style="color:var(--accent)">—</div><div class="l">최종 안정성(일)</div></div>
+      </div>
+      <div class="kpi" style="margin-top:10px">
+        <div class="card"><div class="v" id="ret60">—</div><div class="l">60일째 기억(복습O)</div></div>
+        <div class="card"><div class="v" id="ret60base" style="color:var(--bad)">—</div><div class="l">60일째 기억(복습X)</div></div>
+      </div>
+      <div class="note" id="msg"></div>
+    </div>
+  </div>
+
+  <div class="panel chartwrap">
+    <h2>망각곡선 — 60일</h2>
+    <svg id="chart" viewBox="0 0 600 250" preserveAspectRatio="none"></svg>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--accent)"></i>간격반복 (복습 O)</span>
+      <span><i class="dot" style="background:var(--bad)"></i>복습 안 함</span>
+      <span><i class="dot" style="background:var(--warn)"></i>복습 시점</span>
+      <span><i class="dot" style="background:var(--muted)"></i>복습 임계선</span>
+    </div>
+  </div>
+
+  <p class="note">
+    핵심: 같은 머리라도 <b>언제 꺼내 쓰느냐</b>가 장기기억을 결정한다. 매 복습마다 안정성 S가 ×f로 커져
+    다음 망각이 느려진다(곡선이 눕는다) — 이것이 <b>재공고화</b>의 학습적 응용이고, Anki·간격반복의 원리다.
+    너무 일찍 복습하면 효율이 낮고, 너무 늦으면 재학습이 된다.
+  </p>
+
+<script>
+  const $ = id => document.getElementById(id);
+  ['s','th','f'].forEach(i => $(i).addEventListener('input', run));
+  const H = 60;            // horizon days
+  const W = 600, Ht = 250, PAD = 28;
+
+  function run(){
+    const S0 = +$('s').value, th = +$('th').value/100, f = +$('f').value;
+    $('sV').textContent = S0.toFixed(1); $('thV').textContent = +$('th').value; $('fV').textContent = f.toFixed(1);
+
+    // 복습 일정 시뮬레이션: R=exp(-(d-seg)/S), R==th 이면 복습 → seg=d, S*=f
+    let seg = 0, S = S0, reviews = [];
+    while (true){
+      const next = seg + S * Math.log(1/th);   // R이 th로 떨어지는 날
+      if (next > H) break;
+      reviews.push(next);
+      seg = next; S *= f;
+      if (reviews.length > 200) break;
+    }
+    const finalS = S;
+    const retAt = d => {                         // 복습 반영 retention
+      let sg = 0, st = S0;
+      for (const r of reviews){ if (r <= d){ sg = r; st *= f; } else break; }
+      return Math.exp(-(d - sg)/st);
+    };
+    const baseAt = d => Math.exp(-d/S0);         // 복습 없음
+
+    $('nRev').textContent = reviews.length;
+    $('finalS').textContent = finalS.toFixed(1);
+    $('ret60').textContent = (retAt(H)*100).toFixed(0) + '%';
+    $('ret60base').textContent = (baseAt(H)*100).toFixed(0) + '%';
+    $('msg').innerHTML = `복습 ${reviews.length}회로 안정성이 ${S0.toFixed(1)}일 → <b style="color:var(--accent)">${finalS.toFixed(1)}일</b>로 커졌습니다. ` +
+      `60일째 기억 유지율 <b style="color:var(--accent)">${(retAt(H)*100).toFixed(0)}%</b> vs 복습 안 하면 <b style="color:var(--bad)">${(baseAt(H)*100).toFixed(0)}%</b>.`;
+
+    // SVG 좌표
+    const x = d => PAD + (d/H)*(W-2*PAD);
+    const y = r => PAD + (1-r)*(Ht-2*PAD);
+    const path = fn => {
+      let p = '';
+      for (let i=0;i<=240;i++){ const d=H*i/240; p += (i?'L':'M') + x(d).toFixed(1) + ' ' + y(fn(d)).toFixed(1) + ' '; }
+      return p.trim();
+    };
+
+    let svg = '';
+    // grid: y 0/50/100%
+    [0,0.5,1].forEach(r=>{ svg += `<line x1="${x(0)}" y1="${y(r)}" x2="${x(H)}" y2="${y(r)}" stroke="#2a323d" stroke-width="1"/>`+
+      `<text x="2" y="${y(r)+4}" fill="#8b97a7" font-size="11">${r*100|0}%</text>`; });
+    // threshold line
+    svg += `<line x1="${x(0)}" y1="${y(th)}" x2="${x(H)}" y2="${y(th)}" stroke="#8b97a7" stroke-width="1" stroke-dasharray="4 4"/>`;
+    // x labels
+    [0,15,30,45,60].forEach(d=>{ svg += `<text x="${x(d)-6}" y="${Ht-8}" fill="#8b97a7" font-size="11">${d}일</text>`; });
+    // baseline (복습 X)
+    svg += `<path d="${path(baseAt)}" fill="none" stroke="#e05c5c" stroke-width="2" stroke-dasharray="5 4" opacity="0.85"/>`;
+    // with review
+    svg += `<path d="${path(retAt)}" fill="none" stroke="#4dd0a7" stroke-width="2.5"/>`;
+    // review markers
+    reviews.forEach(r=>{ svg += `<line x1="${x(r)}" y1="${PAD}" x2="${x(r)}" y2="${Ht-PAD}" stroke="#f0b429" stroke-width="1" opacity="0.5"/>`+
+      `<circle cx="${x(r)}" cy="${y(1)}" r="3.5" fill="#f0b429"/>`; });
+    $('chart').innerHTML = svg;
+  }
+  run();
+</script>
+</body>
+</html>
