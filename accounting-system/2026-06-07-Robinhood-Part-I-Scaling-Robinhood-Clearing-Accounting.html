@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Part I: Scaling Robinhood Clearing Accounting · 회계 시스템 구조</title>
+<style>
+  :root{--bg:#0f1419;--panel:#1a2029;--line:#2a323d;--txt:#e6e9ee;--muted:#8b97a7;--accent:#4dd0a7;--a2:#5b8def}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);line-height:1.7;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif;
+    padding:28px 20px 80px;max-width:780px;margin:0 auto;font-size:16px}
+  .nav{display:flex;gap:14px;font-size:13px;color:var(--muted);margin-bottom:22px;
+    border-bottom:1px solid var(--line);padding-bottom:14px}
+  .nav a{color:var(--accent);text-decoration:none}
+  h1{font-size:24px;line-height:1.3;margin:.2em 0 .4em}
+  h2{font-size:19px;margin:1.6em 0 .5em;border-bottom:1px solid var(--line);padding-bottom:.3em}
+  h3{font-size:16px;margin:1.4em 0 .4em;color:var(--accent)}
+  a{color:var(--a2)}
+  code{background:#11161d;border:1px solid var(--line);border-radius:4px;padding:.1em .35em;font-size:.88em;
+    font-family:ui-monospace,Menlo,monospace}
+  pre{background:#11161d;border:1px solid var(--line);border-radius:8px;padding:14px;overflow-x:auto}
+  pre code{border:0;padding:0;background:none}
+  blockquote{border-left:3px solid var(--accent);margin:1em 0;padding:.2em 1em;color:var(--muted);background:#161c24}
+  table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.92em;display:block;overflow-x:auto}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left}
+  th{background:#11161d}
+  hr{border:0;border-top:1px solid var(--line);margin:1.8em 0}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px}
+  .tag{background:#11161d;border:1px solid var(--line);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--muted)}
+  .content img{max-width:100%}
+</style></head><body>
+<div class="nav"><a href="index.html">← 목차(MOC)</a></div>
+<div class="tags"><span class="tag">로빈후드</span><span class="tag">청산결제</span><span class="tag">거래회계</span><span class="tag">시스템확장</span><span class="tag">핀테크플랫폼</span></div>
+<div class="content"><h1 id="part-i-scaling-robinhood-clearing-accounting">Part I: Scaling Robinhood Clearing Accounting</h1>
+<p>파트 I: 로빈후드 청산 회계 시스템 확장</p>
+<h5 id="apr-11-2022">Apr 11, 2022</h5>
+<p>2022년 4월 11일</p>
+<p><img alt="" src="https://images.ctfassets.net/1hpl803w8xsv/1GjrUCbl2debCGb2tvqZHO/9905d7a58c07d0d1cc62d4e8febf075e/05qi0jxrb2h_fgdqc" /></p>
+<p>Since 2018, Robinhood has been self-clearing under Robinhood Securities — a clearing firm that exists solely to support Robinhood customers. With self-clearing, we no longer rely on third parties to reconcile and settle our customers' trades. Self-clearing allowed us to eliminate fees that our former clearing firm charged, achieve 24/7 application approval, and provide a better customer experience around statements and trade confirmations.<br />
+2018년부터 로빈후드는 오로지 로빈후드 고객을 지원하기 위해 존재하는 청산(clearing) 회사인 Robinhood Securities를 통해 자체 청산을 해오고 있습니다. 자체 청산을 통해 우리는 더 이상 고객의 거래를 대사(reconciliation)하고 결제(settlement)하는 데 제3자에 의존하지 않게 되었습니다. 자체 청산 덕분에 우리는 기존 청산 회사가 부과하던 수수료를 없애고, 24/7 계좌 개설 승인을 달성하고, 명세서 및 거래 확인서와 관련해 더 나은 고객 경험을 제공할 수 있었습니다.</p>
+<h2 id="why-is-having-our-own-clearing-operations-good-for-our-customers">Why is having our own clearing operations good for our customers?</h2>
+<p>자체 청산 운영을 갖추는 것이 왜 고객에게 좋은가?</p>
+<p>After a customer places a trade on Robinhood, it will be routed to and executed by one of our partnered market maker venues. After the execution, a clearing process is needed to reconcile Robinhood's view of the trade against that of the trade's counterparty, and eventually settle the assets after two days (or one day in the case of option trading). More details about clearing and settlement can be found in this <a href="https://robinhood.com/us/en/support/articles/whats-clearing-by-robinhood/#Whatdoesaclearingfirmdo">support article</a>. At the center of any clearing firm is its accounting system; the system that keeps accounting up-to-date has to be robust. If accounting ledgers are stale, downstream operations like trade reconciliation or settlement will be blocked. This may in turn prevent the clearing firm from being able to fulfill its obligation to report to authorities like the Depository Trust and Clearing Corporation (<a href="https://www.investopedia.com/terms/d/dtcc.asp">DTCC</a>) in a timely manner, since we will not be able to match our records with our counterparties' if our accounting book is not up to date.<br />
+고객이 로빈후드에서 거래를 주문하면, 그 거래는 우리의 파트너 마켓 메이커 거래소 중 한 곳으로 라우팅되어 체결됩니다. 체결 이후에는, 그 거래에 대한 로빈후드의 관점을 거래 상대방의 관점과 대사(reconciliation)하고, 결국 이틀 후(옵션 거래의 경우 하루 후)에 자산을 결제(settlement)하기 위해 청산(clearing) 프로세스가 필요합니다. 청산과 결제에 대한 더 자세한 내용은 이 <a href="https://robinhood.com/us/en/support/articles/whats-clearing-by-robinhood/#Whatdoesaclearingfirmdo">지원 문서</a>에서 확인할 수 있습니다. 모든 청산 회사의 중심에는 회계 시스템이 있으며, 회계를 최신 상태로 유지하는 시스템은 견고해야 합니다. 만약 회계 원장(ledger)이 오래된(stale) 상태라면, 거래 대사나 결제 같은 하위(downstream) 작업이 막히게 됩니다. 이는 결과적으로 청산 회사가 예탁결제기관(<a href="https://www.investopedia.com/terms/d/dtcc.asp">DTCC</a>) 같은 당국에 적시에 보고할 의무를 이행하지 못하게 만들 수 있는데, 회계 장부가 최신 상태가 아니면 우리 기록을 거래 상대방의 기록과 맞춰볼 수 없기 때문입니다.</p>
+<h2 id="the-problem">The problem</h2>
+<p>문제</p>
+<p>The accounting system's initial implementation was a set of tables in a single Postgres database, and homogeneous Kafka consumers that updated those tables synchronously. It was done as a gigantic transaction with heavy locking to prevent race conditions between multiple consumers. It worked when we first launched back in 2018, but as our customer base grew, we started to see the accounting system lagging behind the ever-increasing volume.<br />
+회계 시스템의 초기 구현은 단일 Postgres 데이터베이스 안의 테이블 집합과, 그 테이블들을 동기적으로 업데이트하는 동질적인(homogeneous) Kafka 컨슈머들로 이루어져 있었습니다. 이는 여러 컨슈머 간의 경쟁 조건(race condition)을 막기 위해 무거운 잠금(locking)을 동반한 거대한 단일 트랜잭션으로 처리되었습니다. 2018년 처음 출시했을 때는 잘 동작했지만, 고객 기반이 커지면서 회계 시스템이 끊임없이 증가하는 물량을 따라가지 못하고 지연되는 현상이 나타나기 시작했습니다.</p>
+<p>Throughout 2020, our growth accelerated, and as a result we focused on scaling our original accounting system to meet the needs of the business. The system continued to function without negative impacts to our customers, but it was clear to us that fixing reactively was not a permanent solution, and it was time to rebuild the system with scalability as a design principle. This won't be an easy task as the clearing domain is intrinsically complex with dozens of responsibilities yet demanding in terms of correctness.<br />
+2020년 한 해 동안 우리의 성장은 가속화되었고, 그 결과 우리는 비즈니스의 요구를 충족시키기 위해 기존 회계 시스템을 확장하는 데 집중했습니다. 시스템은 고객에게 부정적인 영향을 주지 않고 계속 동작했지만, 사후 대응식으로 고치는 것은 영구적인 해결책이 아니며 확장성(scalability)을 설계 원칙으로 삼아 시스템을 다시 구축할 때가 되었다는 것이 우리에게 분명해졌습니다. 청산 도메인은 본질적으로 수십 가지 책임을 가진 복잡한 영역이면서도 정확성(correctness) 측면에서 까다롭기 때문에, 이는 쉬운 작업이 아닐 것입니다.</p>
+<h2 id="finding-the-asynchronous-solution">Finding the asynchronous solution</h2>
+<p>비동기 해법 찾기</p>
+<p>First off, the clearing accounting system isn't on the critical path of order placement by customers, so its latency will not be perceived by the customers. It will, however, be perceived by our clearing operation teams.<br />
+우선, 청산 회계 시스템은 고객의 주문 처리에 있어 임계 경로(critical path) 상에 있지 않으므로, 그 지연(latency)은 고객에게 체감되지 않습니다. 하지만 우리의 청산 운영 팀들에게는 체감됩니다.</p>
+<p>Both the computation and the storage of our old system were monolithic, so in order for our new accounting system to be truly scalable, we needed to tackle both problems. Here is how we broke down the computational monolith.<br />
+기존 시스템의 연산과 저장소는 모두 모놀리식(monolithic)이었기 때문에, 새 회계 시스템이 진정으로 확장 가능하려면 두 문제를 모두 해결해야 했습니다. 다음은 우리가 연산 모놀리스를 어떻게 분해했는지에 대한 내용입니다.</p>
+<p>The following graph illustrates the responsibilities of the Kafka consumers, the only computational component in the old accounting system.<br />
+다음 그림은 기존 회계 시스템에서 유일한 연산 컴포넌트였던 Kafka 컨슈머들의 책임을 보여줍니다.</p>
+<p><img alt="" src="https://images.ctfassets.net/1hpl803w8xsv/3Kxwn2kBFsKtqMZcHpvbfQ/e583fbb9f6959c92b0bf0f4c84333e1a/0_TnIUjW1Sp2lYWdx_" /></p>
+<p>The graph shows a parallelism of two but in reality the consumer group had a much higher parallelism, equaling the number of partitions of its upstream Kafka topic. There are only two ways we can further increase the capacity of this system:<br />
+그림에는 병렬도(parallelism)가 2로 표시되어 있지만, 실제로 컨슈머 그룹은 상위(upstream) Kafka 토픽의 파티션 수와 동일한 훨씬 더 높은 병렬도를 가지고 있었습니다. 이 시스템의 처리 용량을 더 늘릴 수 있는 방법은 단 두 가지뿐입니다:</p>
+<ol>
+<li>Increase the parallelism even more.<br />
+   병렬도를 더욱 늘린다.</li>
+<li>Make the total time shorter to process a message.<br />
+   메시지 하나를 처리하는 데 걸리는 전체 시간을 더 짧게 만든다.</li>
+</ol>
+<p>We decided to first take a step back and review the requirements of the accounting system. Under the current implementation, all steps were stuffed in a synchronous transaction for simplicity, so that developers were able to move fast and not worry about more granular consistency/atomicity requirements. With some due diligence, we were able to identify that:<br />
+우리는 우선 한 걸음 물러서서 회계 시스템의 요구사항을 다시 검토하기로 했습니다. 현재 구현에서는 단순함을 위해 모든 단계가 하나의 동기 트랜잭션 안에 욱여넣어져 있었고, 그래서 개발자들은 빠르게 움직이면서 더 세분화된 일관성/원자성(atomicity) 요구사항을 걱정하지 않을 수 있었습니다. 충분한 검토 끝에, 우리는 다음과 같은 사실을 파악할 수 있었습니다:</p>
+<ul>
+<li>Executions don't have to be updated atomically with ledger entries and account balances.<br />
+  체결(execution)은 원장 항목(ledger entry) 및 계좌 잔액과 원자적으로(atomically) 함께 업데이트될 필요가 없다.</li>
+<li>Ledger entries do not have to be updated atomically with account balances either. They only need to be eventually consistent with account balances at the end of the day.<br />
+  원장 항목 또한 계좌 잔액과 원자적으로 함께 업데이트될 필요가 없다. 하루가 끝나는 시점에 계좌 잔액과 최종 일관성(eventually consistent)만 맞으면 된다.</li>
+<li>Customer balances updates don't have to be atomic with firm balance updates.<br />
+  고객 잔액 업데이트는 회사(firm) 잔액 업데이트와 원자적일 필요가 없다.</li>
+</ul>
+<p>These observations showed us that it's possible to make processing faster by making what used to run synchronously asynchronous. Asynchrony provides a repartition opportunity to aggregate updates to the same firm account, and therefore allows us to write the aggregated updates to the database without locks.<br />
+이러한 관찰을 통해, 기존에 동기적으로 실행되던 것을 비동기적으로 바꿈으로써 처리를 더 빠르게 만들 수 있다는 것을 알게 되었습니다. 비동기성(asynchrony)은 동일한 회사 계좌에 대한 업데이트를 집계할 수 있도록 재분할(repartition) 기회를 제공하며, 따라서 잠금 없이 집계된 업데이트를 데이터베이스에 기록할 수 있게 해줍니다.</p>
+<p>We reimagined our accounting system as a pipeline of asynchronous processes, and the following diagram illustrates what it looks like.<br />
+우리는 회계 시스템을 비동기 프로세스들의 파이프라인으로 재구상했으며, 다음 다이어그램이 그 모습을 보여줍니다.</p>
+<p><img alt="" src="https://images.ctfassets.net/1hpl803w8xsv/5bTlcY8b7wltSejK5HY9do/7a743ba1dc5e6bdad4346f0c373a6aac/0_KU0U8jiWwlQGtzBL" /></p>
+<p>The capacity of this new system is highly dependent on the speed each process can publish messages to its downstreams. Each consumer, both writes to a Postgres database and produces some Kafka topics. Even though absolute atomicity between the two actions is not required, we need each consumed message to have its database side effect written idempotently and its offspring messages produced at least once, if and only if, the DB side effects are visible. We can't include message production inside the Postgres transaction, because even if we place it at the very end, there's always a chance that the DB commit fails. In such cases, the messages would've been sent, but the DB side effects are not visible yet. Traditionally, such requirements are fulfilled with the generic paradigm below:<br />
+이 새 시스템의 처리 용량은 각 프로세스가 하위(downstream)로 메시지를 발행할 수 있는 속도에 크게 의존합니다. 각 컨슈머는 Postgres 데이터베이스에 기록하는 동시에 일부 Kafka 토픽을 생성(produce)합니다. 두 동작 사이의 절대적인 원자성은 요구되지 않지만, 우리는 소비된 각 메시지의 데이터베이스 부수 효과(side effect)가 멱등(idempotent)하게 기록되고, 오직 DB 부수 효과가 가시화될 때에만 그 자식(offspring) 메시지가 최소 한 번(at least once) 생성되도록 해야 합니다. 메시지 생성을 Postgres 트랜잭션 안에 포함시킬 수는 없는데, 이는 그것을 맨 마지막에 두더라도 DB 커밋이 실패할 가능성이 항상 존재하기 때문입니다. 그런 경우에는 메시지는 이미 전송되었지만 DB 부수 효과는 아직 가시화되지 않은 상태가 됩니다. 전통적으로, 이러한 요구사항은 아래의 일반적인 패러다임으로 충족됩니다:</p>
+<ol>
+<li>Write the messages that are supposed to be produced into Postgres under the same transaction with other side effects, with a flag for each message indicating that it's not sent yet and an ordering key.<br />
+   생성될 예정인 메시지들을 다른 부수 효과와 동일한 트랜잭션 하에서 Postgres에 기록하되, 각 메시지에 아직 전송되지 않았음을 나타내는 플래그와 순서 키(ordering key)를 함께 기록한다.</li>
+<li>Have a separate process to scan the message table, which uses the metadata discussed above to decide which messages to send and in what order, send such messages to their corresponding Kafka topics, and update the metadata so that those messages won't be sent again when the next scanning happens.<br />
+   별도의 프로세스를 두어 메시지 테이블을 스캔하게 하고, 위에서 논의한 메타데이터를 사용해 어떤 메시지를 어떤 순서로 보낼지 결정하고, 해당 메시지를 대응하는 Kafka 토픽으로 보내며, 다음 스캔 때 그 메시지들이 다시 전송되지 않도록 메타데이터를 업데이트한다.</li>
+</ol>
+<p>This paradigm worked well for applications whose rate of messages is low. For applications like the accounting system, this becomes a bottleneck because of the necessity of scanning and updating a rapidly-growing table. We realized that we should take advantage of two facts in our case:<br />
+이 패러다임은 메시지 발생률이 낮은 애플리케이션에서는 잘 동작했습니다. 하지만 회계 시스템 같은 애플리케이션에서는 빠르게 커지는 테이블을 스캔하고 업데이트해야 하는 필요성 때문에 이것이 병목(bottleneck)이 됩니다. 우리는 우리 경우에 다음 두 가지 사실을 활용해야 한다는 것을 깨달았습니다:</p>
+<ul>
+<li>Processing happens within Kafka consumers, where Kafka logs and committed offsets provide a natural retry mechanism.<br />
+  처리가 Kafka 컨슈머 내에서 일어나며, Kafka 로그와 커밋된 오프셋(offset)이 자연스러운 재시도 메커니즘을 제공한다.</li>
+<li>Deduplication is done via a lookup table in our Postgres DB that is also updated within the same transaction as other DB side effects.<br />
+  중복 제거(deduplication)는 다른 DB 부수 효과와 동일한 트랜잭션 내에서 함께 업데이트되는 Postgres DB의 조회 테이블(lookup table)을 통해 이루어진다.</li>
+</ul>
+<p>Specifically, we can do the following to eliminate the scan-update paradigm while still maintain the consistency requirements:<br />
+구체적으로, 우리는 일관성 요구사항을 여전히 유지하면서 스캔-업데이트 패러다임을 제거하기 위해 다음과 같이 할 수 있습니다:</p>
+<ol>
+<li>Consume Kafka messages<br />
+   Kafka 메시지를 소비한다</li>
+<li>Process messages and commit DB transaction<br />
+   메시지를 처리하고 DB 트랜잭션을 커밋한다</li>
+<li>Produce messages to downstream Kafka topics<br />
+   하위 Kafka 토픽으로 메시지를 생성한다</li>
+<li>Commit offsets for the consume messages<br />
+   소비한 메시지에 대한 오프셋(offset)을 커밋한다</li>
+</ol>
+<p><img alt="" src="https://images.ctfassets.net/1hpl803w8xsv/4yTCDf1IFH486OObeWJ37f/41cd45180e64b233aae8f5fb37331239/0_E0_7etblTD44I98n" /></p>
+<p>If something goes wrong in step 3, the Kafka consumer would know where to pick up since the committed offsets would still be the old ones, and the re-processing of those messages would be no-op because the lookup table would've already been updated in the previous run. This change has cut down the average time to produce a regular-sized message from ~20ms to less than 0.1ms. Production to Kafka is no longer a bottleneck for the accounting system.<br />
+만약 3단계에서 무언가 잘못되더라도, 커밋된 오프셋(offset)이 여전히 이전 값이므로 Kafka 컨슈머는 어디서부터 다시 시작해야 할지 알게 되며, 조회 테이블이 이미 이전 실행에서 업데이트되었을 것이므로 그 메시지들을 재처리하는 것은 아무 효과 없는(no-op) 작업이 됩니다. 이 변경으로 일반 크기 메시지를 생성하는 평균 시간이 약 20ms에서 0.1ms 미만으로 줄어들었습니다. 이제 Kafka로의 생성은 더 이상 회계 시스템의 병목이 아닙니다.</p>
+<p>After this massive rework, we increased our accounting system's capacity by more than 10x in terms of message throughput. The improvement hasn't shown a single sign of lagging since this effort was complete.<br />
+이 대규모 재작업 이후, 우리는 회계 시스템의 처리 용량을 메시지 처리량(throughput) 기준으로 10배 이상 늘렸습니다. 이 작업이 완료된 이후로 개선된 시스템은 단 한 번도 지연의 징후를 보이지 않았습니다.</p>
+<h2 id="lessons-learned">Lessons learned</h2>
+<p>배운 점</p>
+<p>At this point, we've only finished half of the puzzle. The accounting system was still bound by the storage bottleneck no matter how optimized our computational layer was. With Robinhood's growth rate, we could have come up against that challenge at any time — we were on the clock. In part 2, we talk about how we addressed those limitations, and horizontally scaled our accounting system from end to end.<br />
+이 시점에서, 우리는 퍼즐의 절반만 끝낸 셈입니다. 연산 계층을 아무리 최적화해도 회계 시스템은 여전히 저장소 병목에 묶여 있었습니다. 로빈후드의 성장 속도를 고려하면, 우리는 언제든 그 문제에 부딪힐 수 있었고, 시간에 쫓기는 상황이었습니다. 파트 2에서는 우리가 어떻게 그 한계들을 해결하고, 회계 시스템을 처음부터 끝까지 수평적으로 확장(horizontally scale)했는지 이야기합니다.</p>
+<hr />
+<p>Robinhood Securities, LLC (member <a href="https://www.sipc.org/">SIPC</a>), is a registered broker dealer and provides brokerage clearing services. It is a wholly-owned subsidiary of Robinhood Markets, Inc. ("Robinhood"). © 2022 Robinhood</p></div>
+</body></html>

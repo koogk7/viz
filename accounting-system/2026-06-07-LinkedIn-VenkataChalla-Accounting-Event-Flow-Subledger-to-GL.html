@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accounting Event Flow — From Subledger to General Ledger in Oracle Fusion · 회계 시스템 구조</title>
+<style>
+  :root{--bg:#0f1419;--panel:#1a2029;--line:#2a323d;--txt:#e6e9ee;--muted:#8b97a7;--accent:#4dd0a7;--a2:#5b8def}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);line-height:1.7;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif;
+    padding:28px 20px 80px;max-width:780px;margin:0 auto;font-size:16px}
+  .nav{display:flex;gap:14px;font-size:13px;color:var(--muted);margin-bottom:22px;
+    border-bottom:1px solid var(--line);padding-bottom:14px}
+  .nav a{color:var(--accent);text-decoration:none}
+  h1{font-size:24px;line-height:1.3;margin:.2em 0 .4em}
+  h2{font-size:19px;margin:1.6em 0 .5em;border-bottom:1px solid var(--line);padding-bottom:.3em}
+  h3{font-size:16px;margin:1.4em 0 .4em;color:var(--accent)}
+  a{color:var(--a2)}
+  code{background:#11161d;border:1px solid var(--line);border-radius:4px;padding:.1em .35em;font-size:.88em;
+    font-family:ui-monospace,Menlo,monospace}
+  pre{background:#11161d;border:1px solid var(--line);border-radius:8px;padding:14px;overflow-x:auto}
+  pre code{border:0;padding:0;background:none}
+  blockquote{border-left:3px solid var(--accent);margin:1em 0;padding:.2em 1em;color:var(--muted);background:#161c24}
+  table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.92em;display:block;overflow-x:auto}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left}
+  th{background:#11161d}
+  hr{border:0;border-top:1px solid var(--line);margin:1.8em 0}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px}
+  .tag{background:#11161d;border:1px solid var(--line);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--muted)}
+  .content img{max-width:100%}
+</style></head><body>
+<div class="nav"><a href="index.html">← 목차(MOC)</a></div>
+<div class="tags"><span class="tag">Oracle Fusion</span><span class="tag">보조원장</span><span class="tag">총계정원장</span><span class="tag">회계 이벤트</span><span class="tag">SLA</span><span class="tag">ERP</span></div>
+<div class="content"><h1 id="accounting-event-flow-from-subledger-to-general-ledger-in-oracle-fusion">Accounting Event Flow — From Subledger to General Ledger in Oracle Fusion</h1>
+<p>회계 이벤트 흐름 — Oracle Fusion에서 보조원장(Subledger)에서 총계정원장(GL)까지</p>
+<p>After configuring and validating your Subledger Accounting, the next important concept to understand is how accounting data flows from subledgers (like Payables, Receivables, Assets, or Projects) to the General Ledger.<br />
+보조원장 회계(SLA)를 구성하고 검증한 후, 다음으로 이해해야 할 중요한 개념은 회계 데이터가 보조원장(채무/Payables, 채권/Receivables, 자산/Assets, 프로젝트 등)에서 총계정원장으로 어떻게 흘러가는지다.</p>
+<p>This flow is the backbone of financial integrity in Oracle Fusion — ensuring every operational transaction correctly translates into financial impact.<br />
+이 흐름은 Oracle Fusion에서 재무 정합성(financial integrity)의 척추다 — 모든 운영 거래가 재무적 영향으로 올바르게 변환되도록 보장한다.</p>
+<h2 id="1-what-are-accounting-events">1. What Are Accounting Events?</h2>
+<p>회계 이벤트란 무엇인가?</p>
+<p>Every transaction in a subledger generates one or more accounting events. These represent financial activities such as:<br />
+보조원장의 모든 거래는 하나 이상의 회계 이벤트를 생성한다. 다음과 같은 재무 활동을 나타낸다:</p>
+<ul>
+<li>Invoice creation — 송장(invoice) 생성</li>
+<li>Payment application — 대금 지급 적용</li>
+<li>Asset addition or depreciation — 자산 취득 또는 감가상각</li>
+<li>Receipt generation — 수납(receipt) 생성</li>
+</ul>
+<p>Each event triggers Oracle to create accounting entries according to the defined SLA rules.<br />
+각 이벤트는 정의된 SLA 룰에 따라 Oracle이 회계 분개를 생성하도록 트리거한다.</p>
+<h2 id="2-key-steps-in-the-accounting-flow">2. Key Steps in the Accounting Flow</h2>
+<p>회계 흐름의 핵심 단계</p>
+<p>Step 1: Transaction Entry in Subledger — A user creates a transaction in a subledger (e.g., Payables Invoice).<br />
+1단계: 보조원장 거래 입력 — 사용자가 보조원장에 거래를 생성한다 (예: 매입 송장).</p>
+<p>Step 2: Event Capture — Oracle automatically records this as an accounting event (e.g., Invoice Validated).<br />
+2단계: 이벤트 캡처 — Oracle이 이를 회계 이벤트로 자동 기록한다 (예: Invoice Validated).</p>
+<p>Step 3: Create Accounting Process (SLA Layer) — Using your SLA setup, the system derives accounts and generates journal entries for that event.<br />
+3단계: Create Accounting 프로세스 (SLA 레이어) — SLA 설정을 사용해 시스템이 계정을 도출하고 해당 이벤트의 분개(journal entry)를 생성한다.</p>
+<p>Step 4: Transfer to GL — Once accounting entries are created, they are transferred to General Ledger using the Transfer to GL process.<br />
+4단계: GL 전송 — 회계 분개가 생성되면 Transfer to GL 프로세스로 총계정원장에 전송된다.</p>
+<p>Step 5: Post in General Ledger — In GL, users review, post, and reconcile journals to update the organization's official financial books.<br />
+5단계: GL 전기(Post) — GL에서 사용자가 분개를 검토·전기·대사하여 조직의 공식 재무 장부를 갱신한다.</p>
+<h2 id="3-key-processes-and-reports">3. Key Processes and Reports</h2>
+<p>핵심 프로세스와 리포트</p>
+<ul>
+<li>Create Accounting Process: Generates subledger journal entries.<br />
+  Create Accounting 프로세스: 보조원장 분개 생성.</li>
+<li>Transfer to GL Process: Moves accounted data to the General Ledger.<br />
+  Transfer to GL 프로세스: 회계 처리된 데이터를 GL로 이동.</li>
+<li>Journal Import Report: Confirms journals imported successfully.<br />
+  Journal Import 리포트: 분개가 성공적으로 임포트됐는지 확인.</li>
+<li>Post Journals Process: Updates GL balances.<br />
+  Post Journals 프로세스: GL 잔액 갱신.</li>
+</ul>
+<p>These steps ensure a clean, traceable audit trail from transaction initiation to financial reporting.<br />
+이 단계들이 거래 발생부터 재무 보고까지 깨끗하고 추적 가능한 감사 추적(audit trail)을 보장한다.</p>
+<h2 id="4-understanding-the-accounting-lifecycle">4. Understanding the Accounting Lifecycle</h2>
+<p>회계 라이프사이클 이해</p>
+<p>Here's the sequence of statuses that a transaction passes through:<br />
+거래가 거치는 상태 시퀀스:</p>
+<ol>
+<li><strong>Unaccounted</strong> – The transaction is created but not yet accounted.<br />
+   미처리(Unaccounted) — 거래가 생성됐지만 아직 회계 처리되지 않음.</li>
+<li><strong>Accounted</strong> – The Create Accounting process generates accounting entries.<br />
+   처리됨(Accounted) — Create Accounting 프로세스가 회계 분개를 생성함.</li>
+<li><strong>Transferred</strong> – The entries are successfully moved to the General Ledger.<br />
+   전송됨(Transferred) — 분개가 총계정원장으로 성공적으로 이동됨.</li>
+<li><strong>Posted</strong> – Journals are finalized and reflected in financial reports.<br />
+   전기됨(Posted) — 분개가 확정되어 재무 보고서에 반영됨.</li>
+</ol>
+<p>This lifecycle guarantees data accuracy, audit visibility, and reconciliation consistency.<br />
+이 라이프사이클이 데이터 정확성, 감사 가시성, 대사(reconciliation) 일관성을 보장한다.</p>
+<h2 id="5-best-practices">5. Best Practices</h2>
+<p>베스트 프랙티스</p>
+<ul>
+<li>Run the Create Accounting process regularly to avoid pending items.<br />
+  Create Accounting 프로세스를 정기 실행해 미결 항목을 방지하라.</li>
+<li>Review and reconcile Unaccounted and Error entries.<br />
+  Unaccounted·Error 분개를 검토하고 대사하라.</li>
+<li>Schedule automated Transfer and Posting jobs during off-peak hours.<br />
+  자동 Transfer·Posting 작업을 비혼잡 시간대에 스케줄하라.</li>
+<li>Monitor journal import errors and fix mapping issues promptly.<br />
+  분개 임포트 오류를 모니터링하고 매핑 이슈를 즉시 수정하라.</li>
+</ul>
+<h2 id="takeaway">Takeaway</h2>
+<p>핵심 요약</p>
+<p>The accounting event flow is the bridge between business operations and financial reporting. Understanding this end-to-end process helps ensure accurate, complete, and compliant financial data in Oracle Fusion.<br />
+회계 이벤트 흐름은 비즈니스 운영과 재무 보고 사이의 다리다. 이 end-to-end 프로세스를 이해하면 Oracle Fusion에서 정확하고 완전하며 컴플라이언스를 준수하는 재무 데이터를 보장할 수 있다.</p>
+<blockquote>
+<p>댓글 1 (자료 공유 요청, 실질 내용 없음)</p>
+</blockquote></div>
+</body></html>

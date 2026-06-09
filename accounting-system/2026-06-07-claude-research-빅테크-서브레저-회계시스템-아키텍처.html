@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>빅테크 서브레저·회계 시스템 아키텍처 리서치 · 회계 시스템 구조</title>
+<style>
+  :root{--bg:#0f1419;--panel:#1a2029;--line:#2a323d;--txt:#e6e9ee;--muted:#8b97a7;--accent:#4dd0a7;--a2:#5b8def}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);line-height:1.7;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif;
+    padding:28px 20px 80px;max-width:780px;margin:0 auto;font-size:16px}
+  .nav{display:flex;gap:14px;font-size:13px;color:var(--muted);margin-bottom:22px;
+    border-bottom:1px solid var(--line);padding-bottom:14px}
+  .nav a{color:var(--accent);text-decoration:none}
+  h1{font-size:24px;line-height:1.3;margin:.2em 0 .4em}
+  h2{font-size:19px;margin:1.6em 0 .5em;border-bottom:1px solid var(--line);padding-bottom:.3em}
+  h3{font-size:16px;margin:1.4em 0 .4em;color:var(--accent)}
+  a{color:var(--a2)}
+  code{background:#11161d;border:1px solid var(--line);border-radius:4px;padding:.1em .35em;font-size:.88em;
+    font-family:ui-monospace,Menlo,monospace}
+  pre{background:#11161d;border:1px solid var(--line);border-radius:8px;padding:14px;overflow-x:auto}
+  pre code{border:0;padding:0;background:none}
+  blockquote{border-left:3px solid var(--accent);margin:1em 0;padding:.2em 1em;color:var(--muted);background:#161c24}
+  table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.92em;display:block;overflow-x:auto}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left}
+  th{background:#11161d}
+  hr{border:0;border-top:1px solid var(--line);margin:1.8em 0}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px}
+  .tag{background:#11161d;border:1px solid var(--line);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--muted)}
+  .content img{max-width:100%}
+</style></head><body>
+<div class="nav"><a href="index.html">← 목차(MOC)</a></div>
+<div class="tags"><span class="tag">회계시스템</span><span class="tag">레저설계</span><span class="tag">결제인프라</span><span class="tag">백엔드아키텍처</span></div>
+<div class="content"><h1 id="_1">빅테크 서브레저·회계 시스템 아키텍처 리서치</h1>
+<blockquote>
+<p>2026-06-07 Claude 세션 리서치 정리. 빅테크/핀테크의 회계처리 서버 아키텍처 → sub-ledger 데이터 수신·모델링 심화 순으로 조사.</p>
+</blockquote>
+<h2 id="1-sub-ledger-gl-2">1. 공통 구조: Sub-ledger / GL 2계층</h2>
+<pre><code>비즈니스 이벤트 → [Sub-ledger 계층: 엔지니어링 소유]
+  Kafka 등 이벤트 수집 → 복식부기 ledger (immutable, append-only)
+  → Reconciliation (PSP/은행 3-way 대사)
+  → 집계/Rollup (계정과목×법인×통화×일자)
+  → [GL 계층: 재무 소유] 상용 ERP (SAP/Oracle/NetSuite) → 월마감/감사/공시
+</code></pre>
+<ul>
+<li>거래량 때문에 GL에 건별 적재 불가 → "실시간·고볼륨 = sub-ledger, 저볼륨·고통제 = ERP"</li>
+<li>팀 구조: 파이프라인 배관 = Finance Engineering, 매핑 룰 내용 = Controllership(회계), ERP = Finance Systems</li>
+<li>정정은 UPDATE가 아닌 reversal entry. 차대변 합=0을 시스템이 강제</li>
+</ul>
+<h2 id="2">2. 데이터 수신·모델링 패턴 (회사별 비교)</h2>
+<table>
+<thead>
+<tr>
+<th>회사</th>
+<th>모델링 전략</th>
+<th>핵심 아이디어</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Airbnb</td>
+<td>이벤트 2단 변환</td>
+<td>platform/payment event → event handler → accounting event. (product type+ID)=최소 회계 단위. 모든 제품을 공통 생애주기(계약→자금이동→이행→정산)에 매핑. 정정은 delta 대신 un-book→re-book</td>
+</tr>
+<tr>
+<td>Stripe</td>
+<td>계정=type+properties, 이벤트=상태전이</td>
+<td>producer 시스템을 상태머신으로 인코딩. 계정=상태, 이벤트=잔액 이동. 이벤트끼리 독립·순서 비보장 전제, 식별자로 fund flow 연결. Clearing/Timeliness/Completeness 검증 내장</td>
+</tr>
+<tr>
+<td>Square (Books)</td>
+<td>3-테이블 범용 스키마</td>
+<td>books / journal_entries / book_entries. 이종 제품은 shelf(tenant)+user_data로 격리, 코어 스키마는 순수 복식부기만. Spanner 인터리빙, monotonic version counter</td>
+</tr>
+<tr>
+<td>Uber (LedgerStore)</td>
+<td>document 모델 + 저장소 레벨 보증</td>
+<td>datastore▸table▸records-as-documents로 이종성 흡수. 불변 레코드(1.2PB)/가변 인덱스(0.5PB) 분리. 인덱스는 2PC 강일관성. sealing=30분 윈도우+서명된 manifest(체크섬+키서명)로 재현성·변조탐지 보장</td>
+</tr>
+<tr>
+<td>Adyen</td>
+<td>검증된 템플릿</td>
+<td>분개는 템플릿으로만 생성, 템플릿 변경마다 모든 입력 조합 합=0을 수학적으로 자동 증명</td>
+</tr>
+<tr>
+<td>Nubank</td>
+<td>불변 DB 활용</td>
+<td>Datomic(append-only DB) 위에 실시간 복식부기 → ledger immutability가 DB 속성으로 공짜</td>
+</tr>
+<tr>
+<td>Robinhood</td>
+<td>청산 원장을 스트림으로</td>
+<td>자체 청산(2018~). Kafka exactly-once 스트림 복식부기, Airflow 일마감 300+ jobs. 2020년 위기 때 "ledger entry↔잔액의 원자성 포기, eventual consistency 허용"으로 10x 처리량</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3">3. 가로지르는 설계 원칙</h2>
+<ol>
+<li>비즈니스 이벤트와 회계 이벤트를 분리 — 중간 변환 계층이 이종 데이터 흡수의 핵심</li>
+<li>코어 스키마는 좁게, 제품 의미는 properties/metadata로 — 복식부기 불변식만 코어에서 강제</li>
+<li>순서 비보장·독립 도착 전제 — 식별자 연결, 트랜잭션으로 묶지 않음</li>
+<li>정정 = reversal/re-book (immutability와 세트)</li>
+<li>Completeness 검증이 1급 시민 — source DB ID 전수 대조 (Uber는 Spark로 7,600억 건 offline validation)</li>
+</ol>
+<h2 id="4">4. 아티클 리스트 (읽기 순서 추천)</h2>
+<h3 id="tier-1">Tier 1 — 필독</h3>
+<ul>
+<li><a href="https://developer.squareup.com/blog/books-an-immutable-double-entry-accounting-database-service/">Books, an immutable double-entry accounting database service — Square</a></li>
+<li><a href="https://medium.com/airbnb-engineering/tracking-the-money-scaling-financial-reporting-at-airbnb-6d742b80f040">Tracking the money — Scaling financial reporting at Airbnb</a></li>
+<li><a href="https://stripe.dev/blog/ledger-stripe-system-for-tracking-and-validating-money-movement">Ledger: Stripe's system for tracking and validating money movement</a></li>
+<li><a href="https://www.adyen.com/knowledge-hub/design-to-duty-adyen-architecture-part2">Design to Duty: The Accounting and Reporting Systems at Adyen</a></li>
+</ul>
+<h3 id="tier-2-uber-money">Tier 2 — Uber Money 팀 시리즈</h3>
+<ul>
+<li><a href="https://www.uber.com/en-US/blog/dynamodb-to-docstore-migration/">How Uber Migrated Financial Data from DynamoDB to Docstore</a> — 데이터 모델·sealing 가장 상세</li>
+<li><a href="https://www.uber.com/blog/how-ledgerstore-supports-trillions-of-indexes/">How LedgerStore Supports Trillions of Indexes at Uber</a></li>
+<li><a href="https://www.uber.com/us/en/blog/migrating-from-dynamodb-to-ledgerstore/">Migrating a Trillion Entries of Uber's Ledger Data from DynamoDB to LedgerStore</a></li>
+<li><a href="https://www.uber.com/us/en/blog/ubers-finance-computation-platform/">Uber's Finance Computation Platform</a></li>
+</ul>
+<h3 id="tier-3">Tier 3 — 증권/은행 원장</h3>
+<ul>
+<li><a href="https://medium.com/robinhood-engineering/under-the-hood-of-clearing-by-robinhood-3ed7ab09d60">Under the Hood of Clearing by Robinhood</a></li>
+<li><a href="https://medium.com/robinhood-engineering/part-i-scaling-robinhood-clearing-accounting-432ff8ee5049">Part I: Scaling Robinhood Clearing Accounting</a> (Part II는 미공개)</li>
+<li><a href="https://robinhood.com/us/en/newsroom/the-life-of-a-trade/">The Life of a Trade — Robinhood</a></li>
+<li><a href="https://robinhood.com/us/en/newsroom/robinhoods-batch-processing-platform/">Robinhood's Batch Processing Platform</a></li>
+<li><a href="https://monzo.com/blog/2022/02/08/processing-payments-safely-at-scale">Processing payments safely at scale — Monzo</a></li>
+<li><a href="https://monzo.com/blog/2023/04/28/speeding-up-our-balance-read-time-the-planning-phase">Speeding up our balance read time — Monzo</a></li>
+<li><a href="https://www.infoq.com/presentations/nubank-architecture/">Architecting a Modern Financial Institution — Nubank, InfoQ</a></li>
+</ul>
+<h3 id="tier-4">Tier 4 — 기타·개념</h3>
+<ul>
+<li><a href="https://www.coinbase.com/blog/the-art-of-a-seamless-migration-of-coinbases-internal-ledger">The art of a seamless migration of Coinbase's internal ledger</a></li>
+<li><a href="https://netflixtechblog.com/netflix-billing-migration-to-aws-451fba085a4">Netflix Billing Migration to AWS</a> (+Part II, III)</li>
+<li><a href="https://medium.com/airbnb-engineering/measuring-transactional-integrity-in-airbnbs-distributed-payment-ecosystem-a670d6926d22">Measuring transactional integrity in Airbnb's distributed payment ecosystem</a></li>
+<li><a href="https://newsletter.pragmaticengineer.com/p/designing-a-payment-system">Designing a Payment System — Pragmatic Engineer</a></li>
+<li><a href="https://fragment.dev/blog/a-ledger-for-engineers">A ledger for engineers — Fragment</a></li>
+<li><a href="https://www.moderntreasury.com/journal/how-to-scale-a-ledger-part-i">How to Scale a Ledger, Part I — Modern Treasury</a></li>
+<li><a href="https://www.moderntreasury.com/journal/enforcing-immutability-in-your-double-entry-ledger">Enforcing Immutability in your Double-Entry Ledger — Modern Treasury</a></li>
+<li><a href="https://docs.tigerbeetle.com/concepts/debit-credit/">Debit/Credit: The Schema for OLTP — TigerBeetle</a></li>
+<li><a href="https://www.infoq.com/news/2026/06/uber-payment-batching-system/">30+ Updates per Second per Account: Uber Scales Ledger Processing with Batching — InfoQ</a></li>
+</ul>
+<h2 id="5">5. 추가 리서치 키워드</h2>
+<h3 id="_2">영문 핵심 키워드</h3>
+<ul>
+<li><code>double-entry ledger</code> engineering / architecture</li>
+<li><code>subledger</code> / <code>sub-ledger</code> design</li>
+<li><code>accounting events</code> modeling / <code>financial events</code> schema</li>
+<li><code>money movement platform</code></li>
+<li><code>immutable ledger</code> / <code>append-only ledger</code> database</li>
+<li><code>fund flow</code> modeling</li>
+<li><code>ledger reconciliation</code> at scale</li>
+<li><code>clearing and settlement</code> architecture</li>
+<li><code>chart of accounts</code> service</li>
+<li><code>bitemporal</code> accounting / <code>effective date</code> ledger</li>
+<li><code>exactly-once</code> payments Kafka</li>
+<li><code>GL posting</code> pipeline / <code>ERP integration</code> engineering</li>
+<li><code>financial close</code> automation engineering</li>
+</ul>
+<h3 id="_3">시스템 고유명사 (회사 블로그 직접 검색)</h3>
+<ul>
+<li>Uber: <code>LedgerStore</code>, <code>Gulfstream</code>, <code>Docstore</code>, <code>Finance Computation Platform</code></li>
+<li>Stripe: <code>Ledger</code>, <code>Data Quality Platform</code></li>
+<li>Square: <code>Books</code></li>
+<li>Robinhood: <code>Clearing</code>, <code>clearing accounting</code></li>
+<li>Nubank: <code>Datomic double entry</code></li>
+<li>오픈소스/벤더: <code>TigerBeetle</code>, <code>Formance</code>, <code>Modern Treasury Ledgers</code>, <code>Fragment ledger</code></li>
+</ul>
+<h3 id="_4">검색 채널</h3>
+<ul>
+<li>InfoQ (news/presentations에 ledger·payment 발표 多), QCon 발표 영상</li>
+<li>ByteByteGo, Quastor, Pragmatic Engineer (해설 뉴스레터)</li>
+<li>hn.algolia.com에서 "ledger" / "double-entry" 검색 (HN 토론에 실무자 코멘트)</li>
+<li>github.com/ashishps1/awesome-engineering-articles의 payments 섹션</li>
+<li>각사 채용공고 (Finance Engineering, FinHub 등 팀명·스택 단서)</li>
+</ul>
+<h3 id="_5">피누 메모</h3>
+<p>(읽고 나서 채울 것)</p></div>
+</body></html>

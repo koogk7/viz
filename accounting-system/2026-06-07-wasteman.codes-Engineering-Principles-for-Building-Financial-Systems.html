@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Engineering Principles for Building Financial Systems · 회계 시스템 구조</title>
+<style>
+  :root{--bg:#0f1419;--panel:#1a2029;--line:#2a323d;--txt:#e6e9ee;--muted:#8b97a7;--accent:#4dd0a7;--a2:#5b8def}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);line-height:1.7;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif;
+    padding:28px 20px 80px;max-width:780px;margin:0 auto;font-size:16px}
+  .nav{display:flex;gap:14px;font-size:13px;color:var(--muted);margin-bottom:22px;
+    border-bottom:1px solid var(--line);padding-bottom:14px}
+  .nav a{color:var(--accent);text-decoration:none}
+  h1{font-size:24px;line-height:1.3;margin:.2em 0 .4em}
+  h2{font-size:19px;margin:1.6em 0 .5em;border-bottom:1px solid var(--line);padding-bottom:.3em}
+  h3{font-size:16px;margin:1.4em 0 .4em;color:var(--accent)}
+  a{color:var(--a2)}
+  code{background:#11161d;border:1px solid var(--line);border-radius:4px;padding:.1em .35em;font-size:.88em;
+    font-family:ui-monospace,Menlo,monospace}
+  pre{background:#11161d;border:1px solid var(--line);border-radius:8px;padding:14px;overflow-x:auto}
+  pre code{border:0;padding:0;background:none}
+  blockquote{border-left:3px solid var(--accent);margin:1em 0;padding:.2em 1em;color:var(--muted);background:#161c24}
+  table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.92em;display:block;overflow-x:auto}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left}
+  th{background:#11161d}
+  hr{border:0;border-top:1px solid var(--line);margin:1.8em 0}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px}
+  .tag{background:#11161d;border:1px solid var(--line);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--muted)}
+  .content img{max-width:100%}
+</style></head><body>
+<div class="nav"><a href="index.html">← 목차(MOC)</a></div>
+<div class="tags"><span class="tag">회계 소프트웨어</span><span class="tag">금융 엔지니어링</span><span class="tag">총계정원장</span><span class="tag">거래 기록</span><span class="tag">소프트웨어 신뢰성</span></div>
+<div class="content"><h1 id="engineering-principles-for-building-financial-systems">Engineering Principles for Building Financial Systems</h1>
+<p>금융 시스템 구축을 위한 엔지니어링 원칙</p>
+<p><img alt="User's avatar" src="https://substackcdn.com/image/fetch/$s_!LPJI!,w_64,h_64,c_fill,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F34d6193e-2258-40e7-9e52-69efe9f202f7_520x522.jpeg" /></p>
+<p>Discover more from wasteman.codes</p>
+<p>A blog about the foolishness I encounter, trying to get computers to do the things I want them to.</p>
+<p>By subscribing, you agree Substack's <a href="https://substack.com/tos">Terms of Use</a>, and acknowledge its <a href="https://substack.com/ccpa#personal-data-collected">Information Collection Notice</a> and <a href="https://substack.com/privacy">Privacy Policy</a>.</p>
+<p>Already have an account? Sign in</p>
+<h1 id="engineering-principles-for-building-financial-systems_1">Engineering Principles for Building Financial Systems</h1>
+<p>금융 시스템 구축을 위한 엔지니어링 원칙</p>
+<h3 id="best-practices-and-principles-to-create-accurate-and-reliable-software-based-financial-systems">Best practices and principles to create accurate and reliable software based financial systems.</h3>
+<p>정확하고 신뢰할 수 있는 소프트웨어 기반 금융 시스템을 만들기 위한 모범 사례와 원칙들.</p>
+<p>[</p>
+<p><img alt="wasteman's avatar" src="https://substackcdn.com/image/fetch/$s_!LPJI!,w_36,h_36,c_fill,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F34d6193e-2258-40e7-9e52-69efe9f202f7_520x522.jpeg" /></p>
+<p>](https://substack.com/@wasteman)</p>
+<p><a href="https://substack.com/@wasteman">wasteman</a></p>
+<p>Jul 11, 2024</p>
+<p>Accounting hasn't fundamentally changed in the past couple of hundred years. Despite this, there is a lot of confusion around the right way of building software for financial systems.<br />
+회계는 지난 수백 년간 근본적으로 바뀌지 않았다. 그럼에도 불구하고 금융 시스템을 위한 소프트웨어를 올바르게 구축하는 방법에 대해서는 많은 혼란이 있다.</p>
+<p>In this post, I’ll share lessons from my years working on financial systems at big tech companies. Our focus will be building an accounting system, but the principles apply to more general financial systems as well.<br />
+이 글에서 나는 대형 테크 기업에서 금융 시스템을 다루며 수년간 일하면서 얻은 교훈을 공유하려 한다. 우리의 초점은 회계 시스템 구축이지만, 이 원칙들은 더 일반적인 금융 시스템에도 적용된다.</p>
+<p>This post will go over the following<br />
+이 글은 다음 내용을 다룬다</p>
+<ol>
+<li>Basic financial definitions relevant to the post</li>
+<li>이 글과 관련된 기본 금융 정의</li>
+<li>High level goals of an accounting system</li>
+<li>회계 시스템의 상위 수준 목표</li>
+<li>Engineering principles to achieve those goals</li>
+<li>그 목표를 달성하기 위한 엔지니어링 원칙</li>
+<li>Best Practices</li>
+<li>모범 사례</li>
+</ol>
+<h1 id="definitions">Definitions</h1>
+<p>정의</p>
+<ul>
+<li><strong>General Ledger (GL)</strong>: The primary accounting record of the company, summarizing all financial transactions over a specific time period. You can think of this as an aggregation of it's corresponding sub-ledgers.</li>
+<li>
+<p><strong>총계정원장(General Ledger, GL)</strong>: 특정 기간 동안의 모든 금융 거래를 요약하는 회사의 주요 회계 기록. 이에 대응하는 보조원장(sub-ledger)들의 집계라고 생각하면 된다.</p>
+</li>
+<li>
+<p><strong>Sub-ledger</strong>: Contains detailed information about all individual transactions related to a specific GL. Records in the sub ledger will have much more granular data then the general ledger, like who the specific customer is, specific line items in an order, etc. The difference in data between the sub-ledger and GL will depend on the type of business and volume of data you are working with. Some small businesses can get away with not having any sub-ledgers at all, but it is doubtful that they would ever need custom software to manage something that is so low in scale.</p>
+</li>
+<li>
+<p><strong>보조원장(Sub-ledger)</strong>: 특정 GL과 관련된 모든 개별 거래에 대한 상세 정보를 담는다. 보조원장의 기록은 총계정원장보다 훨씬 더 세분화된 데이터를 갖는다. 예를 들어 특정 고객이 누구인지, 주문 내 개별 품목 항목 등이다. 보조원장과 GL 간 데이터 차이는 사업의 종류와 다루는 데이터의 양에 따라 달라진다. 일부 소규모 사업체는 보조원장이 전혀 없어도 무방하지만, 그렇게 규모가 작은 것을 관리하기 위해 맞춤형 소프트웨어가 필요할 가능성은 낮다.</p>
+</li>
+<li>
+<p><strong>Financial Record:</strong> This refers to the general ledger and sub-ledgers.</p>
+</li>
+<li>
+<p><strong>금융 기록(Financial Record):</strong> 총계정원장과 보조원장을 가리킨다.</p>
+</li>
+<li>
+<p><strong>Material:</strong> Materiality refers to whether misstatement of information in your financial statements would impact a reasonable stakeholder’s decision making statements. Note that this definition is somewhat ambiguous by design, as different businesses have different materiality thresholds. For example what might be material for a business making $250,000 of revenue per year, will not be material for a business making $1 billion in revenue. From a design perspective, the main value of this concept is to classify different categories of financial data.</p>
+</li>
+<li><strong>중요성(Material):</strong> 중요성(materiality)이란 재무제표상 정보의 오기재가 합리적인 이해관계자의 의사결정에 영향을 미칠지 여부를 가리킨다. 이 정의는 의도적으로 다소 모호하다는 점에 유의하라. 사업체마다 중요성 기준치가 다르기 때문이다. 예를 들어 연 매출 25만 달러인 사업체에 중요한 것이 매출 10억 달러인 사업체에는 중요하지 않을 수 있다. 설계 관점에서 이 개념의 주된 가치는 금융 데이터의 서로 다른 범주를 분류하는 데 있다.</li>
+</ul>
+<h1 id="high-level-data-flow">High Level Data Flow</h1>
+<p>상위 수준 데이터 흐름</p>
+<p>[</p>
+<p><img alt="" src="https://substackcdn.com/image/fetch/$s_!lq1D!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F7d4c2233-1b32-409a-9d0d-281470ab3469_1767x3914.png" /></p>
+<p>](https://substackcdn.com/image/fetch/$s_!lq1D!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F7d4c2233-1b32-409a-9d0d-281470ab3469_1767x3914.png)</p>
+<h1 id="goals">Goals</h1>
+<p>목표</p>
+<p>The three main goals of your accounting system are to be <strong>(1) Accurate, (2) Auditable and (3) Timely.</strong><br />
+회계 시스템의 세 가지 주요 목표는 <strong>(1) 정확성(Accurate), (2) 감사 가능성(Auditable), (3) 적시성(Timely)</strong> 이다.</p>
+<h2 id="accurate">Accurate</h2>
+<p>정확성</p>
+<p>The financial record needs to reflect the known state of the business. This statement is a little broad and up to some interpretation so I will give some real examples.<br />
+금융 기록은 알려진 사업의 상태를 반영해야 한다. 이 진술은 다소 광범위하고 해석의 여지가 있으므로 몇 가지 실제 예를 들겠다.</p>
+<p>If we sell a 10 units of a product that costs $9.99, the corresponding financial records must add up to $99.90. This seems obvious but when you are aggregating thousands (in a lot of cases millions) of transactions, simple summation or rounding errors between systems can cause material inaccuracies.<br />
+가격이 9.99달러인 제품 10개를 팔면, 이에 대응하는 금융 기록은 합계가 99.90달러가 되어야 한다. 당연해 보이지만, 수천 건(많은 경우 수백만 건)의 거래를 집계할 때는 시스템 간의 단순한 합산이나 반올림 오류가 중요한 부정확성을 일으킬 수 있다.</p>
+<blockquote>
+<p><strong>Wasteman’s Note:</strong> <em>People say naming is the hardest problem in computer science, I would say a close second is addition. After working on large scale financial systems for the past few years, I can’t remember how many times the smallest bugs caused large discrepancies in our data. Also don’t get me started on summations over floats. I learned the hard way why you should always use integers.</em><br />
+<strong>Wasteman의 메모:</strong> <em>사람들은 네이밍(naming)이 컴퓨터 과학에서 가장 어려운 문제라고 말하는데, 나는 그에 버금가는 두 번째가 덧셈이라고 말하겠다. 지난 몇 년간 대규모 금융 시스템을 다루면서, 가장 사소한 버그가 우리 데이터에 큰 불일치를 일으킨 적이 셀 수 없이 많았다. 그리고 부동소수점(float)의 합산에 대해서는 말도 꺼내지 마라. 나는 왜 항상 정수(integer)를 써야 하는지를 호되게 배웠다.</em></p>
+</blockquote>
+<p>The financial record also needs to be <strong>complete</strong>. More specifically, both the sub-ledger and the general ledger are a complete representation of all business activities that occurred at a specific time. If there is an event that occurred but is not in the financial record, than the system is not complete. Note, that this doesn’t imply eventual consistency not acceptable. You just need to know when your data will become complete, to notify stakeholders that data has settled.<br />
+금융 기록은 또한 <strong>완전(complete)</strong> 해야 한다. 더 구체적으로, 보조원장과 총계정원장 모두 특정 시점에 발생한 모든 사업 활동의 완전한 표현이어야 한다. 발생했지만 금융 기록에 없는 이벤트가 있다면, 그 시스템은 완전하지 않은 것이다. 다만 이것이 최종 일관성(eventual consistency)을 허용하지 않는다는 뜻은 아니다. 데이터가 언제 완전해질지를 알기만 하면 되며, 그래야 데이터가 확정되었음을 이해관계자에게 알릴 수 있다.</p>
+<blockquote>
+<p><strong>Wasteman’s Note:</strong> <em>Another surprisingly really hard problem is guaranteeing completeness. As your system scales, data hops between many systems and at each hop data can easily be mutated or dropped by accident.</em><br />
+<strong>Wasteman의 메모:</strong> <em>또 하나 놀랍도록 정말 어려운 문제는 완전성을 보장하는 것이다. 시스템이 확장됨에 따라 데이터는 여러 시스템을 거쳐 이동하는데, 각 이동 지점에서 데이터가 실수로 변형되거나 누락되기 쉽다.</em></p>
+</blockquote>
+<h2 id="auditable">Auditable</h2>
+<p>감사 가능성</p>
+<p>Very related to accuracy, your financial record must be easily auditable so that stakeholders can detect errors and accurately measure performance of your business. And even if you don’t care, the IRS definitely does.<br />
+정확성과 매우 관련이 깊은데, 금융 기록은 쉽게 감사할 수 있어야 한다. 그래야 이해관계자가 오류를 발견하고 사업 성과를 정확히 측정할 수 있다. 그리고 당신이 신경 쓰지 않더라도, 국세청(IRS)은 분명히 신경 쓴다.</p>
+<h2 id="timely">Timely</h2>
+<p>적시성</p>
+<p>This one depends entirely on your business and it's specific needs. Small businesses can get away with just dumping all numbers near the end of the month, just in time to close the books. Larger businesses generally want to avoid this, and have a near real time system. This allows them to monitor financials within the month, make decisions based on financial data faster, and reduce the rush to close the month/quarter in the first few days of the month.<br />
+이것은 전적으로 당신의 사업과 그 구체적인 필요에 달려 있다. 소규모 사업체는 장부를 마감할 시점에 맞춰 월말 무렵에 모든 숫자를 한꺼번에 쏟아내는 것만으로도 무방하다. 대규모 사업체는 일반적으로 이를 피하고 거의 실시간(near real time) 시스템을 갖추려 한다. 이를 통해 한 달 안에서 재무를 모니터링하고, 금융 데이터를 기반으로 더 빠르게 의사결정을 내리며, 월초 며칠 사이에 월/분기를 마감하려는 부담을 줄일 수 있다.</p>
+<p>But whatever that need is, our accounting system should meet the needs of your business, and whatever <strong>timely</strong> means to them.<br />
+하지만 그 필요가 무엇이든, 우리의 회계 시스템은 당신의 사업의 필요를, 그리고 그들에게 <strong>적시성(timely)</strong> 이 무엇을 의미하든 그것을 충족해야 한다.</p>
+<blockquote>
+<p><strong>Wasteman’s note:</strong> <em>People tend to get lost in conversations about batch vs streaming systems with respect to timeliness a lot. My take is that this isn’t an important distinction to make for most systems. If you care about super low latency cases within seconds to minutes, then this matters. But you would be surprised at how often I hear people arguing about which to do, when the consumer doesn’t need to see updates more than a couple times a day. Just because they asked for it doesn’t mean they need it.</em><br />
+<strong>Wasteman의 메모:</strong> <em>사람들은 적시성과 관련해 배치(batch) 대 스트리밍(streaming) 시스템에 관한 논의에서 길을 잃는 경향이 많다. 내 생각으로는 대부분의 시스템에서 이는 중요한 구분이 아니다. 초 단위에서 분 단위의 초저지연(super low latency) 사례가 중요하다면 이는 의미가 있다. 하지만 소비자가 하루에 두어 번 이상 업데이트를 볼 필요가 없는데도 사람들이 어느 쪽을 할지 논쟁하는 것을 얼마나 자주 듣는지 알면 놀랄 것이다. 그들이 요청했다고 해서 그것이 정말 필요하다는 뜻은 아니다.</em></p>
+</blockquote>
+<p>Enjoying this post? Consider subscribing to my newsletter for free</p>
+<h1 id="engineering-principles">Engineering Principles</h1>
+<p>엔지니어링 원칙</p>
+<p>The three main engineering principles your accounting system should abide by are<br />
+회계 시스템이 준수해야 할 세 가지 주요 엔지니어링 원칙은 다음과 같다</p>
+<ol>
+<li>Immutability and Durability of data</li>
+<li>데이터의 불변성(Immutability)과 내구성(Durability)</li>
+<li>Data should be represented at the smallest grain</li>
+<li>데이터는 가장 작은 단위(grain)로 표현되어야 한다</li>
+<li>Code should be Idempotent</li>
+<li>코드는 멱등성(Idempotent)을 가져야 한다</li>
+</ol>
+<h2 id="immutable-and-durable">Immutable and Durable</h2>
+<p>불변성과 내구성</p>
+<p>This allows for auditability, which helps debugging and in turn accuracy. When data is immutable, you have a record of what the state of the system was at any given time. This makes it really easy to recompute the world from previous states, because no state is every lost.<br />
+이는 감사 가능성을 가능하게 하며, 이는 디버깅을 돕고 결과적으로 정확성에 기여한다. 데이터가 불변일 때, 당신은 어느 시점에서든 시스템의 상태가 무엇이었는지에 대한 기록을 갖게 된다. 이로써 이전 상태로부터 전체를 다시 계산하기가 정말 쉬워지는데, 어떤 상태도 결코 손실되지 않기 때문이다.</p>
+<p>Building on, once data is stated in the financial record it cannot be deleted. Any corrections to the system must be represented as a new financial transaction. For example let’s say your system had a bug and accidentally reported that a service was sold for $1000, when it should have been $900. To correct this mistake, you should first reverse the accounting entries corresponding to the mistake, and restate the accounting entry for the correct amount.<br />
+이어서, 일단 데이터가 금융 기록에 기재되면 삭제할 수 없다. 시스템에 대한 어떤 수정도 새로운 금융 거래로 표현되어야 한다. 예를 들어, 당신의 시스템에 버그가 있어 어떤 서비스가 900달러에 팔렸어야 하는데 실수로 1000달러에 팔렸다고 보고했다고 하자. 이 실수를 바로잡으려면 먼저 그 실수에 해당하는 회계 분개(accounting entries)를 역분개(reverse)한 다음, 올바른 금액으로 회계 분개를 다시 기재(restate)해야 한다.</p>
+<p>It will look something like this:<br />
+다음과 같은 모습이 될 것이다:</p>
+<p>[</p>
+<p><img alt="" src="https://substackcdn.com/image/fetch/$s_!Li9B!,w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fcac99f71-fe2f-41b1-934e-6064f3ffb813_2336x1984.png" /></p>
+<p>](https://substackcdn.com/image/fetch/$s_!Li9B!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fcac99f71-fe2f-41b1-934e-6064f3ffb813_2336x1984.png)</p>
+<p>So you can see that in the financial record, there is evidence that the balance of Accounts Receivable (AR) and Revenue was $1000 at some point, but was corrected later. Even though that balance was incorrect, we want an audit trail of what the balance was at any given moment.<br />
+따라서 금융 기록에서, 매출채권(Accounts Receivable, AR)과 수익(Revenue)의 잔액이 어느 시점에 1000달러였으나 나중에 수정되었다는 증거를 볼 수 있다. 그 잔액이 틀렸더라도, 우리는 어느 순간에든 잔액이 얼마였는지에 대한 감사 추적(audit trail)을 원한다.</p>
+<h2 id="data-recorded-at-the-smallest-grain">Data recorded at the smallest grain</h2>
+<p>가장 작은 단위로 기록되는 데이터</p>
+<p>Similar to the above principle, this is also critical for enabling a clear audit trail. Even though financial reports and the general ledger are aggregated, they are computed from more granular events. When the data doesn't make sense, you need the most granular data to debug what might have been the issue.<br />
+위 원칙과 유사하게, 이 또한 명확한 감사 추적을 가능하게 하는 데 매우 중요하다. 재무 보고서와 총계정원장이 집계된 것이긴 하지만, 그것들은 더 세분화된 이벤트로부터 계산된다. 데이터가 말이 되지 않을 때, 무엇이 문제였을지를 디버깅하려면 가장 세분화된 데이터가 필요하다.</p>
+<p>Saving data at the lowest granularity also makes it really easy to correct data that is derived from that dataset. If a single immutable dataset is the core source of truth for all views of that data, to correct the view all you need to do is rerun the pipeline that creates that view after fixing your data.<br />
+가장 낮은 단위(granularity)로 데이터를 저장하면 그 데이터셋에서 파생된 데이터를 수정하기도 정말 쉬워진다. 단일 불변 데이터셋이 그 데이터의 모든 뷰(view)에 대한 핵심 진실의 원천(source of truth)이라면, 뷰를 수정하기 위해 할 일은 데이터를 고친 뒤 그 뷰를 생성하는 파이프라인을 다시 실행하는 것뿐이다.</p>
+<p>Similarly when accountants are preparing to close the books, they reconcile account balances with all the transactions that occurred to validate that the books are accurate. When a discrepancy is discovered, you can dig into the exact transaction that might be causing the issue.<br />
+마찬가지로 회계사가 장부를 마감할 준비를 할 때, 그들은 계정 잔액을 발생한 모든 거래와 대사(reconcile)하여 장부가 정확한지 검증한다. 불일치가 발견되면, 문제를 일으켰을 수 있는 정확한 거래를 파고들 수 있다.</p>
+<h2 id="idempotency">Idempotency</h2>
+<p>멱등성</p>
+<p>Every financial event can only be processed once, duplicates in the financial record will cause obvious inaccuracies. For that reason, all code that produces financial records should be idempotent.<br />
+모든 금융 이벤트는 단 한 번만 처리될 수 있으며, 금융 기록에 중복이 생기면 명백한 부정확성을 일으킨다. 그런 이유로, 금융 기록을 생성하는 모든 코드는 멱등성(idempotent)을 가져야 한다.</p>
+<h1 id="best-practices">Best Practices</h1>
+<p>모범 사례</p>
+<p>Over the years, I have run into quite a few gotchas that have caused me a lot of pain. Below are best practices I recommend, to avoid the many pitfalls I have personally faced.<br />
+수년에 걸쳐, 나는 큰 고통을 안겨준 함정(gotcha)을 꽤 많이 마주쳤다. 아래는 내가 직접 겪은 많은 함정을 피하기 위해 권장하는 모범 사례들이다.</p>
+<p><strong>Prefer integers to represent financial amounts</strong>. Makes arithmetic much easier. Certain decimal representations are okay, avoid floats at all cost.<br />
+<strong>금융 금액을 표현할 때 정수(integer)를 선호하라</strong>. 산술 연산이 훨씬 쉬워진다. 특정 십진수(decimal) 표현은 괜찮지만, 부동소수점(float)은 무슨 일이 있어도 피하라.</p>
+<p><strong>Granularity of your financial amounts should support currency conversions with minimal loss of precision</strong>. If you are only working with dollars, representing values in cents might be sufficient. If you are a global business, prefer micros or a decimal like <code>DECIMAL(19, 4)</code>(larger than 4 decimal places may also be used if necessary). The decimal choice is quite popular among financial systems, but micros has been the standard for ads financial systems. This limits loss of precision when converting between currencies.<br />
+<strong>금융 금액의 단위(granularity)는 최소한의 정밀도 손실로 통화 변환을 지원해야 한다</strong>. 달러만 다룬다면 값을 센트(cents) 단위로 표현하는 것으로 충분할 수 있다. 글로벌 사업체라면 마이크로(micros)나 <code>DECIMAL(19, 4)</code> 같은 십진수를 선호하라(필요하면 소수점 4자리보다 큰 것도 사용할 수 있다). 십진수 선택은 금융 시스템에서 꽤 널리 쓰이지만, 광고 금융 시스템에서는 마이크로가 표준이었다. 이는 통화 간 변환 시 정밀도 손실을 제한한다.</p>
+<blockquote>
+<p><strong>Wasteman’s note:</strong> <em>Micros of a currency = base currency unit * 1,000,000. E.g $1.23 = 1,230,000 micros. I first came across this when working with Google’s metrics API.</em><br />
+<strong>Wasteman의 메모:</strong> <em>통화의 마이크로(micros) = 기준 통화 단위 * 1,000,000. 예: 1.23달러 = 1,230,000 마이크로. 나는 구글의 메트릭 API를 다루면서 이것을 처음 접했다.</em></p>
+</blockquote>
+<p><strong>Use consistent rounding methodologies</strong>. At scale the way you round can create material differences between expected amounts. For example one rounding methodology is to round all values 5 and up to the next significant digit, and 4 and below rounds down. Another valid way is to always round up. All that matters is you are consistent across the board. When you are dealing with millions of transactions, being off by 1 cent per transaction can lead to material differences. (10 million transactions off by 1 cent, leads to a difference of $100k). This may not be material to your business at this scale, but it’s material enough for the government to come after you for underpaying taxes.<br />
+<strong>일관된 반올림 방법론을 사용하라</strong>. 규모가 커지면 반올림 방식이 예상 금액 사이에 중요한 차이를 만들어낼 수 있다. 예를 들어 한 가지 반올림 방법론은 5 이상의 값은 다음 유효 숫자로 올림하고 4 이하는 내림하는 것이다. 또 다른 유효한 방식은 항상 올림하는 것이다. 중요한 것은 전반에 걸쳐 일관성을 유지하는 것뿐이다. 수백만 건의 거래를 다룰 때, 거래당 1센트씩 차이가 나면 중요한 차이로 이어질 수 있다. (1,000만 건의 거래에서 1센트씩 차이 나면 10만 달러의 차이가 된다). 이 규모에서는 당신의 사업에 중요하지 않을 수 있지만, 정부가 세금 과소 납부로 당신을 추궁할 만큼은 중요하다.</p>
+<blockquote>
+<p><strong>Wasteman’s note:</strong> <em>If you are a global business there can be a lot of gotchas with rounding and currency conversions. I would go as far as saying you should make a centralized library/service to handle both rounding and currency conversions. Different governments respect different rounding rules when calculating taxes, so having all these nuances abstracted into a single library/service will reduce complexity.</em><br />
+<strong>Wasteman의 메모:</strong> <em>글로벌 사업체라면 반올림과 통화 변환에 많은 함정이 있을 수 있다. 나는 반올림과 통화 변환을 모두 처리하는 중앙화된 라이브러리/서비스를 만들어야 한다고까지 말하겠다. 정부마다 세금 계산 시 다른 반올림 규칙을 준수하므로, 이 모든 미묘한 차이를 단일 라이브러리/서비스로 추상화하면 복잡성이 줄어든다.</em></p>
+</blockquote>
+<p><strong>Delay currency conversion until the end of calculations</strong>. Preemptively converting currencies can cause loss of precision. Delay currency conversions until after aggregations occur in their local currency.<br />
+<strong>통화 변환은 계산이 끝날 때까지 미뤄라</strong>. 통화를 선제적으로 변환하면 정밀도 손실이 발생할 수 있다. 통화 변환은 현지 통화로 집계가 일어난 뒤로 미뤄라.</p>
+<p><strong>Use integer representations of time</strong>. This one is a little controversial but I stand by it. There are so many libraries in different technologies that parse timestamps into objects, and they all do them differently. Avoid this headache and just use integers. Unix timestamp, or even integer based UTC datetimes work perfectly fine. The less data conversions that occur between systems, the better. (Read about Etsy’s own problems with timestamp types <a href="https://www.etsy.com/codeascraft/the-problem-with-timeseries-data-in-machine-learning-feature-systems">here</a>)<br />
+<strong>시간을 정수로 표현하라</strong>. 이것은 다소 논란이 있지만 나는 이를 고수한다. 여러 기술에 타임스탬프를 객체로 파싱하는 라이브러리가 너무 많고, 그것들은 모두 제각기 다르게 처리한다. 이 골칫거리를 피하고 그냥 정수를 사용하라. 유닉스 타임스탬프(Unix timestamp), 또는 정수 기반의 UTC 날짜시간도 완벽하게 잘 작동한다. 시스템 간에 일어나는 데이터 변환이 적을수록 좋다. (타임스탬프 타입에 관한 Etsy 자신의 문제는 <a href="https://www.etsy.com/codeascraft/the-problem-with-timeseries-data-in-machine-learning-feature-systems">여기</a>에서 읽어보라)</p>
+<blockquote>
+<p><strong>Wasteman’s note:</strong> <em>I haven’t even talked about daylight savings related bugs. Using an incrementing integer can help you avoid this altogether. If you really insist on using datetimestamps, please at least use UTC. You would be surprised at how many very large businesses use non UTC timestamps.</em><br />
+<strong>Wasteman의 메모:</strong> <em>서머타임(daylight savings) 관련 버그에 대해서는 아직 이야기도 꺼내지 않았다. 증가하는 정수를 사용하면 이를 통째로 피하는 데 도움이 된다. 정말 날짜시간 타임스탬프를 고집한다면, 최소한 UTC만이라도 사용하라. 얼마나 많은 아주 큰 사업체들이 UTC가 아닌 타임스탬프를 쓰는지 알면 놀랄 것이다.</em></p>
+</blockquote>
+<hr />
+<p>Thanks for reading this post, I am sure I made a controversial statement somewhere but please feel free to comment and start a discussion. I am very open to learning and hearing other people’s thoughts. And if you enjoyed this post, consider supporting me by subscribing below!<br />
+이 글을 읽어줘서 고맙다. 어딘가에서 논란이 될 만한 진술을 했으리라 확신하지만, 부담 없이 댓글을 달고 토론을 시작해 주길 바란다. 나는 배우고 다른 사람들의 생각을 듣는 데 매우 열려 있다. 그리고 이 글이 즐거웠다면, 아래에서 구독해 나를 응원해 주길 바란다!</p>
+<p>And for further reading, here are some really good blog posts on accounting tailored towards software engineers.<br />
+그리고 더 읽을거리로, 소프트웨어 엔지니어에게 맞춘 회계에 관한 정말 좋은 블로그 글 몇 개를 소개한다.</p>
+<ul>
+<li>
+<p><a href="https://drew.thecsillags.com/posts/2017-12-06-accounting-for-software-engineers/">Accounting for Software Engineers</a></p>
+</li>
+<li>
+<p><a href="https://www.moderntreasury.com/journal/accounting-for-developers-part-i#does-accounting-really-matter-in-software-development">Accounting for Developers Part 1</a></p>
+</li>
+<li>
+<p><a href="https://martin.kleppmann.com/2011/03/07/accounting-for-computer-scientists.html">Accounting for Computer Scientists</a></p>
+</li>
+</ul>
+<hr />
+<p>Thanks for reading wasteman.codes! Subscribe for free to receive new posts and support my work.</p>
+<p>[</p>
+<p><img alt="jhan's avatar" src="https://substackcdn.com/image/fetch/$s_!I5Vh!,w_32,h_32,c_fill,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fbc347aa6-da11-4f0c-809c-6ae88a443dcd_144x144.png" /></p>
+<p>](https://substack.com/profile/106874719-jhan)[</p>
+<p><img alt="Nancy's avatar" src="https://substackcdn.com/image/fetch/$s_!OuT6!,w_32,h_32,c_fill,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fbucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com%2Fpublic%2Fimages%2Faeaecf96-a6a2-4e0c-909d-45b17301c2c2_144x144.png" /></p>
+<p>](https://substack.com/profile/103422459-nancy)[</p>
+<p><img alt="V S's avatar" src="https://substackcdn.com/image/fetch/$s_!5nUW!,w_32,h_32,c_fill,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F07c40bea-5e02-422a-85ad-cce87794ca60_144x144.png" /></p>
+<p>](https://substack.com/profile/245529177-v-s)[</p>
+<p><img alt="Patrick Altman's avatar" src="https://substackcdn.com/image/fetch/$s_!ymgA!,w_32,h_32,c_fill,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fbucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com%2Fpublic%2Fimages%2F02c65ff8-de48-480f-a7bc-76eb659ab683_671x671.jpeg" /></p>
+<p>](https://substack.com/profile/4379402-patrick-altman)[</p>
+<p><img alt="nagee's avatar" src="https://substackcdn.com/image/fetch/$s_!RIWD!,w_32,h_32,c_fill,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F932a9d27-761e-4e08-b6e5-65517e2ffe7f_144x144.png" /></p>
+<p>](https://substack.com/profile/9623701-nagee)</p>
+<p>83 Likes∙</p>
+<p><a href="https://substack.com/note/p-146452365/restacks?utm_source=substack&amp;utm_content=facepile-restacks">7 Restacks</a></p></div>
+</body></html>

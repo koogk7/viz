@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uber’s Finance Computation Platform · 회계 시스템 구조</title>
+<style>
+  :root{--bg:#0f1419;--panel:#1a2029;--line:#2a323d;--txt:#e6e9ee;--muted:#8b97a7;--accent:#4dd0a7;--a2:#5b8def}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);line-height:1.7;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif;
+    padding:28px 20px 80px;max-width:780px;margin:0 auto;font-size:16px}
+  .nav{display:flex;gap:14px;font-size:13px;color:var(--muted);margin-bottom:22px;
+    border-bottom:1px solid var(--line);padding-bottom:14px}
+  .nav a{color:var(--accent);text-decoration:none}
+  h1{font-size:24px;line-height:1.3;margin:.2em 0 .4em}
+  h2{font-size:19px;margin:1.6em 0 .5em;border-bottom:1px solid var(--line);padding-bottom:.3em}
+  h3{font-size:16px;margin:1.4em 0 .4em;color:var(--accent)}
+  a{color:var(--a2)}
+  code{background:#11161d;border:1px solid var(--line);border-radius:4px;padding:.1em .35em;font-size:.88em;
+    font-family:ui-monospace,Menlo,monospace}
+  pre{background:#11161d;border:1px solid var(--line);border-radius:8px;padding:14px;overflow-x:auto}
+  pre code{border:0;padding:0;background:none}
+  blockquote{border-left:3px solid var(--accent);margin:1em 0;padding:.2em 1em;color:var(--muted);background:#161c24}
+  table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.92em;display:block;overflow-x:auto}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left}
+  th{background:#11161d}
+  hr{border:0;border-top:1px solid var(--line);margin:1.8em 0}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px}
+  .tag{background:#11161d;border:1px solid var(--line);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--muted)}
+  .content img{max-width:100%}
+</style></head><body>
+<div class="nav"><a href="index.html">← 목차(MOC)</a></div>
+<div class="tags"><span class="tag">금융거래처리</span><span class="tag">GAAP준수</span><span class="tag">저널엔트리</span><span class="tag">회계정확성</span><span class="tag">플랫폼확장성</span></div>
+<div class="content"><h1 id="ubers-finance-computation-platform">Uber’s Finance Computation Platform</h1>
+<p>우버의 금융 연산 플랫폼(Finance Computation Platform)</p>
+<p>August 3, 2021<br />
+2021년 8월 3일</p>
+<h1 id="ubers-finance-computation-platform_1">Uber’s Finance Computation Platform</h1>
+<p>우버의 금융 연산 플랫폼(Finance Computation Platform)</p>
+<p><img alt="Shashank Agarwal" src="https://cn-geo1.uber.com/image-proc/crop/resizecrop/udam/format=auto/width=40/height=40/srcb64=aHR0cHM6Ly90Yi1zdGF0aWMudWJlci5jb20vcHJvZC91ZGFtLWFzc2V0cy8zMWMyNTcwYi05YjUwLTVhYTAtYmEzYi0zMWRjMGMzMTc4YjAuanBn" /></p>
+<p>Shashank Agarwal<br />
+샤샹크 아가르왈</p>
+<p><img alt="" src="https://cn-geo1.uber.com/image-proc/crop/resizecrop/udam/format=auto/width=552/height=0/srcb64=aHR0cHM6Ly90Yi1zdGF0aWMudWJlci5jb20vcHJvZC91ZGFtLWFzc2V0cy83ZWJhOWQ2Yy01NjNkLTU0NjQtYTg3Ni1hNTdjNTJlOTc4YjEucG5n" /></p>
+<p>Share this article<br />
+이 글 공유하기</p>
+<p>For a company of our size and scale, robust, accurate, and compliant accounting and analytics are a necessity, ensuring accurate and granular visibility into our financials, across multiple lines of business.<br />
+우리 정도의 규모와 스케일을 가진 회사에게는, 견고하고 정확하며 규정을 준수하는 회계 및 분석이 필수입니다. 이를 통해 여러 사업 부문에 걸쳐 재무 현황을 정확하고 세밀하게 들여다볼 수 있습니다.</p>
+<p>Most standard, off-the-shelf finance engineering solutions cannot support the scale and scope of the transactions on our ever-growing platform.  The ride-sharing business alone has over 4 billion trips per year worldwide, which translates to more than 40 billion <a href="https://en.wikipedia.org/wiki/Journal_entry">journal entries</a> (financial microtransactions). Each of these entries has to be produced in accordance with <a href="https://en.wikipedia.org/wiki/Generally_Accepted_Accounting_Principles_(United_States)">Generally Accepted Accounting Principles (GAAP)</a>, and managed in an idempotent, consistent, accurate, and reproducible manner.<br />
+대부분의 표준화된 기성(off-the-shelf) 금융 엔지니어링 솔루션은 끊임없이 성장하는 우리 플랫폼의 거래 규모와 범위를 감당하지 못합니다. 차량 공유 사업만 해도 전 세계적으로 연간 40억 건이 넘는 운행이 발생하며, 이는 400억 건이 넘는 <a href="https://en.wikipedia.org/wiki/Journal_entry">분개(journal entry)</a>(금융 마이크로트랜잭션)로 환산됩니다. 이 각각의 분개는 <a href="https://en.wikipedia.org/wiki/Generally_Accepted_Accounting_Principles_(United_States)">일반적으로 인정된 회계원칙(GAAP)</a>에 따라 생성되어야 하며, 멱등성(idempotency)을 갖추고 일관되고 정확하며 재현 가능한 방식으로 관리되어야 합니다.</p>
+<p>To meet these specific requirements, we built an in-house Uber’s Finance Computation Platform (FCP) —a solution designed to accommodate our scale, while providing strong guarantees on accuracy and explainability. The same solution also serves in obtaining insights on business operations.<br />
+이러한 구체적인 요구사항을 충족하기 위해, 우리는 자체적으로 우버 금융 연산 플랫폼(FCP, Finance Computation Platform)을 구축했습니다. 이는 우리의 규모를 수용하도록 설계되었으면서도 정확성과 설명 가능성(explainability)에 대한 강력한 보장을 제공하는 솔루션입니다. 동일한 솔루션은 사업 운영에 대한 인사이트를 얻는 데도 활용됩니다.</p>
+<p>There were many challenges in building our financial computation platform, from our architectural choices to the types of controls for accuracy and explainability. <br />
+금융 연산 플랫폼을 구축하는 데에는 아키텍처 선택부터 정확성과 설명 가능성을 위한 통제 방식의 종류에 이르기까지 여러 어려움이 있었습니다.</p>
+<h2 id="motivation-and-technical-challenges">Motivation and Technical Challenges</h2>
+<p>동기와 기술적 과제</p>
+<p>As the scale of our operations grew across multiple services and businesses, guaranteeing accuracy and explainability of financials at scale became cumbersome and costly. <br />
+여러 서비스와 사업에 걸쳐 운영 규모가 커지면서, 대규모로 재무의 정확성과 설명 가능성을 보장하는 일이 번거롭고 비용이 많이 드는 작업이 되었습니다.</p>
+<p>Given that in 2019 our customers take over <a href="https://s23.q4cdn.com/407969754/files/doc_financials/2019/ar/Uber-Technologies-Inc-2019-Annual-Report.pdf">15 million</a> trips every day and across a wide variety of services (Eats, Rides, Freight, etc.), we had to deal with a variety of data, unordered activity, and skewed load to produce an accurate, explainable, and standardized representation. Financial auditors often require recreating the state of business activity and financial computation, quarters or even a full year after the fact, during which time we’ve implemented many changes to our policies. Making an already-daunting task even more difficult, we also had to take into account our platform’s multi-country, multi-taxation, multi-business, and multi-product models. These offered a significant variety of use cases and business logic, requiring a robust system to offer ease of change.<br />
+2019년 기준 우리 고객들은 매일 <a href="https://s23.q4cdn.com/407969754/files/doc_financials/2019/ar/Uber-Technologies-Inc-2019-Annual-Report.pdf">1,500만 건</a>이 넘는 운행을 다양한 서비스(Eats, Rides, Freight 등)에 걸쳐 이용합니다. 따라서 우리는 정확하고 설명 가능하며 표준화된 표현을 만들어내기 위해 다양한 데이터, 순서가 보장되지 않는 활동, 그리고 쏠림(skew)이 있는 부하를 다뤄야 했습니다. 재무 감사인들은 종종 사업 활동과 재무 연산의 상태를, 사후 분기 단위 혹은 심지어 1년이 지난 시점에서 재현할 것을 요구하는데, 그 사이에 우리는 정책에 많은 변경을 적용해왔습니다. 이미 만만치 않은 과제를 더욱 어렵게 만드는 것은, 우리 플랫폼의 다국가·다과세·다사업·다제품 모델까지 고려해야 했다는 점입니다. 이들은 매우 다양한 유스케이스와 비즈니스 로직을 만들어냈고, 변경 용이성을 제공할 견고한 시스템을 요구했습니다.</p>
+<h2 id="typical-financial-computation">Typical Financial Computation</h2>
+<p>일반적인 금융 연산</p>
+<p>To perform accounting operations and record the necessary financial numbers in the general ledger (GL), we needed to tap into each product’s sales, collections, and payments systems. <br />
+회계 작업을 수행하고 필요한 재무 수치를 총계정원장(general ledger, GL)에 기록하려면, 각 제품의 매출(sales), 수금(collections), 결제(payments) 시스템에 접근해야 했습니다.</p>
+<p>One of the simplest and easiest ways to do so is by creating Extract Transform Load (ETL) pipelines to populate warehouse tables for sales, collections, etc and writing Structure Query Language (SQL) queries on top of warehouse tables to generate ledger. This type of typical financial system configuration, depicted below in Figure 1, features various data stores and warehouses to ingest and store financial information for processing. <br />
+이를 위한 가장 단순하고 쉬운 방법 중 하나는 매출, 수금 등의 웨어하우스 테이블을 채우기 위한 ETL(Extract Transform Load) 파이프라인을 만들고, 그 웨어하우스 테이블 위에 SQL(Structure Query Language) 쿼리를 작성하여 원장(ledger)을 생성하는 것입니다. 아래 그림 1에 묘사된 이러한 일반적인 금융 시스템 구성은, 처리할 재무 정보를 수집하고 저장하기 위한 다양한 데이터 저장소와 웨어하우스를 특징으로 합니다.</p>
+<p><a href="https://tb-static.uber.com/prod/udam-assets/becce224-a469-5ae1-b981-34ac71c5fd2e.png"><img alt="" src="https://cn-geo1.uber.com/image-proc/resize/udam/format=auto/quality=0/width=2160/srcb64=aHR0cHM6Ly90Yi1zdGF0aWMudWJlci5jb20vcHJvZC91ZGFtLWFzc2V0cy9iZWNjZTIyNC1hNDY5LTVhZTEtYjk4MS0zNGFjNzFjNWZkMmUucG5n" /></a></p>
+<p>Figure 1. A typical financial system.<br />
+그림 1. 일반적인 금융 시스템.</p>
+<p>As an example, an online media company that sells video content might use a typical financial computation, like the one depicted in Figure 1. To record gross revenue in this system, a user would run a query against the sales system data to determine how much revenue it made from sales, then simply save this query and its resulting snapshot for later audits. <br />
+예를 들어, 영상 콘텐츠를 판매하는 온라인 미디어 회사라면 그림 1에 묘사된 것과 같은 일반적인 금융 연산을 사용할 수 있습니다. 이 시스템에서 총매출(gross revenue)을 기록하려면, 사용자는 매출 시스템 데이터에 대해 쿼리를 실행하여 매출로 얼마의 수익을 냈는지 산출한 다음, 이 쿼리와 그 결과 스냅샷을 나중의 감사를 위해 그냥 저장해두면 됩니다.</p>
+<p>While typical financial computation work for many companies, the size, scope, and dynamic nature of our business made this approach incompatible with our requirements. Specifically, we decided that a typical system would be insufficient because:<br />
+일반적인 금융 연산이 많은 회사에는 잘 작동하지만, 우리 사업의 규모, 범위, 그리고 동적인 특성 때문에 이 접근 방식은 우리의 요구사항과 맞지 않았습니다. 구체적으로, 우리는 다음과 같은 이유로 일반적인 시스템이 충분하지 않다고 판단했습니다:</p>
+<ul>
+<li><strong><em>Complex Queries</em></strong><em>:</em> With growth of business and the number of domains, data models change significantly, which increases the complexity of the queries and makes it hard to maintain. </li>
+<li><strong><em>복잡한 쿼리(Complex Queries)</em></strong>: 사업과 도메인 수가 성장하면서 데이터 모델이 크게 변하고, 이는 쿼리의 복잡도를 높여 유지보수를 어렵게 만듭니다.</li>
+<li><strong><em>Need for Snapshotting and an Audit Trail:</em></strong> A substantive financial audit may require proof of record for each and every entry present in the system for up to a year. Hence, it could request snapshotting and an audit trail to source. Mutations on source can cause financial updates, which may not tie back in a typical system, due to lack of data versioning.</li>
+<li><strong><em>스냅샷팅과 감사 추적(Audit Trail)의 필요성:</em></strong> 실질적인 재무 감사는 시스템에 존재하는 모든 분개 하나하나에 대해 최대 1년간 기록 증빙을 요구할 수 있습니다. 따라서 원본(source)에 대한 스냅샷팅과 감사 추적을 요청할 수 있습니다. 원본에 대한 변경(mutation)은 재무 갱신을 유발할 수 있는데, 데이터 버저닝(versioning)이 없는 일반적인 시스템에서는 이 갱신이 원본과 다시 맞아떨어지지 않을 수 있습니다.</li>
+</ul>
+<p>Taking our dynamic nature and global scale into account, our financial computations would be far too complex for human-made SQL queries alone to handle.  Hence, we created our own Finance Computation Platform (FCP).<br />
+우리의 동적인 특성과 글로벌 규모를 고려하면, 우리의 금융 연산은 사람이 작성한 SQL 쿼리만으로 처리하기에는 지나치게 복잡합니다. 그래서 우리는 자체 금융 연산 플랫폼(FCP)을 만들었습니다.</p>
+<h2 id="the-financial-life-cycle-of-a-trip">The Financial Life Cycle of a Trip</h2>
+<p>한 건의 운행이 거치는 금융 생애주기</p>
+<p>Each trip on our platform goes through a series of synchronous and asynchronous steps across systems (Sales, Payment, FCP-Finance Computation Platform, and PSP-Payment Service Provider), many of which involve and contribute to financial activity. The Finance Computation Platform (FCP) acts as an observer for all sale and payment activities to record their corresponding accounting impacts. <br />
+우리 플랫폼의 각 운행은 여러 시스템(Sales, Payment, FCP-금융 연산 플랫폼, PSP-결제 서비스 제공자)에 걸쳐 일련의 동기·비동기 단계를 거치며, 그중 다수가 금융 활동을 수반하고 또 그에 기여합니다. 금융 연산 플랫폼(FCP)은 모든 매출 및 결제 활동에 대한 관찰자(observer) 역할을 하여 그에 대응하는 회계적 영향을 기록합니다.</p>
+<p><a href="https://tb-static.uber.com/prod/udam-assets/82daccd3-b1e4-5f40-8f19-3daf013caf24.png"><img alt="" src="https://cn-geo1.uber.com/image-proc/resize/udam/format=auto/quality=0/width=2160/srcb64=aHR0cHM6Ly90Yi1zdGF0aWMudWJlci5jb20vcHJvZC91ZGFtLWFzc2V0cy84MmRhY2NkMy1iMWU0LTVmNDAtOGYxOS0zZGFmMDEzY2FmMjQucG5n" /></a></p>
+<p>Figure 2. The financial life cycle of a trip.<br />
+그림 2. 한 건의 운행이 거치는 금융 생애주기.</p>
+<p>Before diving into our design considerations for this system, we would like to walk through a typical financial life cycle of a trip. To illustrate the procedures outlined in Figure 2, imagine the following scenario: first, a rider receives a promotional code for an Uber trip. They then request a trip using this code. A driver-partner picks them up, drives them to their indicated drop-off spot, and ends the trip. On trip completion, our Financial Computation Platform goes into action, recording the financial impact of the trip by factoring in its earnings, expenses incurred from the promotion, and cost towards various fees and charges to the driver-partner. Then the payment system collects from the rider and pays to the driver-partner. The Finance Computation Platform (FCP) captures these activities as receivables and payables to track cash performance. This data is essential to compute the microeconomics with a granular, trip-level statement of profit and loss.<br />
+이 시스템에 대한 설계 고려사항으로 들어가기 전에, 한 건의 운행이 거치는 일반적인 금융 생애주기를 짚어보고자 합니다. 그림 2에 정리된 절차를 설명하기 위해 다음 시나리오를 상상해보세요: 먼저, 라이더가 우버 운행에 대한 프로모션 코드를 받습니다. 그런 다음 이 코드를 사용해 운행을 요청합니다. 드라이버 파트너가 그를 태우고 지정된 하차 지점까지 운전한 뒤 운행을 종료합니다. 운행이 완료되면 우리의 금융 연산 플랫폼이 작동에 들어가, 운행 수익, 프로모션으로 발생한 비용, 그리고 드라이버 파트너에게 부과되는 각종 수수료와 요금 비용을 반영하여 그 운행의 재무적 영향을 기록합니다. 그 후 결제 시스템은 라이더로부터 수금하고 드라이버 파트너에게 지급합니다. 금융 연산 플랫폼(FCP)은 이러한 활동을 미수금(receivables)과 미지급금(payables)으로 포착하여 현금 성과(cash performance)를 추적합니다. 이 데이터는 운행 단위의 세밀한 손익(profit and loss) 명세로 미시경제(microeconomics)를 계산하는 데 필수적입니다.</p>
+<p>In addition to powering these granular transactions, our system helps us better understand our broader organizational plans through aggregated views for profit and loss statements at granularity of day, product, or city and operational metrics for line-of-business-specific earnings. Our platform measures business health across various dimensions, such as line of business, date range, and location, providing visibility into growth and gaps so that we can take proactive measures to improve specific businesses or regions. <br />
+이러한 세밀한 거래를 구동하는 것에 더해, 우리 시스템은 일(day)·제품·도시 단위의 손익계산서 집계 뷰와 사업 부문별 수익에 대한 운영 지표를 통해 더 넓은 조직 차원의 계획을 더 잘 이해하도록 돕습니다. 우리 플랫폼은 사업 부문, 기간, 위치 등 다양한 차원에 걸쳐 사업 건전성을 측정하여 성장과 격차에 대한 가시성을 제공하며, 이를 통해 특정 사업이나 지역을 개선하기 위한 선제적 조치를 취할 수 있습니다.</p>
+<p>The data we collect throughout the life cycle of each trip can make a major impact on our business’s day-to-day and long-term success. We designed our Finance Computation Platform’s architecture with certain key principles in mind. The end result is a system that is precise yet comprehensive, robust yet flexible, and fast yet reliable. <br />
+각 운행의 생애주기 전반에 걸쳐 수집하는 데이터는 우리 사업의 일상적 성과와 장기적 성공에 큰 영향을 줄 수 있습니다. 우리는 몇 가지 핵심 원칙을 염두에 두고 금융 연산 플랫폼의 아키텍처를 설계했습니다. 그 최종 결과는 정밀하면서도 포괄적이고, 견고하면서도 유연하며, 빠르면서도 신뢰할 수 있는 시스템입니다.</p>
+<h3 id="key-tenets-of-the-finance-computation-platform-fcp">Key Tenets of the Finance Computation Platform (FCP)</h3>
+<p>금융 연산 플랫폼(FCP)의 핵심 원칙</p>
+<p>Data guarantees are critical for any financial system, and so we built our platform with some guiding principles:<br />
+데이터에 대한 보장은 모든 금융 시스템에 결정적으로 중요하므로, 우리는 몇 가지 지침 원칙에 따라 플랫폼을 구축했습니다:</p>
+<ol>
+<li><em>Immutable:</em> Editing a Transaction is disabled, and any corrections are taken as additional transactions</li>
+<li><em>불변성(Immutable):</em> 트랜잭션의 수정이 비활성화되어 있으며, 모든 수정 사항은 추가 트랜잭션으로 처리됩니다.</li>
+<li><em>Idempotent and strong Consistency:</em> System guarantees to always produce the same transaction for a given event</li>
+<li><em>멱등성(Idempotent) 및 강한 일관성(strong Consistency):</em> 시스템은 주어진 이벤트에 대해 항상 동일한 트랜잭션을 생성하도록 보장합니다.</li>
+<li><em>Auditable:</em> Maintains audit trail of every financial transaction, with full explainability for each action associated with its root </li>
+<li><em>감사 가능성(Auditable):</em> 모든 금융 트랜잭션의 감사 추적을 유지하며, 각 동작에 대해 그 근원(root)과 연결된 완전한 설명 가능성을 제공합니다.</li>
+<li><em>Complete:</em> Guarantees completeness of financial books through measuring business events dropped by the system and ensuring there are no gaps in financials</li>
+<li><em>완전성(Complete):</em> 시스템에서 누락된 비즈니스 이벤트를 측정하고 재무에 빈틈이 없도록 보장함으로써 재무 장부(financial books)의 완전성을 보장합니다.</li>
+<li><em>Accurate:</em> Precision is ensured by constant monitoring of miscalculations at various stages of financial lifecycle and flagging any gaps</li>
+<li><em>정확성(Accurate):</em> 금융 생애주기의 여러 단계에서 계산 오류를 지속적으로 모니터링하고 격차를 표시(flagging)함으로써 정밀성을 보장합니다.</li>
+<li><em>Secure</em>: Access control mechanisms on underlying Uber infrastructure helps ensure restricted access to Financial Data </li>
+<li><em>보안성(Secure)</em>: 기반이 되는 우버 인프라의 접근 제어 메커니즘이 금융 데이터에 대한 제한된 접근을 보장하도록 돕습니다.</li>
+</ol>
+<h2 id="design-choices">Design Choices</h2>
+<p>설계 선택</p>
+<p>Before building Uber’s Finance Computation Platform’s architecture, we evaluated a number of design options for optimal performance and scalability. We ultimately decided on an event-driven architecture with <a href="https://www.uber.com/us/en/blog/schemaless-part-one/">Schemaless</a> as OLTP (Online Transaction Processing) storage and Apache Hadoop® (Apache Hadoop® Distributed File System) as storage for OLAP (Online Analytic Processing) to power reporting and analytics needs.<br />
+우버 금융 연산 플랫폼의 아키텍처를 구축하기 전에, 우리는 최적의 성능과 확장성을 위해 여러 설계 옵션을 평가했습니다. 우리는 최종적으로, OLTP(온라인 트랜잭션 처리) 저장소로 <a href="https://www.uber.com/us/en/blog/schemaless-part-one/">Schemaless</a>를 사용하고, 리포팅 및 분석 수요를 구동하기 위한 OLAP(온라인 분석 처리)용 저장소로 Apache Hadoop®(Apache Hadoop® 분산 파일 시스템)을 사용하는 이벤트 기반(event-driven) 아키텍처로 결정했습니다.</p>
+<h3 id="event-processing-architecture">Event Processing Architecture</h3>
+<p>이벤트 처리 아키텍처</p>
+<p>We considered 2 options for our event processing: request-driven and event-driven. <br />
+우리는 이벤트 처리를 위해 두 가지 옵션을 고려했습니다: 요청 기반(request-driven)과 이벤트 기반(event-driven).</p>
+<h4 id="request-driven-architecture">Request-Driven Architecture</h4>
+<p>요청 기반 아키텍처</p>
+<p>At many organizations, financial systems build services that expose Application Programming Interfaces (APIs) to offer accounting treatments for computing one or more financial transactions on a business activity request. This leaves the onus on business domains to invoke APIs with defined request objects. This approach gives flexibility for the platform to only focus on platform features and tooling, without worrying about how the caller service formulates requests.<br />
+많은 조직에서 금융 시스템은 비즈니스 활동 요청에 대해 하나 이상의 금융 트랜잭션을 연산하는 회계 처리를 제공하기 위해 API(Application Programming Interface)를 노출하는 서비스를 구축합니다. 이 방식은 정의된 요청 객체로 API를 호출해야 하는 책임을 비즈니스 도메인에 남깁니다. 이 접근 방식은 호출 서비스가 요청을 어떻게 구성하는지 신경 쓰지 않고 플랫폼이 플랫폼 기능과 도구에만 집중할 수 있는 유연성을 제공합니다.</p>
+<h4 id="event-driven-architecture">Event-Driven Architecture</h4>
+<p>이벤트 기반 아키텍처</p>
+<p>With event-driven architecture, each business domain publishes events to a messaging pipeline, and the financial system acts as a consumer, utilizing the message and providing financial treatment. This approach safeguards against skewed load patterns and abstracts the business domain from financial knowledge.<br />
+이벤트 기반 아키텍처에서는 각 비즈니스 도메인이 메시징 파이프라인에 이벤트를 발행(publish)하고, 금융 시스템은 소비자(consumer)로서 그 메시지를 활용하여 금융 처리를 제공합니다. 이 접근 방식은 쏠린(skewed) 부하 패턴으로부터 보호해주며, 비즈니스 도메인이 금융 지식으로부터 추상화되도록 합니다.</p>
+<p>We chose an event-driven architecture with modularization for:<br />
+우리는 다음과 같은 이유로 모듈화를 갖춘 이벤트 기반 아키텍처를 선택했습니다:</p>
+<ul>
+<li><em>Flexibility:</em> Event queue acts as an indirect interface between the business domain and the Finance Computation Platform (FCP), and allows the business domain to focus on business functionality while the Finance Computation Platform (FCP) deals with financial modeling</li>
+<li><em>유연성(Flexibility):</em> 이벤트 큐가 비즈니스 도메인과 금융 연산 플랫폼(FCP) 사이의 간접 인터페이스 역할을 하여, 금융 연산 플랫폼(FCP)이 금융 모델링을 처리하는 동안 비즈니스 도메인은 비즈니스 기능에 집중할 수 있게 합니다.</li>
+<li><em>Fault Tolerance:</em> Queue infrastructure inherently allows retry to recover from intermittent errors</li>
+<li><em>장애 내성(Fault Tolerance):</em> 큐 인프라는 본질적으로 재시도(retry)를 허용하여 간헐적 오류로부터 복구할 수 있게 합니다.</li>
+<li><em>Consistency across Uber services:</em> Leverage business event streams already available from services</li>
+<li><em>우버 서비스 전반의 일관성:</em> 서비스에서 이미 제공되는 비즈니스 이벤트 스트림을 활용합니다.</li>
+<li><em>Scalability:</em> Event queue allows systems to scale independently and account for uneven load patterns and protection from rogue producers</li>
+<li><em>확장성(Scalability):</em> 이벤트 큐는 시스템이 독립적으로 확장될 수 있게 하고, 고르지 않은 부하 패턴을 감당하며, 오작동하는 생산자(rogue producer)로부터 보호해줍니다.</li>
+</ul>
+<h2 id="ubers-finance-computation-platform-fcp">Uber’s Finance Computation Platform (FCP)</h2>
+<p>우버 금융 연산 플랫폼(FCP)</p>
+<p>With the above considerations we designed our Finance Computation Platform (FCP).<br />
+위와 같은 고려사항을 바탕으로 우리는 금융 연산 플랫폼(FCP)을 설계했습니다.</p>
+<p><a href="https://tb-static.uber.com/prod/udam-assets/a837711f-1497-5c4d-985d-d006c2ea4a7e.png"><img alt="" src="https://cn-geo1.uber.com/image-proc/resize/udam/format=auto/quality=0/width=2160/srcb64=aHR0cHM6Ly90Yi1zdGF0aWMudWJlci5jb20vcHJvZC91ZGFtLWFzc2V0cy9hODM3NzExZi0xNDk3LTVjNGQtOTg1ZC1kMDA2YzJlYTRhN2UucG5n" /></a></p>
+<p>Figure 3. In our Finance Computation Platform(FCP) architecture, service event streams represent events generated as part of financial activities within Uber. The Business Ingester, PSP Processor, Batch Reconciliation, Aggregator, and economics all represent services within the platform. Transaction store, Apache Hadoop®(HDFS), GeneralLedger(GL) are part of the storage layer where data produced by the platform resides. Various automated workflows, owned by the platform, power day to day operations.<br />
+그림 3. 우리의 금융 연산 플랫폼(FCP) 아키텍처에서, 서비스 이벤트 스트림은 우버 내 금융 활동의 일부로 생성되는 이벤트를 나타냅니다. Business Ingester, PSP Processor, Batch Reconciliation, Aggregator, 그리고 economics는 모두 플랫폼 내부의 서비스를 나타냅니다. Transaction store, Apache Hadoop®(HDFS), GeneralLedger(GL, 총계정원장)는 플랫폼이 생성한 데이터가 보관되는 저장소 계층의 일부입니다. 플랫폼이 소유하는 다양한 자동화 워크플로가 일상적인 운영을 구동합니다.</p>
+<p>The Finance Computation Platform (FCP) interacts with a variety of systems. In an Application envelope, Business Ingesters ingest events from our front-line services (such as sales and payments) followed by enrichment to a standardized representation. Financial Engine consumes enriched events and applies Business Rules for Financial treatment, producing financial transactions. Transactions are written to Schemaless and replicated to Apache Hadoop®(HDFS), providing support for reporting and reconciliations with data from sales, payments, and other source systems. Any data inconsistencies identified as part of Batch Reconciliations are alerted or fed back for ingestion to ensure completeness. To assert collection success, collection transactions need to tally with Payment service provider (PSP) files. Hence, PSP processors process PSP files followed by enrichment and financial treatment for collection reconciliation. Transactions are also published to a messaging queue (Kafka) for near real-time consumption for freshness in Aggregator, which groups financials to produce batched incremental reports across fixed dimensions. Several workflows are established to measure accuracy and compute metrics, reporting, and other operational needs. The Economics component powers viewing of our financial data across multiple dimensions, such as region, time, line of business, etc.<br />
+금융 연산 플랫폼(FCP)은 다양한 시스템과 상호작용합니다. 애플리케이션 봉투(Application envelope) 안에서, Business Ingester는 우리의 최전선(front-line) 서비스(예: 매출, 결제)로부터 이벤트를 수집한 뒤, 표준화된 표현으로 보강(enrichment)합니다. Financial Engine은 보강된 이벤트를 소비하고 금융 처리를 위한 비즈니스 규칙(Business Rules)을 적용하여 금융 트랜잭션을 생성합니다. 트랜잭션은 Schemaless에 기록되고 Apache Hadoop®(HDFS)으로 복제되어, 매출·결제 및 기타 원본 시스템의 데이터와의 리포팅 및 대사(reconciliation)를 지원합니다. Batch Reconciliation의 일부로 식별된 모든 데이터 불일치는 알림으로 보내지거나, 완전성을 보장하기 위해 수집(ingestion)으로 다시 환류됩니다. 수금 성공을 확정하려면, 수금 트랜잭션이 결제 서비스 제공자(PSP) 파일과 맞아떨어져야(tally) 합니다. 따라서 PSP processor는 PSP 파일을 처리한 뒤 수금 대사를 위한 보강과 금융 처리를 수행합니다. 트랜잭션은 또한 Aggregator에서 신선도(freshness)를 위해 거의 실시간(near real-time)으로 소비되도록 메시징 큐(Kafka)에 발행되며, Aggregator는 재무 데이터를 그룹화하여 고정된 차원(dimension)들에 걸친 배치(batched) 증분 리포트를 생성합니다. 정확성을 측정하고 지표를 계산하며 리포팅 및 기타 운영 수요를 처리하기 위한 여러 워크플로가 구축되어 있습니다. Economics 컴포넌트는 지역, 시간, 사업 부문 등 여러 차원에 걸쳐 우리의 재무 데이터를 조회할 수 있도록 구동합니다.</p>
+<h4 id="using-schemaless-as-our-datastore">Using Schemaless as our Datastore</h4>
+<p>데이터 저장소로 Schemaless 사용하기</p>
+<p>Each trip results in multiple business events. A highly scalable datastore is obviously a must for 10s of millions of trips every day. Financial data plays a key role in driving business decisions. Unavailable or inconsistent data can lead to financial loss and result in subpar customer experiences. To best support our needs and make our datastore optimally functional, we needed a system with high availability and strong consistency. <br />
+각 운행은 여러 비즈니스 이벤트를 발생시킵니다. 매일 수천만 건의 운행에는 당연히 높은 확장성을 가진 데이터 저장소가 필수입니다. 금융 데이터는 비즈니스 의사결정을 이끄는 데 핵심적인 역할을 합니다. 사용할 수 없거나 일관되지 않은 데이터는 금전적 손실로 이어질 수 있고 기대에 못 미치는 고객 경험을 초래할 수 있습니다. 우리의 요구를 가장 잘 지원하고 데이터 저장소가 최적으로 기능하게 하려면, 높은 가용성(high availability)과 강한 일관성(strong consistency)을 갖춘 시스템이 필요했습니다.</p>
+<p>We chose <a href="https://www.uber.com/us/en/blog/schemaless-part-one/">Schemaless</a>, Uber’s homegrown datastore, to house our transaction data, because it provides managed clusters and high throughput, availability, and consistency. Moreover, it’s a battle-tested, in-house product, developed specifically for our scale.<br />
+우리는 트랜잭션 데이터를 보관하기 위해 우버가 자체 개발한 데이터 저장소인 <a href="https://www.uber.com/us/en/blog/schemaless-part-one/">Schemaless</a>를 선택했는데, 이는 관리형 클러스터(managed cluster)와 높은 처리량(throughput), 가용성, 일관성을 제공하기 때문입니다. 더욱이 이는 우리의 규모에 맞춰 특별히 개발된, 실전에서 검증된(battle-tested) 사내 제품입니다.</p>
+<h4 id="using-apache-hadoop-based-data-solutions-for-our-batch-operations">Using Apache Hadoop®-based Data Solutions for our Batch Operations</h4>
+<p>배치 작업을 위해 Apache Hadoop® 기반 데이터 솔루션 사용하기</p>
+<p>Several reports and data quality checks require scanning large amounts of data, which can burden the datastore with an irregular read load. Hence, we chose to replicate financial transactions in <a href="https://hadoop.apache.org/docs/r1.2.1/hdfs_design.html">Apache Hadoop®</a> (HDFS) to power our offline financial analysis, business health monitoring, and multi-dimensional reporting. <br />
+여러 리포트와 데이터 품질 검사는 대량의 데이터를 스캔해야 하며, 이는 불규칙한 읽기 부하로 데이터 저장소에 부담을 줄 수 있습니다. 따라서 우리는 오프라인 금융 분석, 사업 건전성 모니터링, 다차원 리포팅을 구동하기 위해 금융 트랜잭션을 <a href="https://hadoop.apache.org/docs/r1.2.1/hdfs_design.html">Apache Hadoop®</a>(HDFS)에 복제하기로 선택했습니다.</p>
+<h4 id="service-event-streams">Service Event Streams</h4>
+<p>서비스 이벤트 스트림</p>
+<p>A variety of services power our business. These services process sales (rideshare trips, Eats orders, etc.), payments (credit cards, wallets, bank accounts, organizations, etc.), incentives (promotions, loyalty benefits, etc.) and other types of transactions, such as user rewards. <br />
+다양한 서비스가 우리 사업을 구동합니다. 이 서비스들은 매출(차량 공유 운행, Eats 주문 등), 결제(신용카드, 지갑, 은행 계좌, 조직 등), 인센티브(프로모션, 충성도 혜택 등), 그리고 사용자 보상과 같은 기타 유형의 거래를 처리합니다.</p>
+<p>Our services already follow an event-driven architecture that powers asynchronous features and functionalities, making this architecture an obvious choice for our Finance Computation Platform (FCP). It leverages already-established streams of information with an exception for PSP data, which is available in file dumps. <br />
+우리 서비스들은 이미 비동기 기능과 기능성을 구동하는 이벤트 기반 아키텍처를 따르고 있어, 이 아키텍처는 금융 연산 플랫폼(FCP)을 위한 당연한 선택이 되었습니다. 이는 이미 구축된 정보 스트림을 활용하는데, 다만 파일 덤프(file dump) 형태로 제공되는 PSP 데이터는 예외입니다.</p>
+<h4 id="enrichment">Enrichment</h4>
+<p>보강(Enrichment)</p>
+<p>When first captured, source information is unstructured and devoid of some financially relevant information. Financial Computation Platform enriches the heterogeneous event data in order to give us a standardized data representation. This module interacts with various services for additional information, and caches for reuse across multiple sources.<br />
+처음 포착될 때 원본 정보는 비정형(unstructured)이며 일부 금융 관련 정보가 누락되어 있습니다. 금융 연산 플랫폼은 표준화된 데이터 표현을 제공하기 위해 이질적인(heterogeneous) 이벤트 데이터를 보강합니다. 이 모듈은 추가 정보를 위해 다양한 서비스와 상호작용하며, 여러 원본에 걸쳐 재사용할 수 있도록 캐시(cache)합니다.</p>
+<h4 id="application-envelope">Application Envelope</h4>
+<p>애플리케이션 봉투(Application Envelope)</p>
+<p>Each source event enrichment and processing runs in separate Application Envelopes, allowing to scale the processing layer per source, since different sources operate at such a wide range of different scales.<br />
+각 원본 이벤트의 보강과 처리는 별도의 애플리케이션 봉투(Application Envelope)에서 실행되며, 이를 통해 원본별로 처리 계층을 확장할 수 있습니다. 서로 다른 원본들이 매우 다양한 규모로 동작하기 때문입니다.</p>
+<h4 id="financial-engine">Financial Engine</h4>
+<p>금융 엔진(Financial Engine)</p>
+<p>Financial Engine is where the core accounting functionalities are served. It maintains a rule repository to host various configurable business rules that have been modeled by Financial experts. The Financial Engine consumes enriched financial events, applies modelled financial treatment, and produces financial transactions that are stored in <a href="https://www.uber.com/us/en/blog/schemaless-part-one/">Schemaless</a> ensuring idempotency. Each financial transaction hosts journal entries that represent profit and loss against microtransactions at trip-level granularity. Financial transactions are also published to Kafka streams for real-time consumption by a few downstreams and source-to-ETL pipelines (batch processing). <br />
+금융 엔진(Financial Engine)은 핵심 회계 기능이 제공되는 곳입니다. 이는 금융 전문가들이 모델링한 다양한 구성 가능(configurable) 비즈니스 규칙을 보관하는 규칙 저장소(rule repository)를 유지합니다. 금융 엔진은 보강된 금융 이벤트를 소비하고, 모델링된 금융 처리를 적용하여, 멱등성(idempotency)을 보장하면서 <a href="https://www.uber.com/us/en/blog/schemaless-part-one/">Schemaless</a>에 저장되는 금융 트랜잭션을 생성합니다. 각 금융 트랜잭션은 운행 단위 세밀도로 마이크로트랜잭션에 대한 손익을 나타내는 분개(journal entry)를 담고 있습니다. 금융 트랜잭션은 또한 일부 다운스트림과 source-to-ETL 파이프라인(배치 처리)에서의 실시간 소비를 위해 Kafka 스트림에도 발행됩니다.</p>
+<h4 id="data-checkpoints">Data Checkpoints</h4>
+<p>데이터 체크포인트</p>
+<p>Financial Transactions produced by the Financial Engine are immutable and strongly consistent. Hence, only new transactions are created in the system that allows for checkpointing the data periodically. This enables downstream to operate on a consistent and checkpointed time series, simplifying a large set of operations associated with reporting and reconciliations. <br />
+금융 엔진이 생성하는 금융 트랜잭션은 불변(immutable)이며 강하게 일관됩니다(strongly consistent). 따라서 시스템에서는 새로운 트랜잭션만 생성되며, 이로써 데이터를 주기적으로 체크포인트할 수 있습니다. 이는 다운스트림이 일관되고 체크포인트된 시계열(time series) 위에서 동작할 수 있게 하여, 리포팅 및 대사와 관련된 많은 작업을 단순화합니다.</p>
+<h4 id="aggregator">Aggregator</h4>
+<p>집계기(Aggregator)</p>
+<p>Our engine records financial transactions at a granular level. While this kind of comprehensive data collection is important, it’s impossible to scan and collect the massive quantities of data held in the financial engine’s transactional datastore. To accomplish this, we created an aggregator system to collect and report on this transactional information from the financial engine. As its name suggests, the aggregator leverages the financial engine’s data to produce simplified, aggregated reports on various dimensions (like a single city), which our financial books can then actually use. This system is capable of near-real-time aggregation on a fixed set of dimensions, and plays a critical role in ensuring that we close our financial books without delay. <br />
+우리 엔진은 금융 트랜잭션을 세밀한 수준에서 기록합니다. 이런 식의 포괄적인 데이터 수집은 중요하지만, 금융 엔진의 트랜잭션 데이터 저장소에 담긴 막대한 양의 데이터를 일일이 스캔하고 모으는 것은 불가능합니다. 이를 해결하기 위해 우리는 금융 엔진의 이 트랜잭션 정보를 수집하고 리포팅하는 집계기(aggregator) 시스템을 만들었습니다. 이름에서 알 수 있듯이, 집계기는 금융 엔진의 데이터를 활용하여 다양한 차원(예: 단일 도시)에 대한 단순화된 집계 리포트를 생성하며, 이는 우리의 재무 장부가 실제로 사용할 수 있습니다. 이 시스템은 고정된 차원 집합에 대해 거의 실시간(near-real-time) 집계가 가능하며, 우리가 지연 없이 재무 장부를 마감(close)하도록 보장하는 데 핵심적인 역할을 합니다.</p>
+<h4 id="data-correctness">Data Correctness</h4>
+<p>데이터 정합성(Data Correctness)</p>
+<p>Data completeness and accuracy are critical to guarantee quality and success during financial audits. Multiple batch-based reconciliations are put in place to ensure data completeness and perform set comparisons across systems and sources.<br />
+데이터의 완전성과 정확성은 재무 감사 시 품질과 성공을 보장하는 데 결정적으로 중요합니다. 데이터 완전성을 보장하고 시스템과 원본 전반에 걸친 집합 비교(set comparison)를 수행하기 위해 여러 배치 기반(batch-based) 대사가 마련되어 있습니다.</p>
+<p>Financial accuracy is achieved by tallying numbers across systems of a trip’s lifecycle. Batch-based health check data pipelines and workflows are developed to measure business health, isolate, and reason for gaps. It is important to note that these needs often increase along with growth in domains, and so solutions have to be robust, extensible and easy to configure and operate. Hive/Spark-based solutions fit our needs by decoupling these processes from our financial engine.<br />
+재무 정확성은 한 운행의 생애주기에 걸친 시스템들 간 수치를 맞춰봄(tally)으로써 달성됩니다. 사업 건전성을 측정하고 격차를 격리하며 그 원인을 추론하기 위한 배치 기반 헬스 체크 데이터 파이프라인과 워크플로가 개발되어 있습니다. 이러한 수요는 도메인의 성장과 함께 종종 증가하므로, 솔루션은 견고하고 확장 가능하며 구성과 운영이 쉬워야 한다는 점에 유의해야 합니다. Hive/Spark 기반 솔루션은 이러한 프로세스를 우리 금융 엔진에서 분리(decouple)함으로써 우리의 요구에 부합합니다.</p>
+<h4 id="workflows">Workflows</h4>
+<p>워크플로</p>
+<p>Various day-to-day operations (powering metric computations, reportings, batch functions, etc.) are modelled as ETL pipelines in our systems. These automate multiple operations and allow for loads of inferences on data, enabling forecasting and planning.<br />
+다양한 일상 운영(지표 연산, 리포팅, 배치 기능 등을 구동)이 우리 시스템에서 ETL 파이프라인으로 모델링되어 있습니다. 이들은 여러 작업을 자동화하고 데이터에 대한 방대한 추론을 가능하게 하여, 예측(forecasting)과 계획 수립을 가능하게 합니다.</p>
+<h4 id="presentation-layer">Presentation Layer</h4>
+<p>표현 계층(Presentation Layer)</p>
+<p>Economics portal is our presentation layer, which generates summaries of insights from the Finance Computation Platform’s detailed reports on our overall financials across different lines of business, products, regions, and other categories. The Economics Portal’s operational and non-operational metrics help our finance and accounting professionals make better decisions around budgeting, forecasting, and financial planning across these various lines. The web component of this layer is written in <a href="https://fusionjs.com/"><em>fusion.js</em></a>.<br />
+Economics 포털은 우리의 표현 계층으로, 여러 사업 부문·제품·지역 및 기타 범주에 걸친 전체 재무에 대한 금융 연산 플랫폼의 상세 리포트로부터 인사이트 요약을 생성합니다. Economics 포털의 운영(operational) 및 비운영(non-operational) 지표는 우리의 재무 및 회계 전문가들이 이러한 다양한 부문에 걸쳐 예산 수립, 예측, 재무 계획에 관해 더 나은 의사결정을 내리도록 돕습니다. 이 계층의 웹 컴포넌트는 <a href="https://fusionjs.com/"><em>fusion.js</em></a>로 작성되었습니다.</p>
+<h2 id="moving-forward">Moving Forward</h2>
+<p>앞으로의 방향</p>
+<p>Our Finance Computation Platform’s event-driven architecture allows this system to scale independently. We crafted each component of the FCP’s architecture with our key tenets in mind. Our focus has always been to provide accuracy, completeness and auditability at our business’ immense scale. <br />
+우리 금융 연산 플랫폼의 이벤트 기반 아키텍처는 이 시스템이 독립적으로 확장될 수 있게 합니다. 우리는 FCP 아키텍처의 각 컴포넌트를 우리의 핵심 원칙을 염두에 두고 설계했습니다. 우리의 초점은 언제나 우리 사업의 막대한 규모에서 정확성, 완전성, 감사 가능성을 제공하는 것이었습니다.</p>
+<p>Our journey doesn’t end here. While we’ve built our core platform and services, we still aim to solve further finance problems and optimize our operations in the near future. As our business grows, we have to constantly invest and innovate in improving the pace of development, self-service controls, better explainability and data inferences, and a reduced storage footprint. <br />
+우리의 여정은 여기서 끝나지 않습니다. 핵심 플랫폼과 서비스를 구축하긴 했지만, 우리는 가까운 미래에 더 많은 금융 문제를 풀고 운영을 최적화하는 것을 여전히 목표로 합니다. 사업이 성장함에 따라, 우리는 개발 속도, 셀프서비스 통제, 더 나은 설명 가능성과 데이터 추론, 그리고 줄어든 저장 공간(storage footprint)을 개선하는 데 지속적으로 투자하고 혁신해야 합니다.</p>
+<p>If building financial technology systems to power large-scale businesses like Uber interests you, consider applying for <a href="https://www.uber.com/us/en/careers/list/?query=finance&amp;department=Engineering&amp;team=Backend&amp;team=Data&amp;team=Frontend&amp;team=Fullstack&amp;team=Manager">a role</a> on our team. <br />
+우버와 같은 대규모 사업을 구동하는 금융 기술 시스템을 구축하는 일에 관심이 있다면, 우리 팀의 <a href="https://www.uber.com/us/en/careers/list/?query=finance&amp;department=Engineering&amp;team=Backend&amp;team=Data&amp;team=Frontend&amp;team=Fullstack&amp;team=Manager">채용 공고</a>에 지원해보세요.</p>
+<h1 id="acknowledgement">Acknowledgement</h1>
+<p>감사의 말</p>
+<p>This work would not have been possible without significant contributions from many engineers and leadership in the Finance Engineering team at Uber. I would also like to thank seniors at Uber for providing feedback and support with reviews and suggestions.<br />
+이 작업은 우버 금융 엔지니어링 팀의 많은 엔지니어와 리더십의 상당한 기여 없이는 불가능했을 것입니다. 또한 리뷰와 제안으로 피드백과 지원을 제공해준 우버의 선배들에게 감사를 표하고 싶습니다.</p>
+<p>Category</p>
+<p><a href="/us/en/blog/engineering/">Engineering</a></p>
+<p>Written by</p>
+<p><img alt="Shashank Agarwal" src="https://cn-geo1.uber.com/image-proc/crop/resizecrop/udam/format=auto/width=64/height=64/srcb64=aHR0cHM6Ly90Yi1zdGF0aWMudWJlci5jb20vcHJvZC91ZGFtLWFzc2V0cy8zMWMyNTcwYi05YjUwLTVhYTAtYmEzYi0zMWRjMGMzMTc4YjAuanBn" /></p>
+<p>Shashank Agarwal</p>
+<p>Shashank Agarwal is a Senior Staff Software Engineer and has been with Uber for more than 5 years. Shashank Agarwal played a pivotal role in initiating the project's vision, providing invaluable guidance to the team on crucial design decisions. He has led multiple architectural contributions within Fintech at Uber. Currently, he is leading the efforts to standardize Fares at Uber and increase operational efficiency. He has more than 16 years of experience in Software Development, and outside of Uber he has built messaging platforms as well as mobile and desktop applications.</p>
+<p>Related Articles</p>
+<p>6 articles</p>
+<p><img alt="" src="https://cn-geo1.uber.com/image-proc/crop/resizecrop/udam/format=auto/width=407/height=0/srcb64=aHR0cHM6Ly90Yi1zdGF0aWMudWJlci5jb20vcHJvZC91ZGFtLWFzc2V0cy9jODA0ZmExOS0yM2Y5LTRmMjgtYmU1NS0zYjJiZDE4YWFhNjkuanBlZw==" /></p>
+<p>AI / ML</p>
+<p>Engineering</p>
+<p><a href="https://www.uber.com/us/en/blog/ubers-file-analyzer/">Building a File Semantic Analyzer: Guarding Outbound Data at Scale with AI</a></p>
+<p>June 4, 2026</p>
+<p><a href="https://www.uber.com/us/en/blog/ubers-file-analyzer/"></a></p>
+<p><img alt="" src="https://cn-geo1.uber.com/image-proc/crop/resizecrop/udam/format=auto/width=407/height=0/srcb64=aHR0cHM6Ly90Yi1zdGF0aWMudWJlci5jb20vcHJvZC91ZGFtLWFzc2V0cy8yY2I1ZTY2OS00ZWRhLTQ0NzUtODUwZS1kMDJjZmNkZDJmNjIucG5n" /></p>
+<p>Backend</p>
+<p>Engineering</p>
+<p><a href="https://www.uber.com/us/en/blog/modernizing-artifact-storage/">Modernizing Artifact Storage at Uber</a></p>
+<p>May 28, 2026</p>
+<p><a href="https://www.uber.com/us/en/blog/modernizing-artifact-storage/"></a></p>
+<p><img alt="" src="https://cn-geo1.uber.com/image-proc/crop/resizecrop/udam/format=auto/width=407/height=0/srcb64=aHR0cHM6Ly90Yi1zdGF0aWMudWJlci5jb20vcHJvZC91ZGFtLWFzc2V0cy9mNTAxNTRjMy1hNjU4LTQ2YTQtODQ1Yi01ZTk4YTA4ZGE4MmYucG5n" /></p>
+<p>AI / ML</p>
+<p>Engineering</p>
+<p>Security</p>
+<p><a href="https://www.uber.com/us/en/blog/solving-the-agent-identity-crisis/">Solving the Identity Crisis for AI Agents</a></p>
+<p>May 22, 2026</p>
+<p><a href="https://www.uber.com/us/en/blog/solving-the-agent-identity-crisis/"></a></p>
+<p><img alt="" src="https://cn-geo1.uber.com/image-proc/crop/resizecrop/udam/format=auto/width=407/height=0/srcb64=aHR0cHM6Ly90Yi1zdGF0aWMudWJlci5jb20vcHJvZC91ZGFtLWFzc2V0cy80ZWRlMzQ1OS1lNGE2LTRlNWYtYWExOC00YWE5M2UwMWEzNGIucG5n" /></p>
+<p>AI / ML</p>
+<p>Engineering</p>
+<p><a href="https://www.uber.com/us/en/blog/scaling-real-time-traffic/">Scaling Real-Time Traffic Forecasting with a Graph-Aware Transformer</a></p>
+<p>May 19, 2026</p>
+<p><a href="https://www.uber.com/us/en/blog/scaling-real-time-traffic/"></a></p>
+<p><img alt="" src="https://cn-geo1.uber.com/image-proc/crop/resizecrop/udam/format=auto/width=407/height=0/srcb64=aHR0cHM6Ly90Yi1zdGF0aWMudWJlci5jb20vcHJvZC91ZGFtLWFzc2V0cy80NjdiZmE2Mi1jNDMzLTQ4NzMtYTU0OC04MjQ3YjI3ODdhMzYuanBlZw==" /></p>
+<p>Backend</p>
+<p>Data</p>
+<p>Engineering</p>
+<p><a href="https://www.uber.com/us/en/blog/solving-multiple-knapsack/">Beyond Prediction: Solving the Multiple Knapsack Problem at Scale: How Uber Optimizes Incentives</a></p>
+<p>May 14, 2026</p>
+<p><a href="https://www.uber.com/us/en/blog/solving-multiple-knapsack/"></a></p>
+<p><img alt="" src="https://cn-geo1.uber.com/image-proc/crop/resizecrop/udam/format=auto/width=407/height=0/srcb64=aHR0cHM6Ly90Yi1zdGF0aWMudWJlci5jb20vcHJvZC91ZGFtLWFzc2V0cy9mY2MwOGExMy0xNmM1LTQwZmEtYTQ2ZC02NzlkYzY5YzQ3YzEucG5n" /></p>
+<p>AI / ML</p>
+<p>Engineering</p>
+<p><a href="https://www.uber.com/us/en/blog/first-pass-prd/">Lessons from Building a First-Pass AI PRD Reviewer at Uber</a></p>
+<p>May 12, 2026</p>
+<p><a href="https://www.uber.com/us/en/blog/first-pass-prd/"></a></p>
+<h2 id="select-your-preferred-language">Select your preferred language</h2>
+<p><a href="/us/en/blog/ubers-finance-computation-platform/">English</a></p>
+<ul>
+<li>
+<p><img alt="" src="https://tb-static.uber.com/prod/udam-assets/b13c9264-0416-4e8f-bb02-737a108f36ae.svg" /></p>
+<h3 id="products">Products</h3>
+<ul>
+<li>
+<p>[</p>
+<p>Advertising</p>
+<p>Learn more about advertising on Uber. Reach consumers as they go anywhere and get anything.</p>
+<p>](https://www.uber.com/us/en/blog/advertising/)</p>
+</li>
+<li>
+<p>[</p>
+<p>Earn</p>
+<p>Resources for driving and delivering with Uber</p>
+<p>](https://www.uber.com/us/en/blog/earn/)</p>
+</li>
+<li>
+<p>[</p>
+<p>Ride</p>
+<p>Experiences and information for people on the move</p>
+<p>](https://www.uber.com/us/en/blog/ride/)</p>
+</li>
+<li>
+<p>[</p>
+<p>Eat</p>
+<p>Ordering meals for delivery is just the beginning with Uber Eats</p>
+<p>](https://www.uber.com/us/en/blog/eat/)</p>
+</li>
+<li>
+<p>[</p>
+<p>Merchants</p>
+<p>Putting stores within reach of a world of customers</p>
+<p>](https://www.uber.com/us/en/blog/merchants/)</p>
+</li>
+<li>
+<p>[</p>
+<p>Business</p>
+<p>Transforming the way companies move and feed their people</p>
+<p>](https://www.uber.com/us/en/blog/business/)</p>
+</li>
+<li>
+<p>[</p>
+<p>Freight</p>
+<p>Taking shipping logistics in a new direction</p>
+<p>](https://www.uber.com/us/en/blog/freight/)</p>
+</li>
+<li>
+<p>[</p>
+<p>Health</p>
+<p>Moving care forward together with medical providers</p>
+<p>](https://www.uber.com/us/en/blog/health/)</p>
+</li>
+<li>
+<p>[</p>
+<p>Higher Education</p>
+<p>Enhancing campus transportation</p>
+<p>](https://www.uber.com/us/en/blog/higher-education/)</p>
+</li>
+<li>
+<p>[</p>
+<p>Transit</p>
+<p>Expanding the reach of public transportation</p>
+<p>](https://www.uber.com/us/en/blog/transit/)</p>
+</li>
+</ul>
+</li>
+<li>
+<p><img alt="" src="https://cn-geo1.uber.com/image-proc/crop/resizecrop/udam/format=auto/width=0/height=0/srcb64=aHR0cHM6Ly90Yi1zdGF0aWMudWJlci5jb20vcHJvZC91ZGFtLWFzc2V0cy8yNzk4ODM0OC0wY2JkLTRjNWMtYmUzYS1mNTMzZjQ4ZDAwNDcucG5n" /></p>
+<h3 id="company">Company</h3>
+<ul>
+<li>
+<p>[</p>
+<p>Engineering</p>
+<p>The technology behind Uber Engineering</p>
+<p>](https://www.uber.com/us/en/blog/engineering/)</p>
+</li>
+<li>
+<p>[</p>
+<p>Community support</p>
+<p>Doing the right thing for cities and communities globally</p>
+<p>](https://www.uber.com/us/en/blog/community-support/)</p>
+</li>
+<li>
+<p>[</p>
+<p>Newsroom</p>
+<p>Uber news and updates in your country</p>
+<p>](https://www.uber.com/us/en/newsroom/)</p>
+</li>
+<li>
+<p>[</p>
+<p>Uber.com</p>
+<p>Product, how-to, and policy content—and more</p>
+<p>](https://www.uber.com/)</p>
+</li>
+</ul>
+</li>
+<li>
+<p><a href="https://help.uber.com/">Help</a></p>
+</li>
+</ul>
+<h2 id="select-your-preferred-language_1">Select your preferred language</h2>
+<p><a href="/us/en/blog/ubers-finance-computation-platform/">English</a></p>
+<p>[</p>
+<p><img alt="" src="https://tb-static.uber.com/prod/udam-assets/80bb7bdd-6cf4-4053-94c5-2e4e53d9d5f6.svg" /></p>
+<h2 id="ride">Ride</h2>
+<p>](https://m.uber.com/looking/)</p>
+<p>[</p>
+<p><img alt="" src="https://tb-static.uber.com/prod/udam-assets/d4ca3837-f9df-473b-9099-85505187cb2a.svg" /></p>
+<h2 id="drive-deliver">Drive &amp; deliver</h2>
+<p>](https://drivers.uber.com/)</p>
+<p>[</p>
+<p><img alt="" src="https://tb-static.uber.com/prod/udam-assets/839bd4f4-306c-4b1b-b0e8-ab9cc8fd65c7.svg" /></p>
+<h2 id="uber-eats">Uber Eats</h2>
+<p>](https://ubereats.com/login-redirect/)</p>
+<p>[</p>
+<p><img alt="" src="https://tb-static.uber.com/prod/udam-assets/0d73ead7-7739-4bb3-b79b-ded048dba1e1.svg" /></p>
+<h2 id="business">Business</h2>
+<p>](https://business.uber.com/)</p>
+<p>[</p>
+<p><img alt="" src="https://tb-static.uber.com/prod/udam-assets/e3f56da1-d0d0-4ddb-a97a-62451d4164ef.svg" /></p>
+<h2 id="drive-deliver_1">Drive &amp; deliver</h2>
+<p>](https://drivers.uber.com/)</p>
+<p>[</p>
+<p><img alt="" src="https://tb-static.uber.com/prod/udam-assets/ccb36d13-2a48-47a7-a01a-2b5f78973293.svg" /></p>
+<h2 id="ride_1">Ride</h2>
+<p>](https://m.uber.com/login-redirect)</p>
+<p>[</p>
+<p><img alt="" src="https://tb-static.uber.com/prod/udam-assets/aeaa8bd6-4051-4372-bcc5-a8631cfbbcaa.svg" /></p>
+<h2 id="uber-eats_1">Uber Eats</h2>
+<p>](https://ubereats.com/login-redirect/)</p>
+<p>[</p>
+<p><img alt="" src="https://tb-static.uber.com/prod/udam-assets/2a2a1bb3-c25a-4b46-b64d-b8b1ec5e6969.svg" /></p>
+<h2 id="uber-for-business">Uber for Business</h2>
+<p>](https://business.uber.com/)</p>
+<p>[</p>
+<p><img alt="" src="https://tb-static.uber.com/prod/udam-assets/33188c4f-3728-4287-9447-50da6f123c2f.svg" /></p>
+<h2 id="manage-account">Manage account</h2>
+<p>](https://account.uber.com/)</p>
+<p>[</p>
+<h2 id="sign-out">Sign out</h2>
+<p>](https://auth.uber.com/login/logout)</p></div>
+</body></html>

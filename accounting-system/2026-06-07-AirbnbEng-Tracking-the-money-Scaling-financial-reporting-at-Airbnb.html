@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tracking the money — Scaling financial reporting at Airbnb · 회계 시스템 구조</title>
+<style>
+  :root{--bg:#0f1419;--panel:#1a2029;--line:#2a323d;--txt:#e6e9ee;--muted:#8b97a7;--accent:#4dd0a7;--a2:#5b8def}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);line-height:1.7;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif;
+    padding:28px 20px 80px;max-width:780px;margin:0 auto;font-size:16px}
+  .nav{display:flex;gap:14px;font-size:13px;color:var(--muted);margin-bottom:22px;
+    border-bottom:1px solid var(--line);padding-bottom:14px}
+  .nav a{color:var(--accent);text-decoration:none}
+  h1{font-size:24px;line-height:1.3;margin:.2em 0 .4em}
+  h2{font-size:19px;margin:1.6em 0 .5em;border-bottom:1px solid var(--line);padding-bottom:.3em}
+  h3{font-size:16px;margin:1.4em 0 .4em;color:var(--accent)}
+  a{color:var(--a2)}
+  code{background:#11161d;border:1px solid var(--line);border-radius:4px;padding:.1em .35em;font-size:.88em;
+    font-family:ui-monospace,Menlo,monospace}
+  pre{background:#11161d;border:1px solid var(--line);border-radius:8px;padding:14px;overflow-x:auto}
+  pre code{border:0;padding:0;background:none}
+  blockquote{border-left:3px solid var(--accent);margin:1em 0;padding:.2em 1em;color:var(--muted);background:#161c24}
+  table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.92em;display:block;overflow-x:auto}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left}
+  th{background:#11161d}
+  hr{border:0;border-top:1px solid var(--line);margin:1.8em 0}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px}
+  .tag{background:#11161d;border:1px solid var(--line);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--muted)}
+  .content img{max-width:100%}
+</style></head><body>
+<div class="nav"><a href="index.html">← 목차(MOC)</a></div>
+<div class="tags"><span class="tag">금융 리포팅</span><span class="tag">회계 파이프라인</span><span class="tag">복식부기</span><span class="tag">데이터 엔지니어링</span><span class="tag">Airbnb</span></div>
+<div class="content"><h1 id="tracking-the-money-scaling-financial-reporting-at-airbnb">Tracking the money — Scaling financial reporting at Airbnb</h1>
+<p>돈을 추적하다 — Airbnb의 재무 리포팅(financial reporting) 스케일링</p>
+<p><img alt="" src="https://miro.medium.com/v2/resize:fit:1400/1*2F3AL1MjQLNFM39Lt5abjg.png" /></p>
+<p>At Airbnb, the Payments team is responsible for everything related to moving money in Airbnb’s global marketplace. We build technology that powers Airbnb’s massive daily transaction volume to collect payments from guests and distribute payouts to hosts. Our goal is to make the payment experience on Airbnb delightful, magical, and intuitive.<br />
+Airbnb에서 결제(Payments) 팀은 Airbnb의 글로벌 마켓플레이스에서 돈을 이동시키는 모든 일을 담당한다. 우리는 게스트로부터 결제를 수금하고 호스트에게 정산(payout)을 분배하기 위해, Airbnb의 막대한 일일 거래량을 떠받치는 기술을 만든다. 우리의 목표는 Airbnb에서의 결제 경험을 즐겁고, 마법 같고, 직관적으로 만드는 것이다.</p>
+<p>Historically, the payments team’s focus was to implement new features, currencies, and payment methods to make payments local in a global business. Our sphere has grown to include compliance (sales taxes, earnings taxes, licenses, and more) as well as reconciliation and financial accounting according to generally accepted accounting principles.<br />
+역사적으로 결제 팀의 초점은 글로벌 비즈니스에서 결제를 현지화(local)하기 위해 새로운 기능, 통화, 결제 수단을 구현하는 것이었다. 우리의 영역은 컴플라이언스(판매세, 소득세, 라이선스 등)뿐 아니라, 일반적으로 인정되는 회계원칙(GAAP)에 따른 대사(reconciliation)와 재무회계(financial accounting)까지 포함하도록 확장되었다.</p>
+<p>Currently, Airbnb’s payment and financial accounting system is a complex ecosystem that transacts in 191 countries, with 70+ currencies and 20+ processors. Not only has Airbnb’s transaction volume experienced exponential transaction growth every year, we have also rapidly increased features and products on our platform. Airbnb hopes to become a premier end-to-end travel service, not only helping people with accommodations but also trip experiences as well.<br />
+현재 Airbnb의 결제 및 재무회계 시스템은 191개국에서, 70개 이상의 통화와 20개 이상의 결제 프로세서(processor)로 거래하는 복잡한 생태계다. Airbnb의 거래량은 매년 기하급수적으로 성장했을 뿐 아니라, 우리 플랫폼의 기능과 상품도 빠르게 늘어났다. Airbnb는 숙소뿐만 아니라 여행 경험(trip experiences)까지 도와주는, 최고 수준의 엔드투엔드 여행 서비스가 되기를 바란다.</p>
+<p>The challenge to maintain the existing financial accounting system to support new products as well as the increasing data volume has become a “mission impossible” sort of a task.<br />
+새로운 상품을 지원하면서 늘어나는 데이터 양까지 감당하도록 기존 재무회계 시스템을 유지하는 일은, 이제 일종의 “미션 임파서블” 같은 과제가 되어버렸다.</p>
+<p>Airbnb’s Finance Infrastructure engineering team is responsible for delivering accurate, reliable, and comprehensive business/financial data to our stakeholders. In this blog post, we’ll talk about how we manage to keep track of where all of our money is and how it moves in a scalable way in the face of exploding data size and complexity, as well as to support new Airbnb initiatives and payment products. We’ll share the workflow of our deprecated finance system, illustrate its challenges and issues and then describe the new system that we built to replace it.<br />
+Airbnb의 재무 인프라(Finance Infrastructure) 엔지니어링 팀은 정확하고, 신뢰할 수 있으며, 포괄적인 비즈니스/재무 데이터를 이해관계자에게 전달하는 일을 담당한다. 이 블로그 글에서는, 폭발적으로 늘어나는 데이터 규모와 복잡성 속에서 그리고 새로운 Airbnb 이니셔티브와 결제 상품을 지원하면서도, 우리가 모든 돈이 어디에 있고 어떻게 움직이는지를 확장 가능한(scalable) 방식으로 추적하는 방법을 이야기한다. 우리는 폐기된(deprecated) 재무 시스템의 워크플로를 공유하고, 그 도전과 문제점을 설명한 뒤, 이를 대체하기 위해 구축한 새 시스템을 소개할 것이다.</p>
+<h2 id="the-prior-financial-system-a-mysql-based-data-pipeline">The prior financial system: a MySQL-based data pipeline</h2>
+<p>이전 재무 시스템: MySQL 기반 데이터 파이프라인(pipeline)</p>
+<p>Built in early 2012 and retired in late 2016, our previous financial system was a MySQL data pipeline. It was a parameterized MySQL ETL that ran nightly to provide financial reporting, and served us faithfully for the past few years. The workflow was as follows:<br />
+2012년 초에 구축되어 2016년 말에 퇴역한 우리의 이전 재무 시스템은 MySQL 데이터 파이프라인이었다. 그것은 재무 리포팅을 제공하기 위해 매일 밤 실행되는 파라미터화된(parameterized) MySQL ETL이었고, 지난 몇 년간 충실히 제 역할을 해주었다. 워크플로는 다음과 같았다:</p>
+<p><img alt="" src="https://miro.medium.com/v2/resize:fit:1064/1*EzX1NLoTGNYuhtd46QxzUQ.jpeg" /></p>
+<ul>
+<li>We enabled MySQL database triggers for all our main tables to be able to capture each change to Airbnb reservation and payment records as they happen in real time on a per row basis. This way, we enforced immutability, and ensured all financially relevant events would be captured. This was meant to be a temporary solution to deal with the inherent mutability of the production data. We acknowledge that it wasn’t a great pattern, but it was necessary at the time.</li>
+<li>우리는 Airbnb 예약 및 결제 레코드에 대한 모든 변경을 행(row) 단위로 실시간 캡처할 수 있도록, 주요 테이블 전체에 MySQL 데이터베이스 트리거를 활성화했다. 이런 방식으로 불변성(immutability)을 강제했고, 재무적으로 관련된 모든 이벤트가 빠짐없이 캡처되도록 보장했다. 이것은 프로덕션 데이터가 본질적으로 가지는 가변성(mutability)을 다루기 위한 임시 해법으로 의도된 것이었다. 좋은 패턴이 아니었음을 인정하지만, 당시에는 필요한 일이었다.</li>
+<li>By being able to replay the history of events with database triggers, we built a set of intermediate helper tables that assist in calculating different reports. For example, we kept track of recognized revenue, guest receivables, future host payouts (liabilities), and other essential components of financial reporting.</li>
+<li>데이터베이스 트리거로 이벤트 이력을 재생(replay)할 수 있게 되면서, 우리는 서로 다른 리포트를 계산하는 데 도움을 주는 중간 헬퍼 테이블(helper table) 집합을 만들었다. 예를 들어, 인식된 매출(recognized revenue), 게스트 미수금(receivables), 미래의 호스트 정산금(부채, liabilities), 그리고 재무 리포팅의 다른 핵심 구성요소들을 추적했다.</li>
+<li>Based on those helper tables, we built all the financial reporting.</li>
+<li>그 헬퍼 테이블들을 기반으로, 우리는 모든 재무 리포팅을 구축했다.</li>
+</ul>
+<h2 id="the-scaling-challenge">The scaling challenge</h2>
+<p>스케일링이라는 도전 과제</p>
+<p>There were some advantages to this approach. Since we only relied on MySQL DB triggers and MySQL guarantees data accuracy, engineers had lots of flexibility to change the business logic and to move very fast. SQL based reports can be written very fast when the logic is simple.<br />
+이 접근에는 몇 가지 장점이 있었다. MySQL DB 트리거에만 의존했고 MySQL이 데이터 정확성을 보장하기 때문에, 엔지니어들은 비즈니스 로직을 바꾸고 아주 빠르게 움직일 수 있는 많은 유연성을 가졌다. 로직이 단순할 때 SQL 기반 리포트는 매우 빠르게 작성할 수 있다.</p>
+<p>However, the SQL-based ETL approach was not scaling well:<br />
+하지만 SQL 기반 ETL 접근은 확장성이 좋지 못했다:</p>
+<h3 id="it-wasnt-the-right-language-for-the-programming-model">It wasn’t the right language for the programming model</h3>
+<p>프로그래밍 모델에 맞는 언어가 아니었다</p>
+<ul>
+<li>SQL is good for lightweight data transformation. It is not designed to handle complicated business data flow. Modern software design principles can not be easily applied to decompose the complexity.</li>
+<li>SQL은 가벼운 데이터 변환에는 적합하다. 그러나 복잡한 비즈니스 데이터 흐름을 다루도록 설계되지는 않았다. 현대적인 소프트웨어 설계 원칙을 적용해 복잡성을 분해하기가 쉽지 않다.</li>
+<li>The original logic was tightly coupled with our core reservation logic. As Airbnb grew, the company needed to support product logic other than the original reservation flow, e.g. we needed to pay professional photographers, translators, and so on. Every product change had a unique money flow, and thus, financial and accounting impacts. As a result, we had to build many additional reports to meet each business need. Because the MySQL logic was structured around reservation logic, it was hard to modify and was extremely error prone when adding new logic for other products.</li>
+<li>원래의 로직은 우리의 핵심 예약 로직과 강하게 결합(tightly coupled)되어 있었다. Airbnb가 성장하면서, 회사는 기존 예약 플로 외의 상품 로직도 지원해야 했다. 예를 들어 전문 사진작가, 번역가 등에게 비용을 지급해야 했다. 모든 상품 변경에는 고유한 돈의 흐름이 있었고, 따라서 재무 및 회계적 영향이 뒤따랐다. 그 결과, 우리는 각 비즈니스 요구를 충족하기 위해 수많은 추가 리포트를 만들어야 했다. MySQL 로직이 예약 로직을 중심으로 짜여 있었기 때문에, 다른 상품을 위한 새 로직을 추가할 때 수정이 어렵고 오류가 매우 잦았다.</li>
+<li>Validation and testing became impossible. To get a comprehensive result, we pulled the data separately for all the different reports and our finance team combined them at their discretion. Because we built all the reports separately, it could be very difficult to tell which change in which report caused issues if there were number mismatches. This was not scalable when the company wanted to change the product or add new products more frequently.</li>
+<li>검증과 테스트가 불가능해졌다. 포괄적인 결과를 얻기 위해, 우리는 서로 다른 리포트마다 데이터를 따로 추출했고 재무 팀이 그것들을 재량껏 합쳤다. 모든 리포트를 따로 만들었기 때문에, 숫자가 맞지 않을 경우 어느 리포트의 어떤 변경이 문제를 일으켰는지 분간하기가 매우 어려웠다. 회사가 상품을 바꾸거나 새 상품을 더 자주 추가하려 할 때, 이런 방식은 확장 가능하지 않았다.</li>
+<li>As we added more and more reporting logic, and as our transaction volume grew, developing reports using SQL scripts became more complex, and prohibitively so. It became extremely difficult and time consuming to test the logic for accuracy.</li>
+<li>리포팅 로직을 점점 더 많이 추가하고 거래량이 늘어나면서, SQL 스크립트로 리포트를 개발하는 일은 점점 더 복잡해졌고 감당하기 힘들 정도가 되었다. 로직의 정확성을 테스트하기가 극도로 어렵고 시간이 많이 드는 일이 되었다.</li>
+</ul>
+<h3 id="the-nightly-runs-were-taking-too-much-time">The nightly runs were taking too much time</h3>
+<p>야간 배치 실행에 시간이 너무 오래 걸렸다</p>
+<p>As our transaction volume grew and our transformation logic became more complex, the nightly pipeline took more time. A relational database is hard to scale up. It is difficult to shard the data and difficult to leverage a distributed system to process a massive amount of data. Towards the end of its life, we were only able to run it every other day due to its runtime of over 24 hours.<br />
+거래량이 늘고 변환 로직이 복잡해지면서, 야간 파이프라인은 더 많은 시간이 걸렸다. 관계형 데이터베이스는 스케일업이 어렵다. 데이터를 샤딩(shard)하기도 어렵고, 방대한 양의 데이터를 처리하기 위해 분산 시스템을 활용하기도 어렵다. 수명이 끝나갈 무렵에는, 실행 시간이 24시간을 넘어서면서 이틀에 한 번씩만 돌릴 수 있었다.</p>
+<h2 id="our-goals">Our goals:</h2>
+<p>우리의 목표:</p>
+<p>As we grow, we needed to be able to cope with dramatically increasing data size and the frequent addition of new Airbnb products and payment channels. Thus, we had two goals for our new system:<br />
+성장함에 따라, 우리는 급격히 늘어나는 데이터 규모와 새로운 Airbnb 상품 및 결제 채널의 잦은 추가에 대응할 수 있어야 했다. 그래서 새 시스템에는 두 가지 목표가 있었다:</p>
+<ul>
+<li>The new system should give us enough flexibility to support more products as well as deal with product changes or accounting logic changes. To do this, we need to decouple the financial logic from the product logic. The representation of those product behaviors can be very generic in our financial system, e.g. how to book the receivable / payable / revenue / tax / etc. Thus we can build very sustainable financial reports based on highly normalized data.</li>
+<li>새 시스템은 더 많은 상품을 지원하고 상품 변경이나 회계 로직 변경에 대응할 수 있을 만큼 충분한 유연성을 줘야 한다. 이를 위해, 우리는 재무 로직을 상품 로직으로부터 분리(decouple)해야 한다. 그러한 상품 동작의 표현은 우리 재무 시스템 안에서 매우 일반적(generic)일 수 있다. 예를 들어 미수금(receivable) / 미지급금(payable) / 매출(revenue) / 세금(tax) 등을 어떻게 기표(book)할지 같은 것이다. 그렇게 하면 고도로 정규화된(normalized) 데이터를 기반으로 매우 지속 가능한 재무 리포트를 만들 수 있다.</li>
+<li>The new system should scale horizontally. As volume grows, we should be able to scale out our system by just adding machines.</li>
+<li>새 시스템은 수평적으로(horizontally) 확장되어야 한다. 거래량이 늘어나면, 단지 머신을 추가하는 것만으로 시스템을 스케일아웃할 수 있어야 한다.</li>
+</ul>
+<h2 id="introducing-our-new-financial-reporting-pipeline">Introducing our new financial reporting pipeline</h2>
+<p>우리의 새로운 재무 리포팅 파이프라인 소개</p>
+<p>Our event based financial report is designed to:<br />
+우리의 이벤트 기반(event based) 재무 리포트는 다음을 위해 설계되었다:</p>
+<ul>
+<li>support all current and future product types in our platform</li>
+<li>우리 플랫폼의 현재 및 미래의 모든 상품 유형(product type)을 지원한다</li>
+<li>have a holistic view of all events with financial impact on our platform</li>
+<li>우리 플랫폼에서 재무적 영향을 가지는 모든 이벤트에 대한 전체적인(holistic) 시각을 갖는다</li>
+<li>horizontally scale as our transaction volume grows</li>
+<li>거래량이 늘어남에 따라 수평적으로 확장된다</li>
+</ul>
+<p>It is powered by Apache Spark, stored on our HDFS cluster, and written in Scala. Spark is a fast and general engine for large-scale data processing, with implicit parallelism and fault-tolerance. We chose Scala as the language because we wanted the latest features of Spark, as well as the other benefits of the language, like types, closures, immutability, lazy evaluation, etc.<br />
+이 시스템은 Apache Spark로 구동되고, 우리의 HDFS 클러스터에 저장되며, Scala로 작성되었다. Spark는 대규모 데이터 처리를 위한 빠르고 범용적인 엔진으로, 암묵적 병렬성(implicit parallelism)과 내결함성(fault-tolerance)을 갖추고 있다. 우리가 언어로 Scala를 선택한 이유는, Spark의 최신 기능을 원했을 뿐 아니라 타입(types), 클로저(closures), 불변성(immutability), 지연 평가(lazy evaluation) 등 이 언어가 주는 다른 이점들도 원했기 때문이다.</p>
+<p>This is huge considering our previous language was SQL.<br />
+이전 언어가 SQL이었다는 점을 고려하면, 이것은 어마어마한 변화다.</p>
+<h2 id="a-brief-overview-of-how-it-works">A brief overview of how it works</h2>
+<p>작동 방식 간략 개요</p>
+<p>Our new financial reporting system has a concept of different product types, of which reservations are only one. Each product type has its own set of platform and payment events, and a corresponding set of financial events. Thus we can address each product type individually and systematically build up to a holistic report.<br />
+우리의 새 재무 리포팅 시스템은 서로 다른 상품 유형이라는 개념을 가지며, 예약은 그중 하나일 뿐이다. 각 상품 유형은 자체적인 플랫폼 이벤트와 결제 이벤트 집합, 그리고 그에 대응하는 재무 이벤트 집합을 갖는다. 따라서 우리는 각 상품 유형을 개별적으로 다루면서, 체계적으로 전체적인 리포트로 쌓아 올릴 수 있다.</p>
+<p>The system can be thought of as many event handlers that calculate the accounting impact of different products at different points in their life cycle. Because Scala has a strong static type system, while providing full support for functional programming, it is easy to design and write handlers about different products and how to process them.<br />
+이 시스템은, 서로 다른 상품이 생애주기(life cycle)의 서로 다른 시점에서 가지는 회계적 영향을 계산하는 많은 이벤트 핸들러(event handler)로 생각할 수 있다. Scala는 강력한 정적 타입 시스템(static type system)을 가지면서도 함수형 프로그래밍을 완전히 지원하기 때문에, 서로 다른 상품과 그것을 어떻게 처리할지에 대한 핸들러를 설계하고 작성하기가 쉽다.</p>
+<p>Below is a diagram of how the data flows through the system. Don’t worry, we’ll explain everything.<br />
+아래는 데이터가 시스템을 통해 어떻게 흐르는지를 보여주는 다이어그램이다. 걱정 마라, 우리가 전부 설명할 것이다.</p>
+<p><img alt="" src="https://miro.medium.com/v2/resize:fit:984/1*1HCBBvi5d3OhjzSHVwn4lA.jpeg" /></p>
+<p>Platform events are events that provide information about product related changes, like reservations, reservation alterations, photography, cancellations, etc. These usually have some financial expectation associated with them, but it is not always the case. Each time a product is created or updated, we derive an event for that product. For example, when a reservation is booked, we emit a booking event for the reservation product type. A day after the reservation starts, we consider the reservation to have “services rendered”. When the service is delivered to the customer (the guest in this case), we can then recognize revenue. These events are important because they have financial accounting implications, and we will talk about those more below.<br />
+플랫폼 이벤트(Platform events)는 예약, 예약 변경, 사진 촬영, 취소 등 상품 관련 변경에 대한 정보를 제공하는 이벤트다. 이것들은 보통 어떤 재무적 기대(financial expectation)와 연관되어 있지만, 항상 그런 것은 아니다. 상품이 생성되거나 업데이트될 때마다, 우리는 그 상품에 대한 이벤트를 도출한다. 예를 들어 예약이 잡히면, 예약 상품 유형에 대한 예약(booking) 이벤트를 발행(emit)한다. 예약이 시작된 다음 날, 우리는 그 예약이 “서비스가 제공되었다(services rendered)”고 본다. 서비스가 고객(이 경우 게스트)에게 전달되면, 그제서야 매출을 인식(recognize revenue)할 수 있다. 이러한 이벤트들은 재무회계적 함의를 가지기 때문에 중요하며, 이에 대해서는 아래에서 더 이야기할 것이다.</p>
+<h2 id="get-alice-liangs-stories-in-your-inbox">Get Alice Liang’s stories in your inbox</h2>
+<p>Join Medium for free to get updates from this writer.</p>
+<p>Remember me for faster sign in</p>
+<p>Payment events describe money movement. They can be events where real money moves in and out of Airbnb bank accounts. Payment events also describe stored value, like when someone buys and uses gift cards. There are other kinds of payment events where money may not actually move, but we still have to account for the lack of cash movement. This can be when someone sends someone else a gift card, and that person claims it. We consider those to be balance transfers, or virtual movement. An example of no money movement would be when a guest uses a coupon. The money from the coupon is funded from the marketing budget, but no money has actually moved accounts — we just need to account for it somewhere. Money in must equal money out. Because coupons are on the guest side and don’t impact the original host payout amount and likewise the other host side operations, we need to take these into account so the money equation balances.<br />
+결제 이벤트(Payment events)는 돈의 이동을 기술한다. 실제 돈이 Airbnb 은행 계좌로 들어오고 나가는 이벤트일 수 있다. 결제 이벤트는 또한 누군가가 기프트카드를 사서 사용하는 경우처럼 저장 가치(stored value)도 기술한다. 돈이 실제로 움직이지는 않지만 그래도 현금 이동의 부재를 회계 처리해야 하는 다른 종류의 결제 이벤트도 있다. 누군가가 다른 사람에게 기프트카드를 보내고 그 사람이 그것을 수령하는 경우가 그렇다. 우리는 그런 것들을 잔액 이체(balance transfer), 즉 가상의 이동(virtual movement)으로 본다. 돈이 움직이지 않는 또 다른 예는 게스트가 쿠폰을 사용하는 경우다. 쿠폰에서 나오는 돈은 마케팅 예산에서 충당되지만, 실제로 계좌 간에 돈이 움직인 것은 아니다. 우리는 단지 그것을 어딘가에 회계 처리해야 할 뿐이다. 들어온 돈은 나간 돈과 반드시 같아야 한다. 쿠폰은 게스트 쪽에 있고 원래의 호스트 정산 금액이나 마찬가지로 다른 호스트 쪽 작업에 영향을 주지 않기 때문에, 돈의 등식(money equation)이 균형을 이루도록 이것들을 고려해야 한다.</p>
+<p>These events are currently generated from examining the aforementioned accounting audit rows for changes. If the change has an accounting impact, then a platform or payment event is generated. This system was designed as a central place for all the data to pass through from different systems. The financial reporting system processes these platform and payment events with event handlers, and produces accounting events that describe the accounting impact of those events.<br />
+이러한 이벤트들은 현재 앞서 언급한 회계 감사(audit) 행들의 변경을 검사하여 생성된다. 변경에 회계적 영향이 있으면, 플랫폼 이벤트 또는 결제 이벤트가 생성된다. 이 시스템은 서로 다른 시스템에서 오는 모든 데이터가 통과하는 중앙 지점으로 설계되었다. 재무 리포팅 시스템은 이러한 플랫폼 및 결제 이벤트를 이벤트 핸들러로 처리하여, 그 이벤트들의 회계적 영향을 기술하는 회계 이벤트(accounting events)를 생성한다.</p>
+<p>Accounting events are generated by event handlers that build them from the payment and platform events. We introduced this layer of abstraction to represent the relationship between the different platform and payment events for each product, as well as the accounting logic. Sometimes, as you’ll see below, a single platform event can generate more than one accounting event, because it has multiple accounting impacts at different times. These events basically keep track of what happened by assigning a unique identifier, the product type and the product id, to a set of activity. For us, we consider the product type and id to be the smallest accounting unit that we operate on.<br />
+회계 이벤트(Accounting events)는 결제 및 플랫폼 이벤트로부터 그것들을 구성하는 이벤트 핸들러에 의해 생성된다. 우리는 각 상품에 대한 서로 다른 플랫폼 및 결제 이벤트 간의 관계와 회계 로직을 표현하기 위해 이 추상화 계층을 도입했다. 아래에서 보게 되겠지만, 때로는 하나의 플랫폼 이벤트가 여러 개의 회계 이벤트를 생성할 수 있다. 서로 다른 시점에 여러 개의 회계적 영향을 갖기 때문이다. 이러한 이벤트들은 기본적으로, 일련의 활동에 고유 식별자(unique identifier), 즉 상품 유형과 상품 id를 부여함으로써 무슨 일이 일어났는지를 추적한다. 우리에게 있어, 상품 유형과 id는 우리가 다루는 가장 작은 회계 단위(accounting unit)다.</p>
+<p>From accounting events, we generate the subledger, which is the basis for all of our financial accounting. Each entry is a detailed accounting record that includes information about the time a transaction occurred (payment or reservation booking), the amount, the currency, the direction of the monetary impact (credit or debit) and the account that it impacts.<br />
+회계 이벤트로부터 우리는 보조원장(subledger)을 생성하는데, 이는 우리의 모든 재무회계의 기초가 된다. 각 항목(entry)은 거래가 발생한 시각(결제 또는 예약 부킹), 금액, 통화, 화폐적 영향의 방향(대변 credit 또는 차변 debit), 그리고 그것이 영향을 주는 계정(account)에 대한 정보를 포함하는 상세 회계 기록이다.</p>
+<p>The subledger is generated using double entry accounting. Double entry accounting allows us to be sure that everything is accounted for properly in the system. This means no money appears or disappears without a source.<br />
+보조원장(subledger)은 복식부기(double entry accounting)를 사용하여 생성된다. 복식부기는 시스템 안에서 모든 것이 제대로 회계 처리되었음을 확신할 수 있게 해준다. 즉, 출처 없이 돈이 생겨나거나 사라지는 일이 없다는 뜻이다.</p>
+<p>Even though each product type may behave differently, we’ve found a generic life cycle that all product types share. Let’s walk through how a reservation would look in this framework.<br />
+각 상품 유형이 서로 다르게 동작할 수 있더라도, 우리는 모든 상품 유형이 공유하는 일반적인 생애주기(generic life cycle)를 발견했다. 예약이 이 프레임워크 안에서 어떻게 보이는지 단계별로 살펴보자.</p>
+<p><img alt="" src="https://miro.medium.com/v2/resize:fit:1364/1*h3_yS91yfS5UzuNiAcDVWw.jpeg" /></p>
+<p>An event happens that introduces some accounting liability, and a contract is created. No money has moved at this point, but expectations for future money flow are set up here. The accounting events at this point describe the contract that has been created.<br />
+어떤 회계적 부채(liability)를 발생시키는 이벤트가 일어나고, 계약(contract)이 생성된다. 이 시점에는 아직 돈이 움직이지 않았지만, 미래의 돈 흐름에 대한 기대가 여기서 설정된다. 이 시점의 회계 이벤트들은 생성된 계약을 기술한다.</p>
+<ul>
+<li>Here, a guest has confirmed a two night reservation for $100. We refer to this time as booking date, and treat it as the contract start date. Of the $100, $90 is the price of the stay, $10 are fees. (This price breakdown is for example purposes only, and does not reflect any real reservation. We’ve also left the host fees out of this to simplify the explanation.)</li>
+<li>여기서, 한 게스트가 100달러에 2박 예약을 확정했다. 우리는 이 시점을 부킹 날짜(booking date)라고 부르며, 계약 시작일로 취급한다. 100달러 중 90달러는 숙박 가격이고, 10달러는 수수료다. (이 가격 분해는 예시용일 뿐이며, 실제 예약을 반영하지 않는다. 또한 설명을 단순화하기 위해 호스트 수수료는 제외했다.)</li>
+<li>The guest and the host have entered into a contract with each other, with Airbnb acting as the platform and payment collection agent. In exchange for staying at this listing for two nights, the guest will pay Airbnb $100, and the host will receive $90 some time after check-in. On the date of the reservation confirmation, we have a guest receivable of $100, and a future host payable of $90, due to the host when we consider the reservation to be fulfilled. These expectations are set up as soon as the reservation is confirmed.</li>
+<li>게스트와 호스트는 서로 계약을 맺었고, Airbnb는 플랫폼이자 결제 수금 대리인(payment collection agent) 역할을 한다. 이 숙소에서 2박을 머무는 대가로, 게스트는 Airbnb에 100달러를 지불하고, 호스트는 체크인 이후 얼마간 지나 90달러를 받게 된다. 예약 확정일에, 우리는 100달러의 게스트 미수금(guest receivable)과, 예약이 이행되었다고 볼 때 호스트에게 지급해야 하는 90달러의 미래 호스트 미지급금(future host payable)을 갖는다. 이러한 기대들은 예약이 확정되는 즉시 설정된다.</li>
+</ul>
+<p>An event’s money flow occurs. This can happen anytime after the contract has been created. The accounting events here describe the direction and for what liability the amount is fulfilling.<br />
+이벤트의 돈 흐름(money flow)이 발생한다. 이것은 계약이 생성된 후 언제든 일어날 수 있다. 여기서의 회계 이벤트들은 그 금액이 어느 방향으로, 어떤 부채를 이행하기 위한 것인지를 기술한다.</p>
+<ul>
+<li>Here, the guest successfully pays $100 for the reservation. We would consider the guest receivable then fulfilled.</li>
+<li>여기서, 게스트가 예약에 대해 100달러를 성공적으로 지불한다. 그러면 우리는 게스트 미수금이 이행되었다고 본다.</li>
+</ul>
+<p>The event happens and so the contracted service is fulfilled.<br />
+이벤트가 일어나서 계약된 서비스가 이행된다.</p>
+<ul>
+<li>This is after the check-in time. This is the point in which we would recognize revenue and losses, if there are any. In this example, we didn’t have any. This is also the time that the scheduled $90 payout for the host should be delivered to the host. This means that the future host payable is now a host payable because it is now due.</li>
+<li>이것은 체크인 시각 이후다. 이 시점이 (만약 있다면) 매출과 손실을 인식(recognize)하는 지점이다. 이 예시에서는 손실이 없었다. 또한 이때가 호스트를 위해 예정된 90달러 정산금이 호스트에게 전달되어야 하는 시점이다. 즉, 미래 호스트 미지급금(future host payable)이 이제 지급 기한이 되었으므로 호스트 미지급금(host payable)이 된다.</li>
+</ul>
+<p>More money flows may occur.<br />
+추가적인 돈 흐름이 발생할 수 있다.</p>
+<ul>
+<li>This is when we successfully deliver the $90 payout to the host. Now Airbnb’s host payable is $0 for this particular host.</li>
+<li>이것은 우리가 90달러 정산금을 호스트에게 성공적으로 전달하는 때다. 이제 이 특정 호스트에 대한 Airbnb의 호스트 미지급금은 0달러가 된다.</li>
+</ul>
+<p>Sometimes, there are alterations on a product or a payment. Examples would be a guest adding dates to a reservation inducing a reservation price change. To properly account for the price differences from an alteration, we “unbook” and “rebook” the reservation entirely at the time of alteration.<br />
+때때로 상품이나 결제에 변경(alteration)이 생긴다. 게스트가 예약에 날짜를 추가하여 예약 가격 변경을 유발하는 경우가 그 예다. 변경으로 인한 가격 차이를 제대로 회계 처리하기 위해, 우리는 변경 시점에 예약 전체를 “부킹 취소(unbook)”했다가 “재부킹(rebook)”한다.</p>
+<ul>
+<li>For example, if the reservation was previously booked for $100, and now it is $150 because the guest extended their stay at a later date, we could either book an additional $50 on the later date, or unbook the reservation for $100 and rebook it for $150 on that day. Why do you think we chose to do the latter? It’s because when alterations add up, it’s much easier to just unbook and rebook, instead of computing the delta every time. It’s the cleanest way we can deal with product alterations and data backfills. Just imagine how alterations on a long term reservation would look in our system!</li>
+<li>예를 들어, 예약이 이전에 100달러로 부킹되어 있었는데 게스트가 이후 날짜에 숙박을 연장해서 이제 150달러가 되었다면, 우리는 그 이후 날짜에 추가로 50달러를 기표하거나, 아니면 그날 100달러짜리 예약을 부킹 취소하고 150달러로 재부킹할 수 있다. 우리가 왜 후자를 택했다고 생각하는가? 변경이 쌓이면, 매번 차액(delta)을 계산하는 것보다 그냥 부킹 취소했다가 재부킹하는 편이 훨씬 쉽기 때문이다. 그것이 상품 변경과 데이터 백필(backfill)을 다룰 수 있는 가장 깔끔한 방법이다. 장기 예약에 대한 변경이 우리 시스템에서 어떻게 보일지 한번 상상해 보라!</li>
+</ul>
+<p>Now that we’ve built the subledgers from the platform and payment events, and their handlers, we can easily query for the financial impact to different accounts that any event generates.<br />
+이제 플랫폼 및 결제 이벤트와 그 핸들러로부터 보조원장(subledger)을 구축했으므로, 어떤 이벤트가 생성하는 여러 계정에 대한 재무적 영향을 쉽게 쿼리할 수 있다.</p>
+<p>An example of how revenue would be queried from the subledger is as follows:<br />
+보조원장에서 매출을 쿼리하는 방식의 예는 다음과 같다:</p>
+<h2 id="key-takeaways">Key takeaways</h2>
+<p>핵심 정리</p>
+<h3 id="it-scales-while-maintaining-quality-and-performance">It scales while maintaining quality and performance</h3>
+<p>품질과 성능을 유지하면서 확장된다</p>
+<p>Our financial reporting pipeline scales both on a product basis, and on a runtime basis. We can easily support new products on the financial engineering side because we’ve built a framework around the right abstractions, instead of tying it too closely with one specific product’s life cycle. We can also scale horizontally. This is much better than being limited by an Amazon RDS instance, no matter how beefy it may be. Our nightly runtime is 4–5 hours and has not been growing too much as of March 2017.<br />
+우리의 재무 리포팅 파이프라인은 상품 측면에서도, 실행 시간(runtime) 측면에서도 확장된다. 우리는 특정 상품 하나의 생애주기에 너무 밀착시키는 대신 올바른 추상화를 중심으로 프레임워크를 구축했기 때문에, 재무 엔지니어링 측면에서 새 상품을 쉽게 지원할 수 있다. 또한 수평적으로 확장할 수도 있다. 이것은 아무리 강력하더라도 하나의 Amazon RDS 인스턴스에 제약받는 것보다 훨씬 낫다. 우리의 야간 실행 시간은 4~5시간이며, 2017년 3월 기준으로 그다지 많이 늘어나지 않았다.</p>
+<h3 id="it-made-troubleshooting-much-simpler">It made troubleshooting much simpler</h3>
+<p>문제 해결을 훨씬 단순하게 만들었다</p>
+<p>Before, when our Finance team needed comprehensive reports, we pulled the data separately for all the different reports and our finance team combined them at their discretion. Because we built all the reports separately, it could be very difficult to tell which change in which report caused unexpected deviances. This was not scalable when the company wanted to change the product or add new products more frequently. Now when there’s an issue, we investigate data from a single source of truth, significantly simplifying the troubleshooting process.<br />
+이전에는, 재무 팀이 포괄적인 리포트가 필요할 때 서로 다른 리포트마다 데이터를 따로 추출했고 재무 팀이 그것들을 재량껏 합쳤다. 모든 리포트를 따로 만들었기 때문에, 어느 리포트의 어떤 변경이 예상치 못한 편차를 일으켰는지 분간하기가 매우 어려울 수 있었다. 회사가 상품을 바꾸거나 새 상품을 더 자주 추가하려 할 때, 이런 방식은 확장 가능하지 않았다. 이제는 문제가 생기면 단일 진실 공급원(single source of truth)에서 데이터를 조사하므로, 문제 해결 과정이 크게 단순해졌다.</p>
+<h3 id="it-made-coding-much-simpler">It made coding much simpler</h3>
+<p>코딩을 훨씬 단순하게 만들었다</p>
+<p>Going from declarative programming to functional programming has been a powerful paradigm shift for us to think about financial processing and accounting. We can now think of this system as a straightforward actor/handler system rather than getting mired in complicated SQL-join logic.<br />
+선언형 프로그래밍(declarative programming)에서 함수형 프로그래밍(functional programming)으로 넘어간 것은, 재무 처리와 회계를 사고하는 데 있어 우리에게 강력한 패러다임 전환이었다. 이제 우리는 복잡한 SQL 조인(join) 로직에 빠져 허우적대는 대신, 이 시스템을 단순한 액터/핸들러(actor/handler) 시스템으로 생각할 수 있다.</p>
+<h3 id="the-nightly-runs-are-timely-and-well-monitored">The nightly runs are timely and well monitored</h3>
+<p>야간 배치가 제때 돌고 잘 모니터링된다</p>
+<p>Originally, the MySQL ETL was scheduled via a crontab, and was dependent on data arriving via a different pipeline. Instead of taking upwards of a day to complete, the nightly run takes around 4–5 hours to complete. We no longer have to babysit a legacy system that quite frequently encounters snags caused by upstream changes, taking hours of developer time each week to resolve.<br />
+원래 MySQL ETL은 crontab으로 스케줄링되었고, 다른 파이프라인을 통해 도착하는 데이터에 의존했다. 완료하는 데 하루 이상 걸리던 것 대신, 이제 야간 실행은 완료까지 약 4~5시간이 걸린다. 우리는 더 이상, 상류(upstream) 변경으로 인해 꽤 자주 문제가 생겨 매주 개발자 시간을 몇 시간씩 잡아먹는 레거시 시스템을 돌보지 않아도 된다.</p>
+<h3 id="we-built-a-comprehensive-test-framework">We built a comprehensive test framework</h3>
+<p>포괄적인 테스트 프레임워크를 구축했다</p>
+<p>This is perhaps the important part of the picture. Because our financial processing and reporting is no longer in SQL, we are now also able to write extensive suites of unit tests against specific handlers. Together with integration tests and smoke tests, we can easily identify regressions and other errors. Smoke tests are rules we expect our data to follow and when rule violations occur, they are logged and addressed. This gives us a high degree of confidence in the quality of our data and lets us quickly vet new changes and roll them out. We have built an extensive (and ever expanding) test suite of real transactions, in which we check how we expect them to look in the system individually as well as in aggregate. This test framework is critical when we have time sensitive requests from our various partners in Finance and Legal, as well as from our audit partners, and need to be confident in our reporting.<br />
+이것은 어쩌면 이 그림에서 가장 중요한 부분이다. 우리의 재무 처리와 리포팅이 더 이상 SQL에 있지 않기 때문에, 이제 특정 핸들러에 대해 광범위한 단위 테스트(unit test) 모음을 작성할 수도 있다. 통합 테스트(integration test) 및 스모크 테스트(smoke test)와 함께, 우리는 회귀(regression)와 기타 오류를 쉽게 식별할 수 있다. 스모크 테스트는 우리 데이터가 따를 것으로 기대하는 규칙들이며, 규칙 위반이 발생하면 로깅되어 처리된다. 이것은 우리 데이터 품질에 대해 높은 수준의 확신을 주고, 새로운 변경을 빠르게 검증하여 출시할 수 있게 해준다. 우리는 실제 거래로 이루어진 광범위한(그리고 계속 확장되는) 테스트 스위트를 구축했는데, 그 안에서 각 거래가 시스템에서 개별적으로 그리고 집계(aggregate)된 형태로 어떻게 보일 것으로 기대하는지를 확인한다. 이 테스트 프레임워크는, 재무 및 법무의 여러 파트너와 감사 파트너로부터 시간에 민감한 요청을 받아 우리 리포팅에 확신을 가져야 할 때 결정적으로 중요하다.</p>
+<h2 id="future-looking">Future looking</h2>
+<p>앞으로의 전망</p>
+<p>In the future, we will be moving towards an entirely event-based system. The financial reporting system will consume events emitted from other systems. Stay tuned to read about that in a future blog post. This will help us with even greater financial integrity and a richer vocabulary with which we can express different products and payment flows.<br />
+앞으로 우리는 완전히 이벤트 기반(event-based) 시스템으로 이동할 것이다. 재무 리포팅 시스템은 다른 시스템에서 발행된 이벤트를 소비하게 될 것이다. 이에 대해서는 추후 블로그 글에서 다룰 예정이니 기대해 달라. 이는 한층 더 높은 재무적 무결성(financial integrity)과, 서로 다른 상품 및 결제 흐름을 표현할 수 있는 더 풍부한 어휘를 갖추는 데 도움이 될 것이다.</p>
+<p>In the end, what we want most at Airbnb is to have is complete, accurate and extensible financial reporting for all of our current and future products at Airbnb. We believe that we have designed the financial reporting system to be a strong foundation of all financial processing at Airbnb. Because of the clean decoupling of business logic and accounting logic, this system is product agnostic, extensible, and future-proof, which gives us confidence it will serve us well for many years to come. This is just the start of our back office financial systems at Airbnb.<br />
+결국 Airbnb에서 우리가 가장 원하는 것은, Airbnb의 현재 및 미래의 모든 상품에 대해 완전하고, 정확하며, 확장 가능한 재무 리포팅을 갖추는 것이다. 우리는 이 재무 리포팅 시스템을 Airbnb의 모든 재무 처리의 든든한 기반이 되도록 설계했다고 믿는다. 비즈니스 로직과 회계 로직을 깔끔하게 분리(decoupling)한 덕분에, 이 시스템은 상품에 구애받지 않고(product agnostic), 확장 가능하며, 미래에도 견딜 수 있다(future-proof). 이는 앞으로 오랜 세월 동안 잘 작동할 것이라는 확신을 우리에게 준다. 이것은 Airbnb의 백오피스 재무 시스템의 시작일 뿐이다.</p>
+<p>If you enjoyed reading this and thought this was an interesting challenge, the payments team is always looking for talented people to join the team, whether you are a software engineer or a data scientist.<br />
+이 글을 즐겁게 읽고 흥미로운 도전이라고 생각했다면, 결제 팀은 소프트웨어 엔지니어든 데이터 사이언티스트든 팀에 합류할 재능 있는 사람을 항상 찾고 있다.</p>
+<p>Please stay tuned for more on the Payments ecosystem at Airbnb!<br />
+Airbnb의 결제 생태계에 대한 더 많은 이야기를 기대해 달라!</p>
+<p>Many thanks to Sarah Hagstrom, Lou Kosak, Shawn Yan, Brian Wey, Jiangming Yang, and Ian Logan for reading through many drafts and helping me to write this post.<br />
+이 글의 여러 초안을 읽어주고 작성을 도와준 Sarah Hagstrom, Lou Kosak, Shawn Yan, Brian Wey, Jiangming Yang, Ian Logan에게 깊이 감사한다.</p></div>
+</body></html>

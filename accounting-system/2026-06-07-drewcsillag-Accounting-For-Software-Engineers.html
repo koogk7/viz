@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accounting For Software Engineers · 회계 시스템 구조</title>
+<style>
+  :root{--bg:#0f1419;--panel:#1a2029;--line:#2a323d;--txt:#e6e9ee;--muted:#8b97a7;--accent:#4dd0a7;--a2:#5b8def}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);line-height:1.7;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif;
+    padding:28px 20px 80px;max-width:780px;margin:0 auto;font-size:16px}
+  .nav{display:flex;gap:14px;font-size:13px;color:var(--muted);margin-bottom:22px;
+    border-bottom:1px solid var(--line);padding-bottom:14px}
+  .nav a{color:var(--accent);text-decoration:none}
+  h1{font-size:24px;line-height:1.3;margin:.2em 0 .4em}
+  h2{font-size:19px;margin:1.6em 0 .5em;border-bottom:1px solid var(--line);padding-bottom:.3em}
+  h3{font-size:16px;margin:1.4em 0 .4em;color:var(--accent)}
+  a{color:var(--a2)}
+  code{background:#11161d;border:1px solid var(--line);border-radius:4px;padding:.1em .35em;font-size:.88em;
+    font-family:ui-monospace,Menlo,monospace}
+  pre{background:#11161d;border:1px solid var(--line);border-radius:8px;padding:14px;overflow-x:auto}
+  pre code{border:0;padding:0;background:none}
+  blockquote{border-left:3px solid var(--accent);margin:1em 0;padding:.2em 1em;color:var(--muted);background:#161c24}
+  table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.92em;display:block;overflow-x:auto}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left}
+  th{background:#11161d}
+  hr{border:0;border-top:1px solid var(--line);margin:1.8em 0}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px}
+  .tag{background:#11161d;border:1px solid var(--line);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--muted)}
+  .content img{max-width:100%}
+</style></head><body>
+<div class="nav"><a href="index.html">← 목차(MOC)</a></div>
+<div class="tags"><span class="tag">복식부기</span><span class="tag">재무제표</span><span class="tag">회계시스템</span><span class="tag">자산</span></div>
+<div class="content"><p>Dec 6, 2017 - 22 minute read - <a href="https://drew.thecsillags.com/categories/programming/">programming</a> <a href="https://drew.thecsillags.com/categories/accounting/">accounting</a></p>
+<h1 id="accounting-for-software-engineers">Accounting For Software Engineers</h1>
+<h1 id="_1">소프트웨어 엔지니어를 위한 회계</h1>
+<p>For my current job, I’ve had to learn how accounting works. In order to learn that, I did the kinds of things you’d expect I might. But one thing I kept finding was that some fairly simple concept seemed to be explained in a way over-complicated way, after I eventually was able to figure it out. I eventually figured out why, and with that, I think that if you’re new to accounting, and a software engineer, I think I can help you out.<br />
+지금 하는 일 때문에 회계가 어떻게 돌아가는지 배워야 했다. 그걸 배우기 위해 여러분이 예상할 만한 방식으로 공부했다. 그런데 계속 발견한 점 하나는, 결국 이해하고 나서 보니 꽤 단순한 개념이 지나치게 복잡하게 설명되어 있는 것 같았다는 것이다. 결국 그 이유를 알아냈고, 그래서 만약 당신이 회계를 처음 접하는 소프트웨어 엔지니어라면 내가 도움을 줄 수 있을 거라고 생각한다.</p>
+<p>The difference between accountants and software engineers, when it comes to accounting systems, is about what we primarily care about. Accountants care about meaning: is the quick ratio in good shape? Is income growing at an expected rate? How do we deal with an upcoming expense? Software engineers care about: will we properly move money around so that the balances are correct given certain latency, concurrency, etc.? Do we have the information required to generate the Income Statement? How do we represent a credit memo?<br />
+회계 시스템에 관해서 회계사와 소프트웨어 엔지니어의 차이는 우리가 주로 무엇에 관심을 두는지에 있다. 회계사는 의미에 관심을 둔다. 당좌비율(quick ratio)이 양호한가? 수익이 기대한 비율로 성장하고 있는가? 다가오는 지출을 어떻게 처리할 것인가? 소프트웨어 엔지니어는 이런 것에 관심을 둔다. 특정 지연(latency), 동시성(concurrency) 등이 주어졌을 때 잔액이 정확하도록 돈을 제대로 이동시킬 수 있는가? 손익계산서(Income Statement)를 생성하는 데 필요한 정보를 갖추고 있는가? 크레딧 메모(credit memo)를 어떻게 표현할 것인가?</p>
+<p>Once I understood this fundamental difference, it gave me insight into how and why things are described in the accounting world.<br />
+이 근본적인 차이를 이해하고 나니, 회계 세계에서 사물이 어떻게 그리고 왜 그렇게 설명되는지에 대한 통찰을 얻을 수 있었다.</p>
+<p>The elements of double-entry bookkeeping haven’t changed much in the 523 years since Luca Pacioli published his book that described (among other things) double-entry bookkeeping. That being the case, from a concept perspective, as an engineer, you shouldn’t need to invent anything. If you find yourself doing so, please think again and talk to an accountant. While you may need to deal with your varied mechanisms and invent things becasue the off-the-shelf solution won’t cut it for you, accounting concepts should not need to be invented (at least by you), but the job is merely find the proper ways to apply existing concepts to the problem at hand.<br />
+복식부기(double-entry bookkeeping)의 요소들은 루카 파치올리(Luca Pacioli)가 (여러 내용 중에서도) 복식부기를 설명한 책을 출간한 이후 523년 동안 크게 변하지 않았다. 그런 만큼 개념적인 측면에서 엔지니어로서 당신이 무언가를 새로 발명할 필요는 없다. 만약 그렇게 하고 있다면, 다시 생각해 보고 회계사와 상의하기 바란다. 기성 솔루션이 당신에게 맞지 않아 다양한 메커니즘을 다루고 무언가를 만들어내야 할 수는 있겠지만, 회계 개념 자체는 (적어도 당신이) 발명할 필요가 없으며, 당신의 일은 단지 기존 개념을 당면한 문제에 적용하는 올바른 방법을 찾는 것뿐이다.</p>
+<p>Something I did which gave me much better insight into all of this was to create the books for my personal finances on paper. I used <a href="https://www.printablepaper.net/preview/finance-portrait-ledger-3col">printable paper</a>’s 3 column, letter orientation ledger paper. For the journal, I only used two columns, but for accounts, you’ll want three.<br />
+이 모든 것에 대해 훨씬 더 나은 통찰을 준 일은 내 개인 재무 장부를 종이에 직접 작성해 본 것이었다. 나는 <a href="https://www.printablepaper.net/preview/finance-portrait-ledger-3col">printable paper</a>의 3단(3 column), 레터(letter) 세로 방향 원장(ledger) 용지를 사용했다. 분개장(journal)에는 두 개의 열만 사용했지만, 계정(accounts)에는 세 개가 필요할 것이다.</p>
+<p>In accounting, there are a few main things from which <em>everything</em> else derives or can be wedged in, in some way:<br />
+회계에는 _다른 모든 것_이 어떤 식으로든 파생되거나 끼워 맞춰질 수 있는 몇 가지 핵심 요소가 있다.</p>
+<ul>
+<li>debits/credits</li>
+<li>차변/대변(debits/credits)</li>
+<li>the journal</li>
+<li>분개장(the journal)</li>
+<li>the accounts</li>
+<li>계정(the accounts)</li>
+<li>ledgers</li>
+<li>원장(ledgers)</li>
+<li>invoices</li>
+<li>송장(invoices)</li>
+</ul>
+<h1 id="debitscredits">Debits/Credits</h1>
+<h1 id="debitscredits_1">차변/대변(Debits/Credits)</h1>
+<p>The classic description of credits and debits is something like:<br />
+대변과 차변에 대한 전형적인 설명은 다음과 같은 식이다.</p>
+<blockquote>
+<p>A credit increases the value of a liability account, and a debit increases the value of an asset account.<br />
+대변(credit)은 부채(liability) 계정의 값을 증가시키고, 차변(debit)은 자산(asset) 계정의 값을 증가시킨다.</p>
+</blockquote>
+<p>or<br />
+또는</p>
+<blockquote>
+<p>One account will receive a “debit” entry, meaning the amount will be entered on the left side of that account. Another account will receive a “credit” entry, meaning the amount will be entered on the right side of that account.<br />
+한 계정은 "차변(debit)" 기입을 받는데, 이는 그 금액이 해당 계정의 왼쪽에 기입됨을 의미한다. 다른 계정은 "대변(credit)" 기입을 받는데, 이는 그 금액이 해당 계정의 오른쪽에 기입됨을 의미한다.</p>
+</blockquote>
+<p>While these are both accurate, for an engineer, these don’t exactly help clear things up. Wikipedia actually gives a decent, if sloppy, description:<br />
+이 둘 다 정확하긴 하지만, 엔지니어 입장에서는 그다지 이해를 명확하게 해 주지 않는다. 위키피디아가 사실 다소 엉성하긴 해도 괜찮은 설명을 제공한다.</p>
+<blockquote>
+<p>[D]ebits and credits are entries made in account ledgers to record changes in value resulting from business transactions. Generally speaking, the source account for the transaction is credited (that is, an entry is made on the right side of the account’s ledger) and the destination account is debited (that is, an entry is made on the left side).<br />
+차변과 대변은 사업 거래에서 발생한 가치 변동을 기록하기 위해 계정 원장에 기입하는 항목이다. 일반적으로 말하면, 거래의 출처(source) 계정은 대변에 기입되고(즉, 해당 계정 원장의 오른쪽에 기입됨), 목적지(destination) 계정은 차변에 기입된다(즉, 왼쪽에 기입됨).</p>
+</blockquote>
+<p>In short: you __c__redit the account(s) where the money <strong>c</strong>omes from, and <strong>d</strong>ebit the account(s) that are the <strong>d</strong>estination(s) of the money.<br />
+요약하면, 돈이 <strong>나오는(c</strong>omes from<strong>)</strong> 계정을 대변(__c__redit) 처리하고, 돈의 <strong>목적지(d</strong>estination<strong>)</strong>가 되는 계정을 차변(<strong>d</strong>ebit) 처리한다.</p>
+<h1 id="the-journal">The Journal</h1>
+<h1 id="the-journal_1">분개장(The Journal)</h1>
+<p>The journal is the set of transactions against the accounts. If you’re working on paper, the journal should be written in ink because it should be write once. My Dad, now since retired, had clients that required that the ledger was posted in indelible fountain pen ink so as to prevent anyone meddling with them. For us engineers, if you’ve worked with log structured storage systems, the journal is the log of the set of accounts.<br />
+분개장(journal)은 계정들에 대한 거래(transaction)의 집합이다. 종이로 작업한다면 분개장은 한 번만 쓰는(write once) 것이어야 하므로 잉크로 작성해야 한다. 지금은 은퇴하신 우리 아버지는 누군가 장부를 조작하지 못하도록 지울 수 없는 만년필 잉크로 원장을 기입할 것을 요구하는 고객들을 두고 계셨다. 우리 엔지니어 입장에서, 로그 구조 저장 시스템(log structured storage system)을 다뤄 본 적이 있다면, 분개장은 계정 집합의 로그(log)에 해당한다.</p>
+<p>A transaction in the journal is comprised of at least the following:<br />
+분개장의 한 거래는 최소한 다음으로 구성된다.</p>
+<ul>
+<li>a transaction number</li>
+<li>거래 번호(transaction number)</li>
+<li>a date</li>
+<li>날짜(date)</li>
+<li>a description</li>
+<li>설명(description)</li>
+<li>an unordered set of credit and debit operations against accounts in the general ledger</li>
+<li>총계정원장(general ledger)의 계정들에 대한 대변·차변 연산의 순서 없는 집합</li>
+</ul>
+<p>Since SQLite is easily accessible to just about everybody, I’ll use it for the SQL examples. As engineers, we can think of the set of books as the following database tables. This example is very simplified from what a real accounting system would have, and as engineers, you’d probably make an adjustment or two.<br />
+SQLite는 거의 누구나 쉽게 접근할 수 있으므로 SQL 예제에 이것을 사용하겠다. 엔지니어로서 우리는 장부 집합을 다음과 같은 데이터베이스 테이블로 생각할 수 있다. 이 예제는 실제 회계 시스템이 가질 법한 것에서 매우 단순화한 것이며, 엔지니어라면 아마 한두 가지 조정을 할 것이다.</p>
+<pre><code class="language-sql">CREATE TABLE account (
+  account_id INTEGER PRIMARY KEY,
+  name       VARCHAR(255) NOT NULL,
+  acct_type  VARCHAR(20) NOT NULL
+  );
+
+CREATE TABLE journal (
+  txn_id      INTEGER PRIMARY KEY,
+  txn_date    DATE NOT NULL,
+  description VARCHAR(255) NOT NULL
+  );
+
+CREATE TABLE journal_crdr (
+  crdr_id    INTEGER PRIMARY KEY,
+  txn_id     INT UNSIGNED NOT NULL,
+  account_id INT UNSIGNED NOT NULL,
+  debit      DECIMAL(10,2),
+  credit     DECIMAL(10,2),
+  FOREIGN KEY(txn_id) REFERENCES journal(txn_id),
+  FOREIGN KEY(account_id) REFERENCES account(account_id)
+  );
+</code></pre>
+<p>So let’s create some accounts.<br />
+이제 계정 몇 개를 만들어 보자.</p>
+<pre><code class="language-sql">-- some accounts
+INSERT INTO account (name, acct_type) VALUES
+    ('credit card', 'liability'),
+    ('income', 'income'),
+    ('benefits', 'expense'),
+    ('taxes', 'expense'),
+    ('A/R:Bill''s computing', 'asset'),
+    ('A/P:Power co.', 'liability'),
+    ('clothing', 'expense'),
+    ('checking account', 'asset'),
+    ('expenses', 'expense'),
+    ('equity', 'equity');
+</code></pre>
+<p>Now just to make it so things look pretty when we do selects in a bit:<br />
+이제 잠시 후 select를 할 때 결과가 보기 좋게 나오도록 설정해 둔다.</p>
+<pre><code>sqlite&gt; .mode column
+sqlite&gt; .headers on
+</code></pre>
+<p>When showing debit and credit operations in user interfaces, or on paper, debits are to the left, and credits to the right.<br />
+사용자 인터페이스나 종이에서 차변과 대변 연산을 표시할 때, 차변은 왼쪽에, 대변은 오른쪽에 둔다.</p>
+<p>For example, if I buy a shirt for $30 on my credit card, the journal entry might look like this:<br />
+예를 들어, 내가 신용카드로 셔츠를 30달러에 산다면, 분개(journal entry)는 다음과 같을 수 있다.</p>
+<pre><code class="language-sql">INSERT INTO journal (txn_id, txn_date, description) VALUES
+   (1, '2017-09-01', 'pay for shirt with credit card');
+INSERT INTO journal_crdr (txn_id, account_id, debit, credit) VALUES
+   (1, (select account_id from account where name = 'clothing'), 30, NULL),
+   (1, (select account_id from account where name = 'credit card'), NULL, 30);
+</code></pre>
+<p><img alt="buy shirt entry" src="/images/accounting/BuyShirt.JPG" /></p>
+<p>There need not be only one debit or credit in a transaction. For example: for when I get a paycheck, it might look like this (if I’m tracking my benefit and taxes):<br />
+한 거래에 차변이나 대변이 반드시 하나만 있을 필요는 없다. 예를 들어, 급여를 받을 때는 (복리후생과 세금을 추적하고 있다면) 다음과 같을 수 있다.</p>
+<pre><code class="language-sql">INSERT INTO journal (txn_id, txn_date, description) VALUES
+   (2, '2017-09-02', 'Got paid');
+INSERT INTO journal_crdr (txn_id, account_id, debit, credit) VALUES
+   (2, (select account_id from account where name = 'benefits'), 150, NULL),
+   (2, (select account_id from account where name = 'taxes'), 300, NULL),
+   (2, (select account_id from account where name = 'checking account'), 550, NULL),
+   (2, (select account_id from account where name = 'income'), NULL, 1000);
+</code></pre>
+<p><img alt="got paid entry" src="/images/accounting/GotPaid.JPG" /></p>
+<p>Sometimes, no real money really changed hands yet. For example, say I did some work, and cut an invoice (sent the bill) with NET-30 payment terms:<br />
+때로는 실제 돈이 아직 오가지 않은 경우도 있다. 예를 들어, 내가 어떤 일을 했고 NET-30(30일 후 결제) 조건으로 송장을 발행했다(청구서를 보냈다)고 하자.</p>
+<pre><code class="language-sql">INSERT INTO journal (txn_id, txn_date, description) VALUES
+   (3, '2017-09-03', 'Did work for William, PO #910, Invoice #234');
+INSERT INTO journal_crdr (txn_id, account_id, debit, credit) VALUES
+   (3, (select account_id from account where name = 'A/R:Bill''s computing'), 500, NULL),
+   (3, (select account_id from account where name = 'income'), NULL, 500);
+</code></pre>
+<p><img alt="did work" src="/images/accounting/DidWork.JPG" /></p>
+<p>Or conversely, I received a bill for services, payable NET-30:<br />
+또는 반대로, NET-30 조건으로 지급해야 하는 서비스 청구서를 받았다고 하자.</p>
+<pre><code class="language-sql">INSERT INTO journal (txn_id, txn_date, description) VALUES
+   (4, '2017-09-03', 'Foo power co. Stmt #567');
+INSERT INTO journal_crdr (txn_id, account_id, debit, credit) VALUES
+   (4, (select account_id from account where name = 'expenses'), 250, NULL),
+   (4, (select account_id from account where name = 'A/P:Power co.'), NULL, 250);
+</code></pre>
+<p><img alt="got bill" src="/images/accounting/GotBill.JPG" /></p>
+<p>And then I pay the bill:<br />
+그러고 나서 청구서를 결제한다.</p>
+<pre><code class="language-sql">INSERT INTO journal (txn_id, txn_date, description) VALUES
+   (5, '2017-09-10', 'Pay Power co. bill Stmt #567');
+INSERT INTO journal_crdr (txn_id, account_id, debit, credit) VALUES
+   (5, (select account_id from account where name = 'A/P:Power co.'), 250, NULL),
+   (5, (select account_id from account where name = 'checking account'), NULL, 250);
+</code></pre>
+<p><img alt="paid bill" src="/images/accounting/PayBill.JPG" /></p>
+<p>Something to note here is that tracking expenses this way allows you to “realize” expenses and income when they occur separately from when you actually pay them, or receive payment for them.<br />
+여기서 주목할 점은, 이런 방식으로 지출을 추적하면 실제로 지불하거나 대금을 받는 시점과 별개로, 지출과 수익이 발생하는 시점에 그것들을 "인식(realize)"할 수 있다는 것이다.</p>
+<p>Oops, I realized (pun intended) I never “imported” my initial checking account balance of $1,500.<br />
+아차, 내 당좌예금(checking account) 초기 잔액 1,500달러를 한 번도 "가져오기(import)" 하지 않았다는 것을 인식(realize)했다(말장난 의도임).</p>
+<pre><code class="language-sql">INSERT INTO journal (txn_id, txn_date, description) VALUES
+   (6, '2017-09-11', 'start the books with my checking account balance');
+INSERT INTO journal_crdr (txn_id, account_id, debit, credit) VALUES
+   (6, (select account_id from account where name = 'checking account'), 1500, NULL),
+   (6, (select account_id from account where name = 'equity'), NULL, 1500);
+</code></pre>
+<p><img alt="add equity" src="/images/accounting/AddEquity.JPG" /></p>
+<p>Now if you’re doing this on paper, I recommend entering the debits and credits onto the individual account pages at the time you make the journal entries. But sometimes, there are valid practical reasons not to, and you’ll need to keep track of which ones have been entered and which ones haven’t. I put a checkmark to the left of the journal entry after I’ve entered it into the account page. You can also do it by backing up by some amount until you find one where the entry id is in the account already, but with the checkmarks on journal entries, it keeps things simpler.<br />
+이제 이걸 종이로 한다면, 분개를 작성하는 시점에 차변과 대변을 개별 계정 페이지에 함께 기입할 것을 권한다. 하지만 때로는 그렇게 하지 못할 정당한 실무적 이유가 있고, 그러면 어떤 것이 기입되었고 어떤 것이 안 되었는지를 추적해야 한다. 나는 분개 항목을 계정 페이지에 기입한 후 그 분개 항목 왼쪽에 체크 표시를 한다. 이미 계정에 들어가 있는 항목 ID를 찾을 때까지 거슬러 올라가는 방식으로도 할 수 있지만, 분개 항목에 체크 표시를 해 두면 더 단순해진다.</p>
+<p>The main rule for a transaction is the sum of debits and credits in the transaction must <em>always</em> match. In essence, this is the law of conservation of money in accounting. Thou shalt not create nor destroy money, it can only be moved.<br />
+거래의 주요 규칙은, 한 거래 내 차변의 합계와 대변의 합계가 <em>항상</em> 일치해야 한다는 것이다. 본질적으로 이것은 회계에서의 돈 보존 법칙이다. 돈을 창조하거나 파괴해서는 안 되며, 오직 이동만 할 수 있다.</p>
+<h1 id="accounts">Accounts</h1>
+<h1 id="accounts_1">계정(Accounts)</h1>
+<p>Accounts are denormalized views of the journal. For accounting purposes you’ll want things separated out like this as each account (and its associated transactions) can be classified by the account type (asset, expense, etc.).<br />
+계정(accounts)은 분개장의 비정규화된(denormalized) 뷰다. 회계 목적상 이렇게 분리해 두는 것이 좋은데, 각 계정(그리고 그에 연관된 거래들)이 계정 유형(자산, 지출 등)으로 분류될 수 있기 때문이다.</p>
+<p>If you’re tracking accounts on paper, you can use the same three column ledger paper that you used for the journal. In the first column, you’ll record the debits from the journal transactions, in the second column, the you’ll record the credits from the journal transactions, and the third you’ll use when you need to find the current balance of the account. You can track the balance for every transaction if you want, but I found I only tended to strike a balance when I reconciled the accounts, or when I actually needed to know the balance for other reasons.<br />
+종이로 계정을 추적한다면, 분개장에 사용한 것과 동일한 3단 원장 용지를 사용할 수 있다. 첫 번째 열에는 분개장 거래의 차변을 기록하고, 두 번째 열에는 분개장 거래의 대변을 기록하며, 세 번째 열은 계정의 현재 잔액을 알아야 할 때 사용한다. 원한다면 모든 거래마다 잔액을 추적할 수 있지만, 나는 계정을 대사(reconcile)할 때나 다른 이유로 실제 잔액을 알아야 할 때만 잔액을 산출(strike a balance)하는 경향이 있었다.</p>
+<p>For the checking account, the account sheet might look like this:<br />
+당좌예금 계정의 경우, 계정 시트는 다음과 같을 수 있다.</p>
+<p><img alt="checking account" src="/images/accounting/CheckingAccount.JPG" /></p>
+<p>Note that I put the account type at the top of the page, as it makes it simpler when you go to reconcile, so you don’t have to remember/figure out what type of an account a given account is.<br />
+참고로 나는 계정 유형을 페이지 맨 위에 적어 두는데, 그러면 대사할 때 해당 계정이 어떤 유형인지 기억하거나 알아낼 필요가 없어 더 간단해진다.</p>
+<p>From a SQL perspective, the account can be seen as this:<br />
+SQL 관점에서 계정은 다음과 같이 볼 수 있다.</p>
+<pre><code class="language-sql">.width 6 40 10 7 7
+SELECT j.txn_id, j.description, j.txn_date, crdr.debit, crdr.credit
+  FROM journal_crdr crdr, journal j
+ WHERE account_id = (SELECT account_id FROM account WHERE name = 'checking account')
+   AND j.txn_id = crdr.txn_id;
+</code></pre>
+<p>Would yield<br />
+다음을 산출한다.</p>
+<pre><code>txn_id  description                               txn_date    debit    credit 
+------  ----------------------------------------  ----------  -------  -------
+2       Got paid                                  2017-09-02  550             
+5       Pay Power co. bill Stmt #567              2017-09-10           250    
+6       start the books with my checking account  2017-09-11  1500            
+</code></pre>
+<p>To strike the balance, subtract the sum of credits from the sum of debits. If the number is positive, you have a debit balance, and record it in the balance column on the same line as the last entry it includes. If the number is negative, you have a credit balance, and record it in the balance column, surrounded with parentheses, in the balance column on the same line as the last entry it includes. Some examples of credit-normal accounts are things like income, sales, accounts payable, credit accounts. Some examples of debit-normal accounts are things like bank accounts, hard asset accounts, accounts receivable.<br />
+잔액을 산출하려면 차변의 합계에서 대변의 합계를 뺀다. 그 수가 양수면 차변 잔액(debit balance)이 되고, 그것이 포함하는 마지막 항목과 같은 줄의 잔액 열에 기록한다. 그 수가 음수면 대변 잔액(credit balance)이 되고, 그것이 포함하는 마지막 항목과 같은 줄의 잔액 열에 괄호로 둘러싸서 기록한다. 대변이 정상(credit-normal)인 계정의 예로는 수익, 매출, 매입채무(accounts payable), 신용 계정 같은 것들이 있다. 차변이 정상(debit-normal)인 계정의 예로는 은행 계좌, 실물 자산 계정, 매출채권(accounts receivable) 같은 것들이 있다.</p>
+<p>In SQL, this would look like this.<br />
+SQL에서는 다음과 같다.</p>
+<pre><code class="language-sql">SELECT CASE
+       WHEN balance &lt; 0
+       THEN '(' || -balance || ')'
+       ELSE balance
+        END AS balance
+  FROM (SELECT sum(debit) - sum(credit) AS balance
+          FROM journal_crdr
+         WHERE account_id = (
+               SELECT account_id
+                 FROM account
+                WHERE name = 'checking account')) balance;
+</code></pre>
+<p>Accounts, for keeping totals can be thought of as a tree of accounts. For example, we have <code>A/P:Power co.</code> as an account, but it might be in the tree of <code>Accounts Payable</code>. Similarly for Accounts Receivable, retirement accounts, and any time where an aggregate balance of some number of subaccounts is desired. You’ll see this in any reasonable accounting software package (for example, GNUCash, which is free and good can set these up). For our purposes here, we’ll just leave this alone.<br />
+합계를 유지하기 위해 계정은 계정의 트리(tree)로 생각할 수 있다. 예를 들어 우리는 <code>A/P:Power co.</code>라는 계정을 가지고 있지만, 이것이 <code>Accounts Payable</code>(매입채무) 트리 안에 있을 수 있다. 매출채권(Accounts Receivable), 퇴직 계좌, 그리고 여러 하위 계정의 합산 잔액이 필요한 경우에도 마찬가지다. 제대로 된 회계 소프트웨어 패키지라면 어디서든 이를 볼 수 있다(예를 들어 무료이면서 훌륭한 GNUCash가 이런 것을 설정할 수 있다). 여기서 우리 목적상으로는 이것을 그냥 내버려 둔다.</p>
+<h2 id="account-types">Account Types</h2>
+<h2 id="account-types_1">계정 유형(Account Types)</h2>
+<p>Different accounts are treated differently for reporting and reconcilliation purposes. The six main account types, and their credit or debit normality are:<br />
+계정마다 보고와 대사(reconciliation) 목적상 다르게 취급된다. 여섯 가지 주요 계정 유형과 그 대변·차변 정상성(normality)은 다음과 같다.</p>
+<ul>
+<li>Assets (debit normal)</li>
+<li>자산(Assets) (차변 정상)</li>
+<li>Liabilities (credit normal)</li>
+<li>부채(Liabilities) (대변 정상)</li>
+<li>Expenses (debit normal)</li>
+<li>비용(Expenses) (차변 정상)</li>
+<li>Income/Revenue (credit normal)</li>
+<li>수익/매출(Income/Revenue) (대변 정상)</li>
+<li>Equity (credit normal)</li>
+<li>자본(Equity) (대변 정상)</li>
+<li>Dividend/Disbursement (debit normal)</li>
+<li>배당/지급(Dividend/Disbursement) (차변 정상)</li>
+</ul>
+<p>Don’t worry too much about remembering their normality, as with use, it will become obvious just in the way they are used. All that an account’s normality says is that the vast majority of times, the balance of the account will be a credit balance or a debit balance. It’s not impossible that a given account might not have the appropriate debit or credit state, for example, an A/R account for a customer, which being an asset, is debit normal, might have a credit balance (such as might happen in the case where a customer overpaid a bill), but on the whole, accounts will almost always have the a balance of the type of their normality.<br />
+이들의 정상성을 외우려고 너무 걱정하지 마라. 사용하다 보면 쓰이는 방식만으로도 자명해질 것이다. 계정의 정상성이 말하는 것은 단지, 대부분의 경우 그 계정의 잔액이 대변 잔액이거나 차변 잔액이 될 것이라는 점뿐이다. 특정 계정이 그에 맞는 차변·대변 상태를 갖지 않는 것도 불가능하지는 않다. 예를 들어 어떤 고객에 대한 매출채권(A/R) 계정은 자산이므로 차변 정상이지만, (고객이 청구액을 초과 지불한 경우처럼) 대변 잔액을 가질 수도 있다. 그러나 전반적으로 계정은 거의 항상 자신의 정상성 유형에 해당하는 잔액을 갖는다.</p>
+<p>Also a note about the terminology of Dividend/Disbursement: normally, it’s just called dividend, but the reason for including disbursement is that dividend is specific to being a corporation, while there are other forms of companies like sole proprietors, partnerships, and others. For the rest of this, it’ll just be called dividends.<br />
+또한 배당/지급(Dividend/Disbursement)이라는 용어에 대해 한마디 하자면, 보통은 그냥 배당(dividend)이라고 부르지만 지급(disbursement)을 포함한 이유는, 배당은 법인(corporation)에 특정된 개념인 반면 개인사업자, 파트너십 등 다른 형태의 회사도 있기 때문이다. 이후로는 그냥 배당이라고 부르겠다.</p>
+<p>But for each of these account types, what kinds of things are which?<br />
+그런데 이 각 계정 유형에 어떤 것들이 해당될까?</p>
+<p>One way to think about what kinds of accounts would be assets are accounts governing things that rational people might sell to other rational people: Bitcoin, cash, gold, financial instruments, houses, cars, pencils, portions of my accounts receivable. Some assets may be things that are hard to really sell – say an installed brick pizza oven, but it still counts. Assets that are hard to liquidate are referred to as fixed assets.<br />
+어떤 계정이 자산이 될지를 생각하는 한 가지 방법은, 합리적인 사람이 다른 합리적인 사람에게 팔 만한 것들을 관리하는 계정이라는 것이다. 비트코인, 현금, 금, 금융 상품, 집, 자동차, 연필, 내 매출채권의 일부 등이다. 어떤 자산은 실제로 팔기 어려운 것일 수도 있다. 가령 설치된 벽돌 피자 오븐 같은 것이지만, 그래도 자산으로 친다. 현금화하기 어려운 자산은 고정자산(fixed assets)이라고 부른다.</p>
+<p>Liabilities are expected payouts or future obligations of the company. Some examples are loans that need to be repaid, an outstanding bill, accounts payable, and customer deposits. Customer deposits sound like they would be an asset, and they are, sort of. Just not to you. Something you discover is that your assets are someone else’s liability and vice versa.<br />
+부채(Liabilities)는 회사가 예상하는 지출이나 미래의 의무다. 예로는 상환해야 할 대출, 미지급 청구서, 매입채무(accounts payable), 고객 예치금(customer deposits) 등이 있다. 고객 예치금은 마치 자산처럼 들리고, 어떤 면에서는 자산이 맞다. 단지 당신에게는 아니다. 당신이 발견하게 되는 사실은, 당신의 자산이 다른 누군가의 부채이며 그 반대도 마찬가지라는 점이다.</p>
+<p>Expenses are what the normal meaning of the word are; things like your telephone or electric bill, salaries and wages, or things you buy that don’t really represent well as assets as they are short lived - like lunch, or stationery.<br />
+비용(Expenses)은 그 단어의 일반적인 의미 그대로다. 전화 요금이나 전기 요금, 급여와 임금, 또는 수명이 짧아 자산으로 표현하기에 적절하지 않은 구매 품목들, 가령 점심이나 문구류 같은 것들이다.</p>
+<p>Equity records the owners’ claims to the assets of the company. These can be things like retained earnings, common stock, capital, etc. If you do books for your own finances, the way you initially “import” your existing stuff onto the books is to credit them from an equity account that belongs to you, and then debit the appropriate asset account, be it current assets like checking, savings, or retirement, fixed assets, tangible assets (like your house or car), etc. even liability account (like your credit card) which would be importing some negative equity.<br />
+자본(Equity)은 회사의 자산에 대한 소유주의 청구권을 기록한다. 이익잉여금(retained earnings), 보통주(common stock), 자본금(capital) 등이 이에 해당할 수 있다. 본인의 개인 재무 장부를 작성한다면, 기존에 가진 것을 장부에 처음 "가져오는(import)" 방법은 당신에게 속한 자본 계정에서 그것들을 대변 처리하고, 그런 다음 적절한 자산 계정을 차변 처리하는 것이다. 그 자산이 당좌예금, 저축, 퇴직 계좌 같은 유동자산이든, 고정자산이든, 유형자산(집이나 자동차 같은)이든 말이다. 심지어 (신용카드 같은) 부채 계정까지도 포함되며, 이는 일부 음(-)의 자본을 가져오는 것이 된다.</p>
+<p>Income and revenue accounts are what you’d think they’d be; things like your paycheck, or sales, interest income, rent (if you’re the landlord), received dividends, etc.<br />
+수익 및 매출(Income and revenue) 계정은 당신이 생각하는 그대로다. 급여, 매출, 이자 수익, (당신이 임대인인 경우) 임대료, 수령한 배당금 등이다.</p>
+<p>Dividend accounts are where your company pays out some of its funds to equity holders. It’s important to note that this does not reduce equity, so you shouldn’t pay dividends as debits to the equity accounts – unless it has been specifically requested by the person you’re paying, or some other <strong>legal</strong> arrangement has been made.<br />
+배당(Dividend) 계정은 회사가 자기 자금의 일부를 자본 소유자(equity holders)에게 지급하는 곳이다. 주목할 점은 이것이 자본을 감소시키지 않는다는 것이다. 따라서 지급받는 당사자가 특별히 요청했거나 다른 어떤 <strong>법적(legal)</strong> 약정이 이루어진 경우가 아니라면, 배당을 자본 계정에 대한 차변으로 지급해서는 안 된다.</p>
+<p>So every account in your books will be one of the above six types.<br />
+따라서 당신 장부의 모든 계정은 위 여섯 가지 유형 중 하나일 것이다.</p>
+<h2 id="reconciliation">Reconciliation</h2>
+<h2 id="reconciliation_1">대사(Reconciliation)</h2>
+<p>Periodically, you’ll want to reconcile the books; which means to check that all is at least structurally ok.<br />
+주기적으로 장부를 대사(reconcile)하는 것이 좋다. 이는 적어도 구조적으로 모든 것이 괜찮은지 확인한다는 뜻이다.</p>
+<p>There’s a standard equation that should hold, if you did your books correctly:<br />
+장부를 올바르게 작성했다면 성립해야 하는 표준 등식이 있다.</p>
+<pre><code>Assets = Liabilities + Owner's Equity
+</code></pre>
+<p>If you add up the balances of your Asset accounts (which will be debits), they should equal the sum of your Liabilities (which should be credits) with the sum of your Equity (which should also be credits, ok not exactly, we’ll get there in just a second). If you think about this, this is just applying the rule in a journal transaction – the sum of all debits should equal the sum of all credits, just applied across the set of accounts.<br />
+자산 계정의 잔액들(차변일 것이다)을 모두 더하면, 부채의 합계(대변이어야 한다)에 자본의 합계(이것도 대변이어야 한다 — 사실 정확히는 아니지만, 곧 다룰 것이다)를 더한 값과 같아야 한다. 생각해 보면, 이것은 분개 거래의 규칙 — 모든 차변의 합계가 모든 대변의 합계와 같아야 한다 — 을 계정 집합 전체에 걸쳐 적용한 것에 불과하다.</p>
+<p>Wait, there are only three terms but six account types. What about the others?<br />
+잠깐, 항(term)은 세 개뿐인데 계정 유형은 여섯 개다. 나머지는 어떻게 되는가?</p>
+<p>Actually, we can three step expand this out a bit:<br />
+사실, 이것을 세 단계로 조금 더 전개할 수 있다.</p>
+<pre><code>Equity = Contributed Capital + Retained Earnings
+</code></pre>
+<p>Contributed Capital here fits what we called an equity account earlier. Retained earnings is defined as:<br />
+여기서 출자자본(Contributed Capital)은 앞서 우리가 자본 계정이라고 불렀던 것에 해당한다. 이익잉여금(Retained earnings)은 다음과 같이 정의된다.</p>
+<pre><code>Retained Earnings = Net Income - Dividends
+</code></pre>
+<p>and<br />
+그리고</p>
+<pre><code>Net Income = Income - Expenses
+</code></pre>
+<p>The full expansion of this looks like:<br />
+이를 완전히 전개하면 다음과 같다.</p>
+<pre><code>Assets = Liabilities + (Contributed Capital + (
+    (Income - Expenses) - Dividends))
+</code></pre>
+<p>It is important to note that you use the balance of the account relative to its normality when filling these out. If it’s a credit normal account, if the balance is a credit balance, you just put in the balance as a positive number. If the balance is a debit balance, you put it in as a negative number in the equations. The converse is true for debit normal accounts.<br />
+주목할 점은, 이 식을 채울 때 계정의 정상성에 상대적인 잔액을 사용한다는 것이다. 대변 정상 계정이라면, 잔액이 대변 잔액인 경우 그냥 양수로 넣으면 된다. 잔액이 차변 잔액이라면 식에 음수로 넣는다. 차변 정상 계정의 경우에는 그 반대다.</p>
+<p>If that equation checks out for the full set of your accounts, all is good! If not, then something somewhere needs to be checked out and fixed. Tracking it down can sometimes be a challenge. Back in the day, adding machines were used and had a paper tape. This would allow you to double check that you entered everything correctly. I first did reconcilliation on paper, and then moved to doing it in a spreadsheet which helped track down copying and transcription errors. Once I had balanced my books, in each of the accounts and the journal, I would put a mark in the margin, so when striking a balance the next time, I only had to work from an existing known-good balance.<br />
+그 등식이 당신의 전체 계정 집합에 대해 들어맞으면 모든 것이 괜찮은 것이다! 그렇지 않다면 어딘가에 확인하고 고쳐야 할 것이 있다는 뜻이다. 그것을 추적하는 일은 때때로 까다로울 수 있다. 옛날에는 종이 테이프가 달린 계산기(adding machine)를 사용했다. 이를 통해 모든 것을 정확히 입력했는지 다시 확인할 수 있었다. 나는 처음에 종이로 대사를 했고, 이후 복사 및 전사 오류를 추적하는 데 도움이 되는 스프레드시트로 옮겨 갔다. 일단 장부의 균형을 맞추고 나면, 각 계정과 분개장에 여백 표시를 해 두어, 다음번에 잔액을 산출할 때 이미 검증된 잔액에서부터만 작업하면 되도록 했다.</p>
+<p>Something else you can do to verify the state of your books is to add up all the credits and debits across all accounts, and if everything is good, the credits will equal the debits. For some accounts, if you’re doing them on paper, they’ll cross many pages over time, and you don’t want to have to sum them all up every time, so what I’ll do, is write the current sums below the last line on a ledger page for the account after everything has checked out, so that at most, I should have to sum up things since we crossed a page boundary at the last reconcilliation. You could also add a line in the account itself with the current totals in the credits and debits columns, and highlight it or something so you know not to re-add it in, but at least for me, this seemed just enough error prone to avoid.<br />
+장부 상태를 검증하기 위해 할 수 있는 또 다른 일은, 모든 계정에 걸쳐 모든 대변과 차변을 합산하는 것이다. 모든 것이 정상이면 대변의 합이 차변의 합과 같을 것이다. 어떤 계정의 경우 종이로 작업한다면 시간이 지나면서 여러 페이지에 걸치게 되는데, 매번 그것들을 전부 합산하고 싶지는 않을 것이다. 그래서 내가 하는 방식은, 모든 것이 검증된 후 해당 계정의 원장 페이지 마지막 줄 아래에 현재 합계를 적어 두는 것이다. 그러면 기껏해야 지난 대사 이후 페이지 경계를 넘은 부분만 합산하면 된다. 계정 안에 현재 대변·차변 열의 합계를 적은 줄을 추가하고 다시 더하지 않도록 강조 표시 같은 것을 할 수도 있지만, 적어도 내게는 이 방법이 피하고 싶을 만큼 오류가 나기 쉬워 보였다.</p>
+<h2 id="ugh-i-messed-something-up">Ugh, I Messed Something Up!</h2>
+<h2 id="_2">으악, 뭔가 잘못했어!</h2>
+<p>No worries, accounting systems were designed for humans by humans, and to err is human. Unsurprisingly, accounting has ways of dealing with this.<br />
+걱정 마라. 회계 시스템은 인간을 위해 인간이 설계한 것이고, 실수하는 것은 인간적인 일이다. 당연하게도 회계에는 이를 처리하는 방법이 있다.</p>
+<p>If you messed up a journal entry because you sent money to the wrong accounts, or the debits/credits don’t equal each other, or whatever, there are a few options to fix things, but something that is definitely not an option is to cross out or edit old entries.<br />
+돈을 잘못된 계정으로 보냈거나, 차변·대변이 서로 일치하지 않거나, 그 밖의 이유로 분개를 잘못했다면, 그것을 고치는 몇 가지 선택지가 있다. 그러나 절대 선택지가 될 수 없는 것은 기존 항목을 지우거나 수정하는 것이다.</p>
+<ul>
+<li>If you’ve not put a subsequent entry in the journal after the one with an error in it, you can just add to the last transaction, crediting to fix up a debit and vice versa, or adding a credit/debit line to make the credits equal the debits.</li>
+<li>
+<p>오류가 있는 항목 이후에 후속 항목을 아직 분개장에 넣지 않았다면, 그냥 마지막 거래에 추가하여 차변을 바로잡기 위해 대변 처리를 하거나 그 반대로 하거나, 대변과 차변이 같아지도록 대변·차변 줄을 추가하면 된다.</p>
+</li>
+<li>
+<p>You can put in an “undo” transaction which negates the original, putting debits for items that were credits and vice versa, and then create a new one that’s ostensibly correct.</p>
+</li>
+<li>
+<p>원래 거래를 무효화하는 "되돌리기(undo)" 거래를 넣을 수 있다. 즉, 대변이었던 항목에 차변을 넣고 그 반대로도 하여 상쇄한 다음, 표면상 올바른 새 거래를 생성한다.</p>
+</li>
+<li>
+<p>You can create a new transaction that just has the things you need to fix in it. For example, say you debited $100 but only credited $80 in the transaction with an error, you can create a new transaction that credits the $20.</p>
+</li>
+<li>고쳐야 할 부분만 담은 새 거래를 생성할 수 있다. 예를 들어 오류가 있는 거래에서 차변으로 100달러를 처리했는데 대변으로는 80달러만 처리했다면, 20달러를 대변 처리하는 새 거래를 생성할 수 있다.</li>
+</ul>
+<p>Your correction transactions should reference the original, but should be dated with the current date, not the date of the original transaction.<br />
+정정 거래는 원래 거래를 참조해야 하지만, 날짜는 원래 거래의 날짜가 아니라 현재 날짜로 기입해야 한다.</p>
+<h1 id="sidebar-on-credit-and-debit-terminology">Sidebar on Credit and Debit Terminology</h1>
+<h1 id="sidebar">대변·차변 용어에 관한 여담(Sidebar)</h1>
+<p>Why all this credit and debit nonsense? Why not just use negative and positive numbers for all this? This is a good question. I can only speculate, but I have a few guesses:<br />
+이 모든 대변·차변 같은 헛소리는 왜 있는 걸까? 그냥 음수와 양수를 쓰면 안 되는 걸까? 좋은 질문이다. 나로서는 추측만 할 수 있지만, 몇 가지 짐작이 있다.</p>
+<ol>
+<li>That negative numbers and how to deal with them may not have been widely known when double entry bookkeeping was invented.</li>
+<li>복식부기가 발명되었을 때는 음수와 그것을 다루는 방법이 널리 알려지지 않았을 수 있다.</li>
+<li>Having sales of -$1,000,000 sounds really weird and wrong.</li>
+<li>매출이 -1,000,000달러라고 하면 정말 이상하고 잘못된 것처럼 들린다.</li>
+<li>In the days of doing this on paper (probably only as far back as the ’70s probably), treating them differently may just have been simpler.</li>
+<li>이것을 종이로 하던 시절(아마 길어야 70년대 정도까지)에는, 둘을 다르게 취급하는 것이 그냥 더 단순했을 수 있다.</li>
+<li>Having a single column instead of the debit and credit columns could open things up to fraud. It would be very easy to tweak the books by putting either a minus sign before the number, or as accountants deal with negative balances, putting parentheses around it after the fact.</li>
+<li>차변과 대변 열 대신 단일 열을 두면 부정행위의 여지가 생길 수 있다. 숫자 앞에 마이너스 부호를 붙이거나, 회계사들이 음수 잔액을 다루는 방식대로 나중에 괄호로 둘러싸는 식으로 장부를 조작하기가 매우 쉬울 것이다.</li>
+</ol>
+<p>In any case, if you treat credits as negative numbers, and debits as positive numbers, everything works – just make sure you swap signs as necessary when doing the equations for reconcilliation, which means: if it’s a credit normal account, swap the sign of the balance. If you notice in spreadsheet programs, one of the number formatting options is to put negative numbers in parentheses – so this whole credit=negative stuff is not just an invention for this blog post.<br />
+어쨌든 대변을 음수로, 차변을 양수로 취급하면 모든 것이 작동한다. 다만 대사를 위한 등식을 계산할 때 필요에 따라 부호를 바꿔 줘야 한다. 즉, 대변 정상 계정이라면 잔액의 부호를 바꾼다. 스프레드시트 프로그램을 보면 숫자 서식 옵션 중 하나가 음수를 괄호로 표시하는 것임을 알 수 있다. 그러니 이 대변=음수라는 개념 전체가 이 블로그 글을 위해 만들어낸 발명품이 아니다.</p>
+<p>So another way to balance your books without the above equation is: add up the balances of all your accounts, treating debit balances as positive, and credit balances as negative. The sum, if your books are correct, is zero. This follows naturally since the account balances are merely derivations of the journal, and the journal, if correct, should have the property that the sum of any transaction should be zero.<br />
+그래서 위 등식 없이 장부의 균형을 맞추는 또 다른 방법은, 차변 잔액을 양수로, 대변 잔액을 음수로 취급하여 모든 계정의 잔액을 합산하는 것이다. 장부가 올바르다면 그 합은 0이다. 이는 계정 잔액이 분개장의 파생물에 불과하고, 분개장이 올바르다면 어떤 거래의 합도 0이어야 하는 성질을 가지기 때문에 자연스럽게 따라 나온다.</p>
+<p>If I were to write a real accounting system, rather than the schema as presented above would have it, I would just have an <code>amount</code> column in the <code>journal_crdr</code> table rather than separate debit and credit columns, where a positive amount is a debit and a negative is a credit (or vice versa - just be consistent). This is valid since you never credit or debit a negative value. Strictly speaking, this isn’t true, you can, but you <em>really</em> shouldn’t.<br />
+만약 내가 실제 회계 시스템을 작성한다면, 위에 제시한 스키마처럼 하기보다는, <code>journal_crdr</code> 테이블에 차변과 대변을 분리한 열 대신 그냥 <code>amount</code> 열 하나를 두고, 양수 금액은 차변, 음수 금액은 대변으로 할 것이다(또는 그 반대로 — 일관성만 유지하면 된다). 이것이 유효한 이유는 음수 값을 대변이나 차변 처리하는 경우가 절대 없기 때문이다. 엄밀히 말하면 이는 사실이 아니다. 할 수는 있지만, 정말로 그래서는 안 된다.</p>
+<p>Why then did I use debit and credit terminology up to this point when I could have made things much simpler by just using things like positive and negative numbers from the beginning? Simple. If you’re doing accounting stuff, chances are very good that you’ll be speaking to accountants. If you talk to them in the terms that we as engineers would use and describe things in the way that we think of them, and do not understand their terms, things will get confusing in a hurry. If you talk to them in the terms of accounting rather than those of software engineering, communication gets much easier. Just remember, we use different terminology and mental models because we care about different things than the accountants and bookkeepers do. We care about the mechanics of executing transactions properly, latency, throughput, how to generate reports, and keeping it all correct; they care about what all these numbers mean, and their implications on the financial position and performance of the company. This is their domain, and we are the visitors.<br />
+그렇다면 처음부터 양수·음수 같은 것을 써서 훨씬 단순하게 만들 수 있었는데, 왜 나는 여기까지 차변·대변 용어를 사용했을까? 간단하다. 회계 관련 일을 한다면 회계사와 이야기하게 될 가능성이 매우 높다. 우리 엔지니어가 쓰는 용어로 그들에게 말하고, 우리가 생각하는 방식대로 설명하며, 그들의 용어를 이해하지 못한다면, 순식간에 혼란스러워질 것이다. 소프트웨어 엔지니어링의 용어가 아니라 회계의 용어로 그들에게 말하면 의사소통이 훨씬 쉬워진다. 기억할 점은, 우리가 다른 용어와 사고 모델을 쓰는 이유는 회계사나 부기 담당자와는 다른 것에 관심을 두기 때문이라는 것이다. 우리는 거래를 제대로 실행하는 메커니즘, 지연, 처리량, 보고서를 생성하는 방법, 그리고 모든 것을 정확하게 유지하는 데 관심을 둔다. 그들은 이 모든 숫자가 무엇을 의미하는지, 그리고 그것이 회사의 재무 상태와 성과에 미치는 함의에 관심을 둔다. 이것은 그들의 영역이고, 우리는 방문자다.</p>
+<h1 id="ledger">Ledger</h1>
+<h1 id="ledger_1">원장(Ledger)</h1>
+<p>The ledger is the place where accounts are maintained. That is: it’s the collection of the accounts and the journal. When I refer to the general ledger, that is the central accounting record of a company or organization consisting of the accounts that support the value items shown in the major financial statements. You may have subsidiary ledgers that feed into the general ledger so as to make an accounting system and organization scale. They can be split out either by function (sales, payroll, etc.) or by geography, or both, or other criteria to delegate subfunctions of accounting to other groups.<br />
+원장(ledger)은 계정이 관리되는 곳이다. 즉, 계정과 분개장의 모음이다. 내가 총계정원장(general ledger)이라고 할 때, 이는 주요 재무제표에 표시된 가치 항목을 뒷받침하는 계정들로 구성된, 회사나 조직의 중심 회계 기록을 말한다. 회계 시스템과 조직을 확장하기 위해 총계정원장으로 흘러 들어가는 보조원장(subsidiary ledger)을 둘 수도 있다. 이들은 기능(매출, 급여 등)별로, 지역별로, 또는 둘 다, 혹은 회계의 하위 기능을 다른 그룹에 위임하기 위한 기타 기준으로 분리할 수 있다.</p>
+<p>If you have an altogether separate ledger for the same company, weeeelll, you’re probably not operating above board.<br />
+같은 회사에 대해 완전히 별개의 원장을 따로 두고 있다면, 으으음, 당신은 아마 정정당당하게 운영하고 있지 않을 것이다.</p>
+<h1 id="path-of-a-sale">Path of a Sale</h1>
+<h1 id="path-of-a-sale_1">판매의 경로(Path of a Sale)</h1>
+<p>While in most consumer transactions, this is greatly abbreviated, or there are implied versions of some of these processes, but if you buy something online, or in most business to business transactions, you’ll see all or most of these.<br />
+대부분의 소비자 거래에서는 이 과정이 크게 축약되거나 일부 절차가 암묵적인 형태로 존재하지만, 온라인에서 무언가를 사거나 대부분의 기업 간(B2B) 거래에서는 이 절차의 전부 또는 대부분을 보게 될 것이다.</p>
+<p>Say you want to buy something from a company. First there’s the order, which is short for purchase order. It’s a document describing what you want to buy, quantities and the prices for those goods and services. The receiver of the purchase order may go to the buyer and renegotiate or adjust the order based upon agreement with the buyer. A purchase order, or PO, has no “books” implications. That is, a PO is not an asset or a liability to be entered into the journal.<br />
+어떤 회사로부터 무언가를 사고 싶다고 하자. 우선 주문(order)이 있는데, 이는 구매 주문(purchase order)의 줄임말이다. 이것은 당신이 사고 싶은 것, 수량, 그리고 그 상품과 서비스의 가격을 기술한 문서다. 구매 주문을 받은 측은 구매자에게 가서 합의에 따라 주문을 재협상하거나 조정할 수 있다. 구매 주문(PO)은 "장부상" 함의가 없다. 즉, PO는 분개장에 기입될 자산이나 부채가 아니다.</p>
+<p>Upon shipment of the good or delivery of service (partial or complete), an invoice will be issued from the seller to the buyer. Payment terms are often included. At the point of issuing the invoice, the seller can then create a transaction crediting the value of the shipped/delivered good/service from say, the sales account, and debiting the accounts receivable (A/R) account they have for the buyer. Upon receiving the bill (invoice), the buyer will create a transaction crediting the amount from accounts payable (A/P) for the seller and debiting an appropriate asset or expense account (depending on the good or service purchased). The transactions created by the buyer and seller concerning the invoice will contain a reference to the invoice number. It is important to note that revenue is recognized at the point when the invoice is issued to the buyer. Ideally, the issued date is the same date as sent, as the payment terms clock starts ticking when the invoice is issued. This is also important for financial reporting. There may be multiple invoices as a result of a single PO.<br />
+상품의 출하 또는 서비스의 (부분적 또는 완전한) 제공이 이루어지면, 판매자가 구매자에게 송장(invoice)을 발행한다. 결제 조건이 함께 포함되는 경우가 많다. 송장을 발행하는 시점에 판매자는 예를 들어 매출 계정에서 출하/제공한 상품/서비스의 가치를 대변 처리하고, 그 구매자에 대해 보유한 매출채권(A/R) 계정을 차변 처리하는 거래를 생성할 수 있다. 청구서(송장)를 받은 구매자는 그 판매자에 대한 매입채무(A/P)에서 해당 금액을 대변 처리하고 (구매한 상품이나 서비스에 따라) 적절한 자산 또는 비용 계정을 차변 처리하는 거래를 생성한다. 송장과 관련하여 구매자와 판매자가 생성한 거래에는 송장 번호에 대한 참조가 포함된다. 주목할 점은 수익(revenue)이 송장이 구매자에게 발행되는 시점에 인식된다는 것이다. 이상적으로는 발행 날짜가 발송 날짜와 동일한데, 결제 조건의 시계가 송장 발행 시점부터 째깍거리기 시작하기 때문이다. 이는 재무 보고에도 중요하다. 하나의 PO로부터 여러 개의 송장이 나올 수도 있다.</p>
+<p>Hopefully, the buyer decides and is able to pay the bill within the appropriate terms. So the buyer creates a transaction to credit an asset account (like a checking account) and debiting A/P with a reference to the invoice # and the transaction which originally moved the money from accounts payable. On the buyer side, when they receive payment on the invoice, they create a transaction crediting A/R for the buyer and debiting an asset account (like a checking account). There may be multiple payments on an invoice, and when the balance of the invoice is paid, the invoice on the buyer side is so marked. Personally, when I did my own books, I put a mark in the accounts receivable entries for that invoice to note that it was all paid so unpaid items would stick out.<br />
+바라건대 구매자는 적절한 조건 내에서 청구서를 지불하기로 결정하고 또 그럴 수 있을 것이다. 그래서 구매자는 자산 계정(당좌예금 같은)을 대변 처리하고, 송장 번호와 원래 매입채무에서 돈을 이동시킨 거래에 대한 참조와 함께 A/P를 차변 처리하는 거래를 생성한다. 판매자 측에서는 송장에 대한 대금을 받으면, 그 구매자에 대한 A/R을 대변 처리하고 자산 계정(당좌예금 같은)을 차변 처리하는 거래를 생성한다. (원문에서 buyer/seller 표기가 다소 뒤섞여 있으나, 대금 수령은 판매자 측 처리에 해당한다.) 하나의 송장에 여러 번의 결제가 있을 수 있고, 송장의 잔액이 모두 지불되면 판매자 측 송장에 그렇게 표시한다. 개인적으로 나는 내 장부를 작성할 때 해당 송장의 매출채권 항목에 표시를 해 두어 전부 지불되었음을 기록했고, 그래서 미지급 항목이 눈에 띄도록 했다.</p>
+<p>Well, things don’t always go smoothly, and buyers don’t always pay. So if you sell the collection of the bill to a bill collector, this needs to be accounted (pun intended) for. So what you do is create a journal entry that credits A/R for the whole amount of the invoice, and debits the amount you get from the bill collector to an asset account, and debits the rest to a realized loss account (that would be an expense type). This is what’s referred to a being written off. If there’s no bill collector and you just write the whole thing off, skip the appropriate part.<br />
+음, 일이 항상 순조롭게 풀리는 것은 아니고, 구매자가 항상 돈을 내는 것도 아니다. 그래서 청구액의 추심권을 채권추심업체(bill collector)에게 판다면, 이것을 회계 처리(account)해야 한다(말장난 의도임). 그러면 당신이 하는 일은, 송장 전액에 대해 A/R을 대변 처리하고, 채권추심업체로부터 받는 금액을 자산 계정에 차변 처리하며, 나머지를 실현손실 계정(비용 유형이 될 것이다)에 차변 처리하는 분개를 생성하는 것이다. 이것을 가리켜 상각(written off)이라고 한다. 채권추심업체가 없고 그냥 전액을 상각한다면, 해당 부분을 건너뛰면 된다.</p>
+<h1 id="reports">Reports</h1>
+<h1 id="reports_1">보고서(Reports)</h1>
+<p>There are all sorts of financial reports that you may need. If your books are running correctly, these are all very straightforward to manage.<br />
+당신이 필요로 할 수 있는 온갖 종류의 재무 보고서가 있다. 장부가 올바르게 돌아가고 있다면, 이것들은 모두 매우 간단하게 관리할 수 있다.</p>
+<h1 id="final-observations">Final Observations</h1>
+<h1 id="final-observations_1">마지막 소견(Final Observations)</h1>
+<p>Anyway, hopefully this will clear some things for engineers who have to think more about mechanics than meaning when it comes to accounting systems.<br />
+어쨌든, 이 글이 회계 시스템에 관해 의미보다 메커니즘을 더 많이 생각해야 하는 엔지니어들에게 몇 가지를 명확히 해 주기를 바란다.</p>
+<p>A good and short book that I got which I found super-helpful was <a href="https://www.amazon.com/Accounting-Made-Simple-Explained-Pages/dp/0981454224/ref=sr_1_1?ie=UTF8&amp;qid=1503865476&amp;sr=8-1&amp;keywords=accounting+made+simple">Accounting Made Simple</a>. It’s a quick read and under 100 pages, and will give you more detail regarding the definitions of quick ratio, and the common reports you’ll probably need to be able to produce.<br />
+내가 구해서 매우 유용하다고 느낀 좋고 짧은 책은 <a href="https://www.amazon.com/Accounting-Made-Simple-Explained-Pages/dp/0981454224/ref=sr_1_1?ie=UTF8&amp;qid=1503865476&amp;sr=8-1&amp;keywords=accounting+made+simple">Accounting Made Simple</a>이다. 빠르게 읽을 수 있고 100페이지 미만이며, 당좌비율(quick ratio)의 정의와 당신이 아마 작성해야 할 흔한 보고서들에 관해 더 자세한 내용을 알려 줄 것이다.</p>
+<p>There’s a ton more that I could talk about, like prepaid expenses, details surrounding payment terms, the various different reports, and soooo much more, but hopefully here, I’ve provided you enough basics to understand the stuff you’d encounter learning about those other things.<br />
+선급비용(prepaid expenses), 결제 조건을 둘러싼 세부 사항, 다양한 보고서들, 그리고 훨씬 더 많은 것들 등 이야기할 수 있는 내용이 산더미처럼 더 있지만, 여기서는 그런 다른 것들을 배우면서 마주칠 내용을 이해하는 데 충분한 기초를 제공했기를 바란다.</p></div>
+</body></html>
