@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KV캐쉬 VRAM 계산기</title>
+<style>
+  :root{--bg:#0f1419;--panel:#1a2029;--line:#2a323d;--txt:#e6e9ee;--muted:#8b97a7;
+    --accent:#4dd0a7;--a2:#5b8def;--warn:#f0b429;--bad:#e05c5c;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);padding:24px;max-width:920px;margin:0 auto;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif;line-height:1.5}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 20px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .panel h2{font-size:13px;color:var(--muted);margin:0 0 14px;font-weight:600;text-transform:uppercase}
+  .ctrl{margin-bottom:14px}
+  .ctrl label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+  .ctrl label b{color:var(--accent);font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;accent-color:var(--accent);height:4px}
+  .quant{display:flex;gap:8px;margin-top:4px}
+  .quant button{flex:1;background:#11161d;border:1px solid var(--line);color:var(--muted);
+    border-radius:8px;padding:8px;font-size:13px;cursor:pointer}
+  .quant button.on{border-color:var(--accent);color:var(--accent);background:#13241d}
+  .kpi{display:flex;gap:10px;flex-wrap:wrap}
+  .card{flex:1;min-width:120px;background:#11161d;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .card .v{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+  .card .l{font-size:11px;color:var(--muted);margin-top:2px}
+  .warn{background:#2a1518;border-color:#5c2a2a}
+  .warn .v{color:var(--bad)}
+  .formula{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:var(--muted);
+    background:#11161d;border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:14px;white-space:pre-wrap;line-height:1.6}
+  .bars{display:flex;align-items:flex-end;gap:18px;height:170px;padding-top:10px;border-bottom:1px solid var(--line);margin-bottom:24px}
+  .bcol{flex:1;display:flex;flex-direction:column-reverse;align-items:center;height:100%;position:relative}
+  .bar{width:70%;border-radius:4px 4px 0 0;transition:height .15s}
+  .bcol .lab{position:absolute;bottom:-22px;font-size:11px;color:var(--muted)}
+  .bcol .val{position:absolute;font-size:11px;color:var(--txt);font-variant-numeric:tabular-nums}
+  .note{font-size:12px;color:var(--muted);margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+  <h1>KV캐쉬 VRAM 계산기</h1>
+  <p class="sub">LLM 추론 시 KV캐쉬가 먹는 메모리 = <code>2 × 레이어 × KV헤드 × 헤드차원 × bytes × 컨텍스트</code>. 빅테크 GPU VRAM의 ~95%가 여기에 쓰인다.</p>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>모델 구성</h2>
+      <div class="ctrl"><label>레이어 수 <b><span id="lV">62</span></b></label>
+        <input type="range" id="l" min="8" max="120" value="62" step="1"></div>
+      <div class="ctrl"><label>KV 헤드 수 <b><span id="hV">8</span></b></label>
+        <input type="range" id="h" min="1" max="64" value="8" step="1"></div>
+      <div class="ctrl"><label>헤드 차원 <b><span id="dV">128</span></b></label>
+        <input type="range" id="d" min="64" max="512" value="128" step="64"></div>
+      <div class="ctrl"><label>컨텍스트 <b><span id="cV">256</span>K 토큰</b></label>
+        <input type="range" id="c" min="8" max="1024" value="256" step="8"></div>
+      <div class="ctrl"><label>양자화 (KV 1개당 bytes)</label>
+        <div class="quant" id="quant">
+          <button data-b="2" class="on">FP16 · 2B</button>
+          <button data-b="1">INT8 · 1B</button>
+          <button data-b="0.5">INT4 · 0.5B</button>
+        </div></div>
+      <div class="ctrl" style="margin-top:14px"><label>동시 세션 수 <b><span id="sV">1</span></b></label>
+        <input type="range" id="s" min="1" max="50" value="1" step="1"></div>
+    </div>
+
+    <div class="panel">
+      <h2>KV캐쉬 메모리</h2>
+      <div class="kpi">
+        <div class="card" id="perCard"><div class="v" id="per">—</div><div class="l">세션당 (GB)</div></div>
+        <div class="card" id="totCard"><div class="v" id="tot" style="color:var(--a2)">—</div><div class="l">전체 (× 세션)</div></div>
+      </div>
+      <div class="formula" id="formula"></div>
+      <div class="note" id="msg"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>양자화별 세션당 VRAM 비교</h2>
+    <div class="bars" id="bars"></div>
+    <div class="note">V는 줄이면 영향이 크고 K는 비교적 견딘다 → 실무에선 K·V를 다르게 양자화하기도. INT4까지 줄이면 1/4로 떡락하지만, 긴 컨텍스트 정밀 코딩(바이브코딩)에선 손실이 누적돼 위험.</div>
+  </div>
+
+  <p class="note">
+    같은 31B 모델이라도 <b>구조(전역/지역 어텐션 비율, 헤드·차원)</b>에 따라 KV캐쉬가 9배까지 차이난다(Gemma 31B ≈ 52GB vs 26B ≈ 6GB).
+    모델 가중치(22GB)보다 KV캐쉬가 더 큰 게 로컬 로딩이 안 되는 진짜 이유. 세션·사용자가 늘면 캐쉬는 기하급수로 폭증한다.
+  </p>
+
+<script>
+  const $ = id => document.getElementById(id);
+  let bytes = 2;
+  document.querySelectorAll('#quant button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#quant button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on'); bytes = +b.dataset.b; run();
+  }));
+  ['l','h','d','c','s'].forEach(i => $(i).addEventListener('input', run));
+
+  const GB = 1024**3;
+  const sizeGB = (L,H,D,ctxK,by) => (2 * L * H * D * by * (ctxK*1024)) / GB;
+
+  function run(){
+    const L=+$('l').value, H=+$('h').value, D=+$('d').value, ctxK=+$('c').value, S=+$('s').value;
+    $('lV').textContent=L; $('hV').textContent=H; $('dV').textContent=D; $('cV').textContent=ctxK; $('sV').textContent=S;
+
+    const per = sizeGB(L,H,D,ctxK,bytes);
+    const tot = per * S;
+    $('per').textContent = per.toFixed(1);
+    $('tot').textContent = tot.toFixed(1);
+    $('perCard').classList.toggle('warn', per > 80);
+    $('totCard').classList.toggle('warn', tot > 80);
+
+    $('formula').textContent =
+      `2(KV) × ${L}레이어 × ${H}헤드 × ${D}차원\n  × ${bytes}B × ${(ctxK*1024).toLocaleString()}토큰\n= ${per.toFixed(1)} GB / 세션` +
+      (S>1 ? `\n× ${S}세션 = ${tot.toFixed(1)} GB` : '');
+
+    const ref = per>80 ? '단일 GPU(80GB)로도 벅참 — CPU 오프로딩 시 극도로 느려짐.'
+              : per>24 ? '24GB 소비자 GPU엔 안 들어감(가중치 별도).'
+              : '소비자 GPU에 들어갈 만한 수준.';
+    $('msg').innerHTML = `세션당 <b style="color:var(--accent)">${per.toFixed(1)}GB</b>. ${ref}`;
+
+    // 양자화 비교 막대 (세션당)
+    const levels = [['FP16',2,'var(--bad)'],['INT8',1,'var(--warn)'],['INT4',0.5,'var(--accent)']];
+    const vals = levels.map(([n,b])=> sizeGB(L,H,D,ctxK,b));
+    const max = vals[0] || 1;
+    let html='';
+    levels.forEach(([n,b,col],i)=>{
+      const v=vals[i], hgt=Math.max(2,(v/max)*150);
+      html += `<div class="bcol"><span class="val" style="bottom:${hgt+4}px">${v.toFixed(0)}GB</span>`+
+        `<div class="bar" style="height:${hgt}px;background:${col}"></div><span class="lab">${n}</span></div>`;
+    });
+    $('bars').innerHTML = html;
+  }
+  run();
+</script>
+</body>
+</html>
