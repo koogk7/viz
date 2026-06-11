@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>회계 시스템 구조 — Finance Integration 발표</title>
+<style>
+  :root{--bg:#0f1419;--panel:#1a2029;--line:#2a323d;--txt:#e6e9ee;--muted:#8b97a7;
+    --accent:#4dd0a7;--a2:#5b8def;--warn:#f0b429;--bad:#e05c5c;--pur:#a78bfa;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--bg);color:var(--txt);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif}
+  #deck{height:100vh;width:100vw;position:relative}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;
+    padding:6vh 8vw;opacity:0;transition:opacity .25s}
+  .slide.on{display:flex;opacity:1}
+  .slide.center{align-items:center;text-align:center}
+  .kicker{color:var(--accent);font-size:15px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
+  h1{font-size:clamp(28px,5vw,52px);line-height:1.2;margin-bottom:18px}
+  h2{font-size:clamp(22px,3.6vw,38px);line-height:1.25;margin-bottom:22px}
+  h2 .hl{color:var(--accent)}
+  p.lead{font-size:clamp(16px,2.2vw,24px);color:var(--muted);line-height:1.6;max-width:60ch}
+  ul{list-style:none;font-size:clamp(15px,2vw,22px);line-height:1.7}
+  li{margin:10px 0;padding-left:28px;position:relative}
+  li::before{content:"▸";position:absolute;left:0;color:var(--accent)}
+  li small{color:var(--muted);font-size:.8em}
+  .quote{font-size:clamp(20px,3.2vw,34px);line-height:1.45;border-left:4px solid var(--accent);
+    padding-left:24px;max-width:24ch;font-weight:600}
+  .divider{background:linear-gradient(135deg,#141a22,#1a2230)}
+  .divider .num{font-size:clamp(60px,12vw,140px);font-weight:800;color:var(--line);line-height:1}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:28px;width:100%;max-width:1000px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}
+  .card h3{font-size:clamp(16px,2vw,22px);color:var(--accent);margin-bottom:10px}
+  .card p{font-size:clamp(13px,1.6vw,17px);color:var(--muted);line-height:1.6}
+  /* pipeline spine */
+  .pipe{display:flex;flex-direction:column;gap:10px;width:100%;max-width:560px;margin-top:10px}
+  .node{border:1px solid var(--line);border-radius:10px;padding:12px 16px;text-align:center;font-size:clamp(13px,1.7vw,18px);background:var(--panel)}
+  .node.us{border-color:var(--accent);background:#13241d;color:var(--accent);font-weight:700;box-shadow:0 0 0 3px rgba(77,208,167,.12)}
+  .node .sub{display:block;font-size:.72em;color:var(--muted);font-weight:400;margin-top:3px}
+  .arrow{text-align:center;color:var(--muted);font-size:18px;line-height:.6}
+  /* state machine */
+  .states{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:clamp(13px,1.8vw,20px);margin-top:8px}
+  .st{border:1px solid var(--line);border-radius:20px;padding:8px 16px;background:var(--panel)}
+  .st.ours{border-color:var(--accent);color:var(--accent);font-weight:700}
+  .st .sep{color:var(--muted)}
+  .chev{color:var(--muted)}
+  .tag{display:inline-block;background:#11161d;border:1px solid var(--line);border-radius:6px;
+    padding:2px 9px;font-size:.7em;color:var(--muted);margin-left:8px}
+  .foot{position:fixed;bottom:14px;left:0;right:0;display:flex;justify-content:space-between;
+    align-items:center;padding:0 18px;font-size:12px;color:var(--muted);pointer-events:none}
+  #bar{position:fixed;top:0;left:0;height:3px;background:var(--accent);transition:width .25s;z-index:10}
+  .hint{color:var(--warn)} .ok{color:var(--accent)} .blue{color:var(--a2)} .pur{color:var(--pur)}
+  a{color:var(--a2)}
+  @media(max-width:680px){.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="deck">
+
+  <!-- 1 -->
+  <section class="slide center divider">
+    <div class="kicker">Finance Integration · 기술 공유</div>
+    <h1>회계 시스템 구조<br>— 우리는 무엇을 만드는가</h1>
+    <p class="lead">N개 팀의 제각각인 거래를, 회계가 이해하는 단 하나의 언어로.</p>
+  </section>
+
+  <!-- 2 -->
+  <section class="slide">
+    <div class="kicker">왜 어려운가</div>
+    <h2>우리 일은 <span class="hl">glue code가 아니다</span></h2>
+    <ul>
+      <li>N개 프로덕트 팀 × M개 거래유형 → 회계는 <b>단일 진실</b>을 요구</li>
+      <li>이 매핑 지옥을 Stripe·Uber·Airbnb도 똑같이 풀었다 <small>→ 우리는 같은 리그의 문제를 푸는 중</small></li>
+      <li>본질은 배관이 아니라 <span class="ok">캐노니컬 모델 · 멱등성 · 통제</span> 설계</li>
+    </ul>
+  </section>
+
+  <!-- 3 -->
+  <section class="slide center">
+    <div class="kicker">한 줄로</div>
+    <p class="quote">우리는 거래를 <span class="hl">정규 회계 이벤트</span>로 번역하는 <span class="hl">어댑터 레이어</span>다.<br>분개엔진은 그 다음이다.</p>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide center">
+    <div class="kicker">파이프라인 속 우리 위치</div>
+    <div class="pipe">
+      <div class="node">각 팀 도메인 이벤트 <span class="sub">결제·정산·포인트·… (제각각)</span></div>
+      <div class="arrow">▼</div>
+      <div class="node us">우리: 정규화 · 통합 · 통제 레이어 <span class="sub">"분개엔진에 던지기 전"</span></div>
+      <div class="arrow">▼</div>
+      <div class="node">분개엔진 <span class="sub">회계 규칙 → 차변/대변</span></div>
+      <div class="arrow">▼</div>
+      <div class="node">보조원장 → 총계정원장(GL) → 보고</div>
+    </div>
+  </section>
+
+  <!-- 5 divider -->
+  <section class="slide center divider">
+    <div class="num">01</div>
+    <h2>이기종 거래를 <span class="hl">어떻게 하나로</span> 통합하나</h2>
+    <p class="lead">Oracle Accounting Hub가 보여주는 교과서 패턴</p>
+  </section>
+
+  <!-- 6 -->
+  <section class="slide">
+    <div class="kicker">핵심 ① 정규 회계 이벤트 모델</div>
+    <h2>거래 객체 ↔ 회계 규칙 <span class="hl">분리</span></h2>
+    <ul>
+      <li>모든 팀의 거래를 <b>단일 표준 이벤트 스키마</b>(Canonical Event)로 흡수</li>
+      <li>"무슨 일이 일어났나"(이벤트)와 "어떻게 분개하나"(규칙)를 분리</li>
+      <li><span class="ok">소스가 늘어도 분개엔진은 안 바뀐다</span> <small>— 느슨결합(MSA)</small></li>
+    </ul>
+  </section>
+
+  <!-- 7 -->
+  <section class="slide">
+    <div class="kicker">핵심 ② 소스 어댑터 + 계정 코드집</div>
+    <h2>흩어진 표현을 <span class="hl">전사 표준</span>으로</h2>
+    <ul>
+      <li>팀 이벤트 → 정규 이벤트 <b>어댑터/컨트랙트</b> (소스별 1개)</li>
+      <li>제각각인 계정·통화·단위를 <b>전사 계정 코드집</b>으로 통일</li>
+      <li>새 팀이 붙어도 어댑터 1개만 추가 <small>— 분개엔진·GL은 무변경</small></li>
+    </ul>
+  </section>
+
+  <!-- 8 -->
+  <section class="slide">
+    <div class="kicker">핵심 ③ 멱등성 · 중복제거</div>
+    <h2>같은 거래가 두 번 와도 <span class="hl">한 번만</span></h2>
+    <ul>
+      <li>재시도·중복 발행은 분산 시스템의 기본값 → 멱등 키로 흡수</li>
+      <li><b>Uber</b>: 연 400억 분개를 <span class="ok">멱등·재현 가능</span>하게 처리</li>
+      <li>재현성 = 같은 입력 → 항상 같은 분개 (감사·디버깅의 토대)</li>
+    </ul>
+  </section>
+
+  <!-- 9 -->
+  <section class="slide">
+    <div class="kicker">핵심 ④ Enrichment</div>
+    <h2>분개에 필요한 맥락을 <span class="hl">상류에서 채운다</span></h2>
+    <ul>
+      <li>FX 환율 · 수수료 · 계정 매핑 · 거래 분류를 정규 이벤트에 보강</li>
+      <li>분개엔진은 "완성된" 이벤트만 받게 → 규칙이 단순해짐</li>
+      <li>맥락 누락은 하류로 갈수록 고치기 비쌈 → 우리가 책임</li>
+    </ul>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide">
+    <div class="kicker">핵심 ⑤ 통제 게이트 ★</div>
+    <h2>분개엔진에 던지기 <span class="hl">전에</span> 검증한다</h2>
+    <ul>
+      <li>완전성·정합성 체크: 빠진 거래 없나, 양변 균형 맞나</li>
+      <li><b>Marot</b>: <span class="ok">"상류 통제가 품질을 결정한다"</span> — 보고도구가 아니라 입구에서</li>
+      <li><b>Stripe</b>: 데이터 품질 메트릭(<span class="blue">적시성·완전성</span>)을 지표로 관리</li>
+      <li class="hint">→ 이 레이어가 업계에서 가장 과소투자되는 곳. 우리의 차별점.</li>
+    </ul>
+  </section>
+
+  <!-- 11 -->
+  <section class="slide center">
+    <div class="kicker">우리가 넘기는 이벤트의 생애</div>
+    <h2>회계 이벤트 <span class="hl">상태머신</span></h2>
+    <div class="states">
+      <span class="st ours">Unaccounted</span><span class="chev">▶</span>
+      <span class="st ours">Accounted</span><span class="chev">▶</span>
+      <span class="st">Transferred</span><span class="chev">▶</span>
+      <span class="st">Posted</span>
+    </div>
+    <p class="lead" style="margin-top:22px">우리는 앞 두 단계(<span class="ok">Unaccounted → Accounted</span>)의 주인.<br>여기서 정규화·통제가 끝나야 분개엔진이 받는다. <span class="tag">Oracle Fusion 흐름</span></p>
+  </section>
+
+  <!-- 12 divider -->
+  <section class="slide center divider">
+    <div class="num">02</div>
+    <h2>빅테크는 이미 <span class="hl">이렇게 한다</span></h2>
+    <p class="lead">우리 설계의 롤모델 2가지</p>
+  </section>
+
+  <!-- 13 -->
+  <section class="slide">
+    <div class="kicker">증거 ① Stripe</div>
+    <h2>불변 원장 + <span class="hl">데이터 품질 메트릭</span></h2>
+    <ul>
+      <li>돈의 이동을 <b>immutable ledger</b>로 추적·검증</li>
+      <li>품질을 "느낌"이 아니라 <span class="ok">적시성·완전성 메트릭</span>으로 측정</li>
+      <li><b>→ 우리 통제 게이트의 롤모델</b>: 품질을 숫자로 관리하라</li>
+    </ul>
+  </section>
+
+  <!-- 14 -->
+  <section class="slide">
+    <div class="kicker">증거 ② Uber · Airbnb</div>
+    <h2>보조원장 = <span class="hl">단일 진실 공급원(SSOT)</span></h2>
+    <ul>
+      <li><b>Airbnb</b>: 보조원장을 SSOT로 두고 리포팅을 스케일</li>
+      <li><b>Uber</b>: 멱등·재현으로 400억 분개를 신뢰 가능하게</li>
+      <li><b>→ 우리 정규화 레이어가 SSOT가 되어야</b> 하류 전부가 신뢰</li>
+    </ul>
+  </section>
+
+  <!-- 15 -->
+  <section class="slide">
+    <div class="kicker">관통 원칙 = 우리 팀 행동강령</div>
+    <h2>네 가지로 <span class="hl">압축</span></h2>
+    <ul>
+      <li>① <b>정규 이벤트 모델</b>이 어댑터 폭증을 막는다</li>
+      <li>② <b>통제는 상류(우리)</b>에서 — 하류 보정은 항상 더 비싸다</li>
+      <li>③ <b>멱등 · 불변 · 감사추적</b>은 타협 불가</li>
+      <li>④ 우리는 <span class="ok">SSOT</span> — 우리가 틀리면 회계 전체가 틀린다</li>
+    </ul>
+  </section>
+
+  <!-- 16 -->
+  <section class="slide center">
+    <div class="kicker">함께 생각해보자</div>
+    <h2>우리 파이프라인은 <span class="hl">어디가 약한가?</span></h2>
+    <p class="lead">· 새 소스 추가 시 어댑터만으로 끝나나, 분개엔진까지 건드리나?<br>· 통제 게이트가 "던지기 전"에 있나, 사고 후 보정인가?<br>· 우리 데이터 품질을 숫자로 보고 있나?</p>
+  </section>
+
+  <!-- 17 -->
+  <section class="slide center divider">
+    <div class="kicker">리소스</div>
+    <h2>더 깊이 읽기</h2>
+    <p class="lead">정리한 회계 시스템 컬렉션(복식부기→설계원칙→빅테크→ERP) 전체:<br>
+    <a href="https://koogk7.github.io/viz/accounting-system/">koogk7.github.io/viz/accounting-system</a></p>
+    <p class="lead" style="margin-top:18px;font-size:15px">감사합니다 · 질문 환영</p>
+  </section>
+
+</div>
+
+<div class="foot"><span id="thru">"우리는 거래를 정규 회계 이벤트로 번역하는 어댑터 레이어다"</span><span id="cnt"></span></div>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  let i = 0;
+  function show(n){
+    i = Math.max(0, Math.min(slides.length-1, n));
+    slides.forEach((s,k)=>s.classList.toggle('on', k===i));
+    document.getElementById('bar').style.width = ((i+1)/slides.length*100)+'%';
+    document.getElementById('cnt').textContent = (i+1)+' / '+slides.length;
+  }
+  function next(){show(i+1)} function prev(){show(i-1)}
+  document.addEventListener('keydown', e=>{
+    if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();next()}
+    else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();prev()}
+    else if(e.key==='Home'){show(0)} else if(e.key==='End'){show(slides.length-1)}
+  });
+  // 클릭(오른쪽/왼쪽 절반) + 모바일 스와이프
+  document.getElementById('deck').addEventListener('click', e=>{
+    if(e.target.closest('a')) return;
+    (e.clientX > innerWidth/2) ? next() : prev();
+  });
+  let x0=null;
+  addEventListener('touchstart', e=>x0=e.touches[0].clientX, {passive:true});
+  addEventListener('touchend', e=>{ if(x0===null)return; const dx=e.changedTouches[0].clientX-x0;
+    if(Math.abs(dx)>40){ dx<0?next():prev() } x0=null; }, {passive:true});
+  show(0);
+</script>
+</body>
+</html>
