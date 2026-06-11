@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tracking the money — Scaling financial reporting at Airbnb · 회계 시스템 구조</title>
+<title>Tracking the money — Scaling financial reporting at Airbnb</title>
 <style>
   :root{--bg:#0f1419;--panel:#1a2029;--line:#2a323d;--txt:#e6e9ee;--muted:#8b97a7;--accent:#4dd0a7;--a2:#5b8def}
   *{box-sizing:border-box}
@@ -21,19 +21,20 @@
   pre code{border:0;padding:0;background:none}
   blockquote{border-left:3px solid var(--accent);margin:1em 0;padding:.2em 1em;color:var(--muted);background:#161c24}
   table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.92em;display:block;overflow-x:auto}
-  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left}
-  th{background:#11161d}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left} th{background:#11161d}
   hr{border:0;border-top:1px solid var(--line);margin:1.8em 0}
-  ul,ol{padding-left:1.4em}
-  li{margin:.3em 0}
+  ul,ol{padding-left:1.4em} li{margin:.3em 0}
   .tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px}
   .tag{background:#11161d;border:1px solid var(--line);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--muted)}
   .content img{max-width:100%}
 </style></head><body>
-<div class="nav"><a href="index.html">← 목차(MOC)</a></div>
+<div class="nav"><a href="index.html">← 목차</a></div>
 <div class="tags"><span class="tag">금융 리포팅</span><span class="tag">회계 파이프라인</span><span class="tag">복식부기</span><span class="tag">데이터 엔지니어링</span><span class="tag">Airbnb</span></div>
 <div class="content"><h1 id="tracking-the-money-scaling-financial-reporting-at-airbnb">Tracking the money — Scaling financial reporting at Airbnb</h1>
-<p>돈을 추적하다 — Airbnb의 재무 리포팅(financial reporting) 스케일링</p>
+<blockquote>
+<p>📄 <strong>원문</strong>: <a href="https://medium.com/airbnb-engineering/tracking-the-money-scaling-financial-reporting-at-airbnb-6d742b80f040">Airbnb Engineering (Medium)</a><br />
+돈을 추적하다 — Airbnb의 재무 리포팅(financial reporting) 스케일링</p>
+</blockquote>
 <p><img alt="" src="https://miro.medium.com/v2/resize:fit:1400/1*2F3AL1MjQLNFM39Lt5abjg.png" /></p>
 <p>At Airbnb, the Payments team is responsible for everything related to moving money in Airbnb’s global marketplace. We build technology that powers Airbnb’s massive daily transaction volume to collect payments from guests and distribute payouts to hosts. Our goal is to make the payment experience on Airbnb delightful, magical, and intuitive.<br />
 Airbnb에서 결제(Payments) 팀은 Airbnb의 글로벌 마켓플레이스에서 돈을 이동시키는 모든 일을 담당한다. 우리는 게스트로부터 결제를 수금하고 호스트에게 정산(payout)을 분배하기 위해, Airbnb의 막대한 일일 거래량을 떠받치는 기술을 만든다. 우리의 목표는 Airbnb에서의 결제 경험을 즐겁고, 마법 같고, 직관적으로 만드는 것이다.</p>

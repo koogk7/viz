@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Accounting For Software Engineers · 회계 시스템 구조</title>
+<title>Accounting For Software Engineers</title>
 <style>
   :root{--bg:#0f1419;--panel:#1a2029;--line:#2a323d;--txt:#e6e9ee;--muted:#8b97a7;--accent:#4dd0a7;--a2:#5b8def}
   *{box-sizing:border-box}
@@ -21,19 +21,20 @@
   pre code{border:0;padding:0;background:none}
   blockquote{border-left:3px solid var(--accent);margin:1em 0;padding:.2em 1em;color:var(--muted);background:#161c24}
   table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.92em;display:block;overflow-x:auto}
-  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left}
-  th{background:#11161d}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left} th{background:#11161d}
   hr{border:0;border-top:1px solid var(--line);margin:1.8em 0}
-  ul,ol{padding-left:1.4em}
-  li{margin:.3em 0}
+  ul,ol{padding-left:1.4em} li{margin:.3em 0}
   .tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px}
   .tag{background:#11161d;border:1px solid var(--line);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--muted)}
   .content img{max-width:100%}
 </style></head><body>
-<div class="nav"><a href="index.html">← 목차(MOC)</a></div>
+<div class="nav"><a href="index.html">← 목차</a></div>
 <div class="tags"><span class="tag">복식부기</span><span class="tag">재무제표</span><span class="tag">회계시스템</span><span class="tag">자산</span></div>
 <div class="content"><p>Dec 6, 2017 - 22 minute read - <a href="https://drew.thecsillags.com/categories/programming/">programming</a> <a href="https://drew.thecsillags.com/categories/accounting/">accounting</a></p>
 <h1 id="accounting-for-software-engineers">Accounting For Software Engineers</h1>
+<blockquote>
+<p>📄 <strong>원문</strong>: <a href="https://drew.thecsillags.com/posts/2017-12-06-accounting-for-software-engineers/">drew.thecsillags.com</a></p>
+</blockquote>
 <h1 id="_1">소프트웨어 엔지니어를 위한 회계</h1>
 <p>For my current job, I’ve had to learn how accounting works. In order to learn that, I did the kinds of things you’d expect I might. But one thing I kept finding was that some fairly simple concept seemed to be explained in a way over-complicated way, after I eventually was able to figure it out. I eventually figured out why, and with that, I think that if you’re new to accounting, and a software engineer, I think I can help you out.<br />
 지금 하는 일 때문에 회계가 어떻게 돌아가는지 배워야 했다. 그걸 배우기 위해 여러분이 예상할 만한 방식으로 공부했다. 그런데 계속 발견한 점 하나는, 결국 이해하고 나서 보니 꽤 단순한 개념이 지나치게 복잡하게 설명되어 있는 것 같았다는 것이다. 결국 그 이유를 알아냈고, 그래서 만약 당신이 회계를 처음 접하는 소프트웨어 엔지니어라면 내가 도움을 줄 수 있을 거라고 생각한다.</p>
