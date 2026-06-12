@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>분개지도 — 시나리오 데이터 흐름</title>
+<style>
+  :root{--bg:#0f1419;--panel:#1a2029;--line:#2a323d;--txt:#e6e9ee;--muted:#8b97a7;
+    --accent:#4dd0a7;--a2:#5b8def;--warn:#f0b429;--bad:#e05c5c;--pur:#a78bfa;--dr:#5b8def;--cr:#e0894d;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--txt);padding:20px;max-width:1080px;margin:0 auto;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif;line-height:1.5}
+  h1{font-size:20px;margin-bottom:2px}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:6px}
+  .disc{font-size:11px;color:var(--warn);background:#221a10;border:1px solid #4a3a16;border-radius:7px;padding:6px 10px;margin-bottom:16px;display:inline-block}
+  /* step timeline */
+  .steps{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+  .step{flex:1;min-width:130px;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:10px 12px;cursor:pointer;transition:.15s;position:relative}
+  .step.on{border-color:var(--accent);background:#13241d}
+  .step .n{font-size:11px;color:var(--muted)} .step.on .n{color:var(--accent)}
+  .step .t{font-size:14px;font-weight:600;margin-top:2px}
+  .nav{display:flex;gap:8px;margin:10px 0 18px}
+  .nav button{background:var(--panel);border:1px solid var(--line);color:var(--txt);border-radius:8px;
+    padding:8px 16px;cursor:pointer;font-size:13px}
+  .nav button:hover{border-color:var(--accent)}
+  .nav .play{color:var(--accent)}
+  .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .panel h2{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;font-weight:600}
+  /* parties lanes */
+  .lanes{display:flex;gap:8px;margin-bottom:6px}
+  .lane{flex:1;text-align:center;border:1px solid var(--line);border-radius:9px;padding:9px 6px;font-size:12px;
+    background:#11161d;color:var(--muted);transition:.15s}
+  .lane.act{border-color:var(--accent);color:var(--accent);background:#13241d;font-weight:700;box-shadow:0 0 0 2px rgba(77,208,167,.1)}
+  .lane .e{display:block;font-size:16px;margin-bottom:2px}
+  /* flows */
+  .flow{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+  .frow{display:flex;align-items:center;gap:8px;font-size:13px;background:#11161d;border:1px solid var(--line);
+    border-radius:9px;padding:9px 12px}
+  .frow .from,.frow .to{font-weight:600;white-space:nowrap}
+  .frow .ar{flex:1;text-align:center;color:var(--accent);position:relative;font-size:12px}
+  .frow .ar .amt{display:block;color:var(--txt);font-variant-numeric:tabular-nums;font-weight:600}
+  .frow .ar::before{content:"";position:absolute;top:50%;left:0;right:0;height:1px;background:var(--line);z-index:0}
+  .frow .ar span{position:relative;background:#11161d;padding:0 8px;z-index:1}
+  .frow .via{font-size:11px;color:var(--muted)}
+  /* ledger */
+  .led{font-size:13px;line-height:1.7}
+  .led .rec{padding:6px 0;border-bottom:1px solid var(--line)}
+  .led .book{display:inline-block;font-size:11px;color:var(--pur);border:1px solid #3a3050;border-radius:5px;padding:1px 7px;margin-right:8px}
+  /* journal */
+  table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+  th{text-align:left;color:var(--muted);font-size:11px;font-weight:600;padding:4px 6px;border-bottom:1px solid var(--line)}
+  td{padding:6px 6px;border-bottom:1px solid #20262f}
+  .dr{color:var(--dr)} .cr{color:var(--cr)} .amt{text-align:right}
+  .ent{font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:1px 6px;margin-left:6px}
+  .note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.6}
+  /* balances */
+  .bal{display:flex;gap:10px;margin-top:16px}
+  .bcard{flex:1;background:#11161d;border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .bcard .v{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+  .bcard .l{font-size:11px;color:var(--muted);margin-top:2px}
+  .bcard.hot{border-color:var(--accent)} .bcard.hot .v{color:var(--accent)}
+</style>
+</head>
+<body>
+  <h1>분개지도 — 시나리오 데이터 흐름</h1>
+  <p class="sub">하나의 시나리오가 <b>주식원장에 기록</b>되며 <b>회계 분개</b>까지 터지는 과정을 단계별로 추적. 고객거래 + 은행정산 + 브로커정산.</p>
+  <div class="disc">⚠ 예시 데이터 — 실제 토스증권 계정과목·금액·결제구조 아님. 구조 검증용.</div>
+
+  <div class="sub" style="font-size:14px;color:var(--txt);font-weight:600;margin-bottom:10px">📌 시나리오: 고객이 원화 입금 → 달러 환전 → 애플(AAPL) 매수 결제까지</div>
+
+  <div class="steps" id="steps"></div>
+  <div class="nav">
+    <button id="prev">◀ 이전</button>
+    <button id="play" class="play">▶ 자동 재생</button>
+    <button id="next">다음 ▶</button>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="panel">
+        <h2>참여 주체 & 데이터 흐름</h2>
+        <div class="lanes" id="lanes"></div>
+        <div class="flow" id="flow"></div>
+        <div class="note" id="stepnote"></div>
+      </div>
+      <div class="panel" style="margin-top:16px">
+        <h2>📒 원장 기록</h2>
+        <div class="led" id="ledger"></div>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <h2>🧾 회계 분개 (차변 / 대변)</h2>
+        <table><thead><tr><th>구분</th><th>계정과목</th><th class="amt">금액</th></tr></thead>
+        <tbody id="journal"></tbody></table>
+        <div class="note" id="jnote"></div>
+      </div>
+      <div class="bal" id="bal"></div>
+    </div>
+  </div>
+
+<script>
+  const P = {C:'고객', B:'증권사 원장', K:'은행(입금·FX)', G:'글로벌 브로커·예탁'};
+  const EMO = {C:'🧑', B:'🏦', K:'💱', G:'🌐'};
+  const won = n => '₩'+n.toLocaleString();
+  const usd = n => '$'+n.toLocaleString();
+
+  const scenario = [
+    { name:'원화 입금', actors:['C','B','K'],
+      flows:[{from:'C',to:'B',asset:'KRW', amt:'₩1,400,000', via:'은행 가상계좌(펌뱅킹)'}],
+      ledger:[['예수금원장','투자자예수금(KRW) +1,400,000']],
+      journal:[['차','고객예치금-은행(별도예치)',1400000,'증권사'],['대','투자자예수금-KRW',1400000,'증권사']],
+      note:'고객 은행계좌 → 증권사 별도예치 계좌. 은행이 입금 정산을 처리, 증권사는 고객 예수금 부채를 인식.',
+      jnote:'고객 현금은 증권사 입장에서 갚아야 할 부채(투자자예수금).',
+      bal:{KRW:1400000, USD:0, AAPL:0} },
+
+    { name:'환전 KRW→USD', actors:['C','B','K'],
+      flows:[{from:'C',to:'B',asset:'KRW', amt:'₩1,400,000', via:'고객 적용환율 1,400'},
+             {from:'K',to:'B',asset:'USD 조달', amt:'$1,000', via:'은행 도매환율 1,398'}],
+      ledger:[['예수금원장','투자자예수금(KRW) −1,400,000'],['예수금원장','투자자예수금(USD) +$1,000']],
+      journal:[['차','투자자예수금-KRW',1400000,'증권사'],['대','투자자예수금-USD','$1,000 (₩1,398,000)','증권사'],['대','외환매매이익(스프레드)',2000,'증권사']],
+      note:'고객은 1,400원에 환전, 증권사는 은행과 도매 1,398원에 USD 조달 → 스프레드 ₩2,000이 증권사 수익. 은행 FX 정산 발생.',
+      jnote:'고객 적용환율 − 도매환율 = 증권사 외환이익.',
+      bal:{KRW:0, USD:1000, AAPL:0} },
+
+    { name:'AAPL 매수 체결', actors:['C','B','G'],
+      flows:[{from:'C',to:'B',asset:'매수주문', amt:'AAPL 4주 @ $200', via:'$800 + 수수료 $2'},
+             {from:'B',to:'G',asset:'주문 라우팅', amt:'체결', via:'글로벌 브로커 집행'}],
+      ledger:[['주식원장','AAPL +4주 (취득가 $800)'],['예수금원장','투자자예수금(USD) −$802']],
+      journal:[['차','해외주식-AAPL(고객)','$800','증권사'],['차','위탁매매수수료비용','$2','고객부담'],['대','투자자예수금-USD','$802','증권사'],['대','수수료수익','$2','증권사']],
+      note:'체결 시점: 주식원장에 포지션 기록 + 고객 USD 예수금 차감. 실제 대금 결제는 다음 단계(T+1).',
+      jnote:'수수료는 고객에겐 비용, 증권사에겐 수익(거울 분개).',
+      bal:{KRW:0, USD:198, AAPL:4} },
+
+    { name:'결제 (T+1 외화결제)', actors:['B','G'],
+      flows:[{from:'B',to:'G',asset:'USD 결제', amt:'$800', via:'글로벌 브로커 정산'},
+             {from:'G',to:'B',asset:'AAPL 4주 입고', amt:'예탁(DTC)', via:'현지 예탁기관 보관'}],
+      ledger:[['결제원장','대(對)브로커 결제 $800 완료'],['예탁원장','AAPL 4주 예탁 보관 확정']],
+      journal:[['차','대브로커-미지급금','$800','증권사'],['대','외화예치금(결제계좌)','$800','증권사']],
+      note:'해외주식은 현지 브로커·예탁(DTC) 통해 T+1 결제. 증권사↔브로커 외화 정산 + 예탁 보관 확정으로 거래 종결.',
+      jnote:'체결(미결제) → 결제(현금·증권 실제 이전)로 분리되는 게 핵심.',
+      bal:{KRW:0, USD:198, AAPL:4} },
+  ];
+
+  let i = 0, timer = null;
+  const $ = id => document.getElementById(id);
+
+  function render(){
+    const s = scenario[i];
+    // steps
+    $('steps').innerHTML = scenario.map((st,k)=>
+      `<div class="step ${k===i?'on':''}" data-k="${k}"><div class="n">STEP ${k+1}</div><div class="t">${st.name}</div></div>`).join('');
+    document.querySelectorAll('.step').forEach(el=>el.onclick=()=>{go(+el.dataset.k)});
+    // lanes
+    $('lanes').innerHTML = Object.keys(P).map(k=>
+      `<div class="lane ${s.actors.includes(k)?'act':''}"><span class="e">${EMO[k]}</span>${P[k]}</div>`).join('');
+    // flows
+    $('flow').innerHTML = s.flows.map(f=>
+      `<div class="frow"><span class="from">${EMO[f.from]} ${P[f.from]}</span>
+        <span class="ar"><span>${f.asset}<span class="amt">${f.amt}</span></span></span>
+        <span class="to">${EMO[f.to]} ${P[f.to]}</span></div>
+        <div class="via">↳ ${f.via}</div>`).join('');
+    $('stepnote').textContent = s.note;
+    // ledger
+    $('ledger').innerHTML = s.ledger.map(([b,t])=>`<div class="rec"><span class="book">${b}</span>${t}</div>`).join('');
+    // journal
+    $('journal').innerHTML = s.journal.map(([side,acct,amt,ent])=>{
+      const a = typeof amt==='number' ? '₩'+amt.toLocaleString() : amt;
+      return `<tr><td class="${side==='차'?'dr':'cr'}">${side==='차'?'차변':'대변'}</td>
+        <td>${acct}<span class="ent">${ent}</span></td><td class="amt ${side==='차'?'dr':'cr'}">${a}</td></tr>`;
+    }).join('');
+    $('jnote').textContent = s.jnote;
+    // balances (누적)
+    const b = s.bal;
+    $('bal').innerHTML =
+      `<div class="bcard ${b.KRW?'hot':''}"><div class="v">${won(b.KRW)}</div><div class="l">고객 예수금 KRW</div></div>
+       <div class="bcard ${b.USD?'hot':''}"><div class="v">${usd(b.USD)}</div><div class="l">고객 예수금 USD</div></div>
+       <div class="bcard ${b.AAPL?'hot':''}"><div class="v">${b.AAPL}주</div><div class="l">AAPL 보유</div></div>`;
+  }
+  function go(n){ i=Math.max(0,Math.min(scenario.length-1,n)); render(); }
+  $('prev').onclick=()=>go(i-1);
+  $('next').onclick=()=>go(i+1);
+  $('play').onclick=function(){
+    if(timer){clearInterval(timer);timer=null;this.textContent='▶ 자동 재생';return;}
+    this.textContent='⏸ 정지';
+    timer=setInterval(()=>{ if(i>=scenario.length-1){clearInterval(timer);timer=null;$('play').textContent='▶ 자동 재생';return;} go(i+1); },1800);
+  };
+  document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(i+1);if(e.key==='ArrowLeft')go(i-1);});
+  render();
+</script>
+</body>
+</html>
