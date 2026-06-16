@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>서버개발 101 — 파일럿 슬라이드 (2주제)</title>
+<style>
+  :root{--bg:#0f1419;--panel:#1a2029;--line:#2a323d;--txt:#e6e9ee;--muted:#8b97a7;
+    --accent:#4dd0a7;--a2:#5b8def;--warn:#f0b429;--bad:#e05c5c;--flag:#f0b429;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--bg);color:var(--txt);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif}
+  #deck{height:100vh;width:100vw;position:relative}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;padding:6vh 8vw;opacity:0;transition:opacity .22s}
+  .slide.on{display:flex;opacity:1}
+  .slide.center{align-items:center;text-align:center}
+  .kicker{color:var(--accent);font-size:14px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
+  .cat{color:var(--muted);font-size:12px;letter-spacing:1px;margin-bottom:10px}
+  h1{font-size:clamp(26px,5vw,50px);line-height:1.18;margin-bottom:16px}
+  h2{font-size:clamp(22px,3.4vw,36px);line-height:1.25;margin-bottom:20px}
+  h2 .hl{color:var(--accent)}
+  p.lead{font-size:clamp(16px,2.1vw,23px);color:var(--muted);line-height:1.6;max-width:62ch}
+  ul{list-style:none;font-size:clamp(15px,1.95vw,21px);line-height:1.7;max-width:64ch}
+  li{margin:10px 0;padding-left:26px;position:relative}
+  li::before{content:"▸";position:absolute;left:0;color:var(--accent)}
+  li small{color:var(--muted);font-size:.82em}
+  code{background:#11161d;border:1px solid var(--line);border-radius:5px;padding:.08em .4em;font-size:.85em;font-family:ui-monospace,Menlo,monospace;color:var(--a2)}
+  .divider{background:linear-gradient(135deg,#141a22,#1a2230)}
+  .num{font-size:clamp(46px,9vw,96px);font-weight:800;color:var(--line);line-height:1}
+  .flagwrap{background:linear-gradient(135deg,#241c0f,#2a2210)}
+  .flagbadge{display:inline-block;background:#3a2e12;border:1px solid #5c4a1a;color:var(--flag);border-radius:20px;padding:5px 16px;font-size:14px;font-weight:700;margin-bottom:18px}
+  .qbox{background:var(--panel);border:1px solid var(--flag);border-left:4px solid var(--flag);border-radius:12px;padding:20px 24px;max-width:60ch;font-size:clamp(15px,2vw,20px);line-height:1.6;text-align:left}
+  .qbox b{color:var(--flag)}
+  .foot{position:fixed;bottom:14px;left:0;right:0;display:flex;justify-content:space-between;padding:0 18px;font-size:12px;color:var(--muted);pointer-events:none}
+  #bar{position:fixed;top:0;left:0;height:3px;background:var(--accent);transition:width .22s;z-index:10}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="deck"></div>
+<div class="foot"><span>서버개발 101 · 파일럿(2주제) · 🙋=네 경험 필요</span><span id="cnt"></span></div>
+
+<script>
+const S = [
+  {t:'title', kicker:'서버개발 101 · 파일럿', h:'5년차 시행착오를<br>슬라이드로',
+   lead:'얼개 79주제 중 2개를 하이브리드(LLM 드래프트 + 네 경험 플래그)로 시범 제작.'},
+
+  // ── Topic 1 ──
+  {t:'divider', num:'01', cat:'설계', h:'캐시에 관하여 <span class="hl">— 버저닝 · 캐시관통</span>'},
+  {t:'body', cat:'설계 · 캐시', kicker:'왜 어려운가', h:'캐시는 성능을 <span class="hl">사고</span>, 정합성을 <span class="hl">판다</span>',
+   ul:['진짜 어려움은 저장이 아니라 <b>무효화(invalidation)</b> — "지금 이 캐시가 옳은가?"',
+       '무효화 레이스 · 부분 실패 · stale read가 버그의 온상',
+       '→ 두 고전 문제: <b>버저닝</b>(무효화 설계)과 <b>캐시관통</b>(미스 설계)']},
+  {t:'body', cat:'설계 · 캐시', kicker:'① 버저닝', h:'지우지 말고 <span class="hl">키를 교체</span>하라',
+   ul:['무효화(delete) 대신 키에 버전을 박음: <code>user:123:v2</code>',
+       '갱신 = 새 버전 키로 write → 읽기는 항상 "현재 버전"을 가리킴',
+       '구버전은 TTL로 자연 소멸. <small>무효화 레이스·부분실패 회피, 롤백이 키 포인터 교체 한 번</small>']},
+  {t:'body', cat:'설계 · 캐시', kicker:'② 캐시관통(penetration)', h:'<span class="hl">없는 키</span>가 DB를 때린다',
+   ul:['존재하지 않는 키 반복 조회 → 항상 캐시 미스 → DB 직격 (버그 or 공격)',
+       '해결 A: <b>null/빈값도 짧은 TTL로 캐싱</b> (재조회 차단)',
+       '해결 B: <b>블룸필터</b>로 "없는 키"를 캐시 앞단에서 사전 차단',
+       '<small>cf. 스탬피드(stampede)·핫키: TTL 동시만료→DB 폭주. 만료 지터·논리만료+백그라운드 갱신·singleflight</small>']},
+  {t:'flag', cat:'설계 · 캐시', h:'네 경험이 필요한 칸',
+   q:'캐시 버저닝이나 관통을 <b>실제로 겪은 사례</b> 1~2문장: 어떤 데이터였고, 어떤 증상(장애/지연)이었고, 버저닝·null캐싱·블룸 중 뭘로 풀었나? <br><br>(이게 들어가야 "5년차 전문성" 슬라이드가 됨)'},
+
+  // ── Topic 2 ──
+  {t:'divider', num:'02', cat:'설계', h:'Read On Logic <span class="hl">— 쓰기를 읽기로</span>'},
+  {t:'body', cat:'설계 · Read On Logic', kicker:'개념', h:'비싼 계산을 <span class="hl">읽기 말고 쓰기</span>에서',
+   ul:['읽기 때마다 매번 계산하지 말고 — <b>쓰기 시점에 미리 계산·저장</b>해서 읽기를 싸게',
+       '읽기 QPS ≫ 쓰기 QPS인 시스템에서 압도적 (대부분의 서비스가 이쪽)',
+       '같은 사상: <b>CQRS · 머티리얼라이즈드 뷰 · 사전집계(precompute)</b>']},
+  {t:'body', cat:'설계 · Read On Logic', kicker:'트레이드오프', h:'공짜는 <span class="hl">아니다</span>',
+   ul:['쓰기 경로 복잡도 ↑ (한 번의 쓰기가 여러 파생 데이터 갱신)',
+       '저장 중복 + 읽기·쓰기 모델 <b>정합성 동기화</b> 책임',
+       '"언제 옮길까"의 판단 = 읽기 비용 × 빈도 vs 쓰기 복잡도. <small>아무거나 옮기면 쓰기가 지옥</small>']},
+  {t:'flag', cat:'설계 · Read On Logic', h:'네 경험이 필요한 칸 (★핵심)',
+   q:'얼개에 적은 <b>"다빈님 증거금"</b> 사례 — 증거금 계산을 읽기→쓰기로 옮긴 <b>구체 맥락</b>: 원래 어디가 느렸고, 무엇을 쓰기 시점으로 옮겼고, 효과가 어땠나? <br><br>이 토픽은 이 사례가 <b>본체</b>야 — LLM은 일반론만 채울 수 있어서 네 1~2문장이 결정적.'},
+
+  {t:'title', kicker:'파일럿 끝', h:'이 포맷·품질로<br>79개 갈까?',
+   lead:'🙋 슬라이드 2칸만 네가 채우면 완성. OK면 설계 45개로 확장(병렬 Ralph).'},
+];
+
+const deck=document.getElementById('deck');
+deck.innerHTML = S.map((s,i)=>{
+  let inner='';
+  if(s.t==='title') inner=`<div class="kicker">${s.kicker}</div><h1>${s.h}</h1><p class="lead">${s.lead}</p>`;
+  else if(s.t==='divider') inner=`<div class="num">${s.num}</div><div class="cat">${s.cat}</div><h2>${s.h}</h2>`;
+  else if(s.t==='body') inner=`<div class="cat">${s.cat}</div><div class="kicker">${s.kicker}</div><h2>${s.h}</h2><ul>${s.ul.map(x=>`<li>${x}</li>`).join('')}</ul>`;
+  else if(s.t==='flag') inner=`<div class="cat">${s.cat}</div><span class="flagbadge">🙋 네 경험 필요 (하이브리드 플래그)</span><h2>${s.h}</h2><div class="qbox">${s.q}</div>`;
+  const cls = s.t==='divider'?'slide center divider' : s.t==='flag'?'slide center flagwrap' : (s.t==='title'?'slide center divider':'slide');
+  return `<section class="${cls}">${inner}</section>`;
+}).join('');
+
+const slides=[...document.querySelectorAll('.slide')];
+let i=0;
+function show(n){i=Math.max(0,Math.min(slides.length-1,n));slides.forEach((s,k)=>s.classList.toggle('on',k===i));
+  document.getElementById('bar').style.width=((i+1)/slides.length*100)+'%';
+  document.getElementById('cnt').textContent=(i+1)+' / '+slides.length;}
+document.addEventListener('keydown',e=>{if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();show(i+1)}else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();show(i-1)}});
+deck.addEventListener('click',e=>{(e.clientX>innerWidth/2)?show(i+1):show(i-1)});
+let x0=null;addEventListener('touchstart',e=>x0=e.touches[0].clientX,{passive:true});
+addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>40){dx<0?show(i+1):show(i-1)}x0=null},{passive:true});
+show(0);
+</script>
+</body>
+</html>
