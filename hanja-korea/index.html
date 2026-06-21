@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한자, 한국에 어떻게 흘러들어왔나 — 인터랙티브 타임라인</title>
+<style>
+  :root{--bg:#0f1419;--panel:#1a2029;--line:#2a323d;--txt:#e6e9ee;--muted:#8b97a7;
+    --accent:#4dd0a7;--a2:#5b8def;--warn:#f0b429;--bad:#e05c5c;--pur:#a78bfa;--gray:#5a646f;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--txt);padding:22px;max-width:1000px;margin:0 auto;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif;line-height:1.55}
+  h1{font-size:21px;margin-bottom:3px}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  /* timeline track */
+  .track{display:flex;gap:6px;overflow-x:auto;padding:6px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:18px}
+  .node{flex:0 0 auto;min-width:104px;cursor:pointer;text-align:center;padding:10px 10px;border:1px solid var(--line);
+    border-radius:11px;background:var(--panel);transition:.15s;position:relative}
+  .node:hover{border-color:var(--muted)}
+  .node.on{border-color:var(--accent);background:#13241d;box-shadow:0 0 0 2px rgba(77,208,167,.12)}
+  .node.future{opacity:.6;border-style:dashed}
+  .node .yr{font-size:13px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+  .node.future .yr{color:var(--gray)}
+  .node .lab{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.3}
+  /* detail */
+  .detail{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;min-height:260px}
+  .detail .era{color:var(--muted);font-size:12px;letter-spacing:.5px}
+  .detail h2{font-size:clamp(18px,2.6vw,26px);margin:4px 0 6px;line-height:1.25}
+  .detail h2 .hl{color:var(--accent)}
+  .detail .lead{color:var(--muted);font-size:14px;margin-bottom:12px}
+  .detail ul{list-style:none;font-size:14.5px;line-height:1.65}
+  .detail li{margin:7px 0;padding-left:20px;position:relative}
+  .detail li::before{content:"▸";position:absolute;left:0;color:var(--accent)}
+  .detail li b{color:var(--txt)} .detail li .h{color:var(--accent)}
+  code{background:#11161d;border:1px solid var(--line);border-radius:4px;padding:.05em .35em;font-size:.85em;font-family:ui-monospace,Menlo,monospace;color:var(--a2)}
+  .cmp{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px}
+  .cmp .c{flex:1;min-width:170px;background:#11161d;border:1px solid var(--line);border-radius:9px;padding:11px 13px}
+  .cmp .c .t{color:var(--pur);font-weight:700;font-size:13px;margin-bottom:3px}
+  .cmp .c .d{font-size:12.5px;color:var(--muted);line-height:1.5}
+  .srcs{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+  .srcs a{display:inline-block;color:var(--a2);font-size:11.5px;text-decoration:none;margin:2px 12px 2px 0;word-break:break-all}
+  .badge{display:inline-block;border-radius:5px;padding:1px 7px;font-size:11px;margin-left:6px}
+  .badge.hi{background:#13241d;border:1px solid #2c5c46;color:var(--accent)}
+  .badge.un{background:#2a2210;border:1px solid #5c4a1a;color:var(--warn)}
+  .theme{background:#1d1726;border:1px solid #3a3050;border-radius:11px;padding:12px 16px;margin-top:16px;font-size:13.5px;color:var(--txt)}
+  .theme b{color:var(--pur)}
+  .nav{font-size:12px;color:var(--muted);margin-top:12px;text-align:center}
+  .note{font-size:12px;color:var(--muted);margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+</style>
+</head>
+<body>
+  <h1>한자, 한국에 어떻게 흘러들어왔나</h1>
+  <p class="sub">전래 → 한국화(차자표기) → 문자 권력 → 한글 창제 → 행정문자 전환. 노드를 클릭(←/→ 키)하면 검증된 사실·출처가 펼쳐집니다. <span class="badge hi">검증</span>=3표 적대검증 통과 · <span class="badge un">미검증</span>=추가조사 필요</p>
+
+  <div class="track" id="track"></div>
+  <div class="detail" id="detail"></div>
+  <div class="theme">🔑 관통 주제 — <b>문자 = 권력</b>: 조선의 문서생활은 신분·성별로 분화됐다. <b>양반=한문 · 평천민=이두문 · 여성=한글</b>. 한문 능력이 곧 지배층의 문자 권력이었고, 한글 창제·갑오개혁은 그 독점을 흔든 사건이다.</div>
+  <p class="note">출처: 전부 1차 권위(한국민족문화대백과·국사편찬위 우리역사넷/신편한국사/조선사료DB·KCI 논문·KOCW). deep-research 9개 사실 3표 적대검증 통과본.</p>
+
+<script>
+const E = [
+  {yr:"B.C. 3C~", era:"고조선 말엽 → 삼국", lab:"한자 전래 시작", v:"hi",
+   h:"한자, <span class='hl'>여러 경로</span>로 흘러들다",
+   lead:"단일 경로가 아니었다 — 중국 이주민·고구려·백제를 매개로 점진 수용.",
+   ul:["전래 시작 ~B.C. 3세기(고조선 말엽), <b>본격 사용은 삼국 성립 이후</b>",
+       "신라 수용 = 중국 이주민 + 고구려·백제 외교 등 <b>복수 경로</b>",
+       "<b>함안 성산산성 6세기 신라 목간</b>(253점·1,581자·263종) → 지방까지 한자 행정·기록 실증",
+       "천자문·급취편 같은 <code>식자 교재</code>가 지방 보급됐을 가능성"],
+   src:[["KOCW 국어사","http://contents.kocw.net/KOCW/document/2014/Chungnam/LeeKumyoung/03.pdf"],["KCI 성산산성 목간(방국화)","https://www.kci.go.kr/kciportal/ci/sereArticleSearch/ciSereArtiView.kci?sereArticleSearchBean.artiId=ART002980423"]]},
+
+  {yr:"757", era:"통일신라 경덕왕", lab:"고유명사 한자화", v:"hi",
+   h:"한국화의 첫 단계 — <span class='hl'>고유명사 표기</span>",
+   lead:"한자 음(音)·훈(訓)을 빌려 우리말을 적기 시작.",
+   ul:["한자·한문 한국화의 최초 단계 = <b>지명·관명·인명</b> 표기",
+       "<b>757년 경덕왕대</b> 고유 지명까지 2음절 한자식으로 일괄 개정될 만큼 보급",
+       "이 <b>차자(借字) 원리</b>가 이후 이두·향찰·구결로 확장"],
+   src:[["KOCW 국어사","http://contents.kocw.net/KOCW/document/2014/Chungnam/LeeKumyoung/03.pdf"],["민백 '차자표기법'","https://encykorea.aks.ac.kr/Article/E0055185"]]},
+
+  {yr:"7~8C", era:"삼국~통일신라", lab:"차자표기 3분화", v:"hi",
+   h:"이두 · 향찰 · 구결로 <span class='hl'>갈라지다</span>",
+   lead:"한자를 빌려 우리말을 적는 방식이 용도별로 분화.",
+   cmp:[["이두(吏讀)","한자를 우리말 어순으로 + 조사·어미까지. 설총이 집대성(창작 X). 공문서·법률용. 『대명률직해』서 완성, 한글 이후 19세기까지 사용"],
+        ["향찰(鄕札)","향가를 우리말로 완전 표기한 완성형(8세기). 토(吐)는 한자 뜻 버리고 음운기호로. 용어 초출 『균여전』(1075)"],
+        ["구결(口訣)","한문 읽을 때 각 구절에 우리말 토를 다는 독해 보조"]],
+   ul:["공통 원리: <b>음독·훈독</b>으로 개념부 + <b>토(吐)</b>로 문법요소",
+       "향찰이 가장 완전(국어 어순+조사·어미), 이두는 혼재, 구결은 보조"],
+   src:[["민백 '이두'","https://encykorea.aks.ac.kr/Article/E0044081"],["민백 '향찰'","https://encykorea.aks.ac.kr/Article/E0062985"],["민백 '구결'","https://encykorea.aks.ac.kr/Article/E0005629"],["국편 신편한국사","https://contents.history.go.kr/mobile/nh/view.do?levelId=nh_017_0030_0020_0010"]]},
+
+  {yr:"1443", era:"조선 세종 25년", lab:"훈민정음 창제", v:"hi",
+   h:"<span class='hl'>28자</span>, 한자와 무관한 새 문자",
+   lead:"1443년 12월, 한자 차자가 아닌 독자 문자 탄생.",
+   ul:["훈민정음 28자 창제 — 이두·향찰처럼 한자를 빌리는 게 아닌 <b>별개 문자</b>",
+       "문해(文解)가 특수 계층(지배층)의 특권이던 시대",
+       "한글 창제 = 특권이던 문해를 <b>통치자의 시혜로 확대</b>"],
+   src:[["우리역사넷(세종실록 논쟁)","https://contents.history.go.kr/id/hm_091_0040"],["KCI 한글문해 논문","https://www.kci.go.kr/kciportal/landing/article.kci?arti_id=ART002225997"]]},
+
+  {yr:"1444", era:"조선 세종 26년", lab:"최만리 반대상소", v:"hi",
+   h:"반대 논리가 <span class='hl'>한자의 위상</span>을 폭로",
+   lead:"창제 2개월 뒤, 집현전 최만리 등 반대 상소.",
+   ul:["핵심 논리: 새 문자가 한자/중화 문명과 단절 — <b>\"중국을 버리고 이적과 같아지려는 문명의 큰 흠절\"</b>",
+       "→ 한자가 <b>지배층 문화·정치 질서의 근간</b>임을 역설적으로 드러냄",
+       "최만리: 설총 이두는 '중국 글자를 빌려 어조사에 사용' vs 언문은 한자 무관 = 별개",
+       "<b>세종 반박</b>: \"이두도 백성 편의였듯 언문도 그렇다\" → 한글 정당화"],
+   src:[["우리역사넷 hm_091_0040","https://contents.history.go.kr/id/hm_091_0040"]]},
+
+  {yr:"1894", era:"갑오개혁", lab:"공문식 칙령", v:"hi",
+   h:"행정 문자, <span class='hl'>한문 → 국문</span> 분기점",
+   lead:"국가 공문의 기본 문자가 바뀌는 제도적 전환.",
+   ul:["공문식 칙령 제1호 14조: <code>法律勅令 總以國文爲本 漢文附譯 或混用國漢文</code>",
+       "= 국문(한글) 기본 + 한문 부역(附譯) 또는 <b>국한문 혼용</b> 허용",
+       "한문→국문 전환의 <b>제도적 분기점</b> (단 실제론 국한문 혼용 우세, 점진적)"],
+   src:[["국편 조선사료DB(공문식)","https://db.history.go.kr/joseon/level.do?levelId=odi_001_0040"]]},
+
+  {yr:"광복~현대", era:"1948 ~ 현재", lab:"한자 폐지·교육 논쟁", v:"un", future:true,
+   h:"이 구간은 <span class='hl'>아직 미검증</span>",
+   lead:"deep-research에서 검증된 클레임을 확보하지 못한 범위.",
+   ul:["한글전용법(1948)·1970년대 한자교육 논쟁·국한문혼용 쇠퇴·현재 한자 위상",
+       "<b>추가 deep-research 필요</b> — 원하면 이 구간만 별도 조사 가능",
+       "참고: 검증 중 <b>기각된 과도 일반화</b> 2건 — '고려 공식문자=한자뿐', '조선 전기간 한자-한글 이중구조 유지'(실제론 시기·계층·문서별로 복합)"],
+   src:[]},
+];
+
+const track=document.getElementById('track'), detail=document.getElementById('detail');
+let i=0;
+track.innerHTML=E.map((e,k)=>`<div class="node ${e.future?'future':''}" data-k="${k}"><div class="yr">${e.yr}</div><div class="lab">${e.lab}</div></div>`).join('');
+function render(){
+  document.querySelectorAll('.node').forEach((n,k)=>n.classList.toggle('on',k===i));
+  const e=E[i];
+  let html=`<div class="era">${e.era} <span class="badge ${e.v}">${e.v==='hi'?'검증':'미검증'}</span></div><h2>${e.h}</h2><div class="lead">${e.lead}</div>`;
+  if(e.cmp) html+=`<div class="cmp">${e.cmp.map(c=>`<div class="c"><div class="t">${c[0]}</div><div class="d">${c[1]}</div></div>`).join('')}</div>`;
+  html+=`<ul>${e.ul.map(x=>`<li>${x}</li>`).join('')}</ul>`;
+  if(e.src&&e.src.length) html+=`<div class="srcs">📚 ${e.src.map(s=>`<a href="${s[1]}" target="_blank">${s[0]}</a>`).join('')}</div>`;
+  detail.innerHTML=html;
+  const on=document.querySelector('.node.on'); if(on) on.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
+}
+function go(n){i=Math.max(0,Math.min(E.length-1,n));render();}
+track.querySelectorAll('.node').forEach(n=>n.onclick=()=>go(+n.dataset.k));
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(i+1);if(e.key==='ArrowLeft')go(i-1);});
+render();
+</script>
+</body>
+</html>
