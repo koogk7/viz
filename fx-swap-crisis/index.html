@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<title>환율 1500, 진짜 위기일까? — FX스왑으로 보는 외환위기</title>
+<style>
+  :root{--bg:#0f1217;--card:#1a1f29;--card2:#222936;--ink:#e8ecf3;--sub:#9aa6b8;
+    --green:#5ad19a;--amber:#f0a840;--red:#f0556a;--blue:#7cc4ff;--line:#2c3442}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--ink);line-height:1.6;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Helvetica Neue",sans-serif}
+  .wrap{max-width:680px;margin:0 auto;padding:20px 16px 64px}
+  h1{font-size:21px;margin:0 0 4px;line-height:1.35}
+  .sub{color:var(--sub);font-size:13px;margin:0 0 6px}
+  .src{color:var(--sub);font-size:11px;opacity:.7;margin:0 0 20px}
+  .lead{background:var(--card);border-left:3px solid var(--blue);border-radius:0 10px 10px 0;
+    padding:14px 16px;font-size:15px;margin:0 0 22px}
+  .lead b{color:var(--blue)}
+  h2{font-size:15px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;
+    margin:26px 0 10px;font-weight:700}
+  .markets{display:grid;grid-template-columns:1fr;gap:8px}
+  .mkt{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .mkt b{font-size:14px} .mkt .d{font-size:12.5px;color:var(--sub)}
+  .mkt.key{border-color:var(--amber)}
+  .mkt.key b{color:var(--amber)}
+
+  /* 2축 판별기 */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:8px}
+  .togrow{display:flex;align-items:center;gap:10px;margin:12px 0}
+  .togrow .lab{font-size:13px;width:96px;flex:0 0 96px;color:var(--sub)}
+  .seg{display:flex;flex:1;gap:6px}
+  .seg button{flex:1;padding:9px 4px;font-size:12.5px;font-weight:600;border-radius:9px;
+    background:var(--card2);border:1px solid var(--line);color:var(--sub);cursor:pointer;transition:.12s}
+  .seg button.on{color:#0f1217}
+  .seg.rate button.on{background:var(--blue);border-color:var(--blue)}
+  .seg.swap button.on{background:var(--amber);border-color:var(--amber)}
+  .verdict{margin-top:16px;border-radius:12px;padding:16px;text-align:center;transition:.15s}
+  .verdict .tag{font-size:12px;letter-spacing:1px;font-weight:700;opacity:.85}
+  .verdict .big{font-size:21px;font-weight:800;margin:6px 0 4px}
+  .verdict .ex{font-size:13.5px;line-height:1.5}
+  .gauge{height:12px;border-radius:6px;margin:14px 0 4px;
+    background:linear-gradient(90deg,var(--green) 0%,var(--amber) 55%,var(--red) 100%);position:relative}
+  .gauge .needle{position:absolute;top:-5px;width:3px;height:22px;background:#fff;border-radius:2px;
+    transition:left .25s;box-shadow:0 0 4px rgba(0,0,0,.6)}
+  .gauge-lab{display:flex;justify-content:space-between;font-size:11px;color:var(--sub)}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--sub);font-weight:600}
+  .hist td:first-child{color:var(--red);font-weight:700;white-space:nowrap}
+  .note{background:#231e15;border:1px solid #4a3a1c;border-radius:10px;padding:11px 13px;
+    font-size:12px;color:#d9c89a;margin-top:26px}
+  .foot{color:var(--sub);font-size:11.5px;margin-top:18px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>환율 1500, 진짜 위기일까?</h1>
+  <p class="sub">FX스왑으로 보는 "비싼 것"과 "달러가 없는 것"의 차이</p>
+  <p class="src">출처: 월가아재 영상 정리 · 개념 프레임 (구체 수치는 정성적 표현)</p>
+
+  <div class="lead">
+    환율 숫자가 <b>비싼 것</b>과 달러가 <b>없는 것</b>은 완전히 다른 사건이다.<br>
+    진짜 위기 신호는 환율 숫자가 아니라 — <b>달러 수혈망(FX스왑 시장)이 열려 있느냐</b>.
+  </div>
+
+  <h2>원달러는 세 시장에서 움직인다</h2>
+  <div class="markets">
+    <div class="mkt"><b>① 현물환</b> <span class="d">— 지금 당장 원↔달러 교환. 뉴스에 뜨는 "환율 1500"이 여기.</span></div>
+    <div class="mkt key"><b>② FX스왑 ★</b> <span class="d">— 달러를 빌려오고 갚는 *조달* 시장. 여기 비용(스왑포인트)이 진짜 위기 경보계.</span></div>
+    <div class="mkt"><b>③ NDF</b> <span class="d">— 역외 차액결제선물환. 해외에서 보는 원화 베팅.</span></div>
+  </div>
+
+  <h2>직접 만져보기 — 환율 × FX스왑</h2>
+  <div class="panel">
+    <div class="togrow">
+      <span class="lab">환율 수준</span>
+      <div class="seg rate" id="segRate">
+        <button data-v="0">보통</button>
+        <button data-v="1" class="on">높음(1500)</button>
+        <button data-v="2">초고</button>
+      </div>
+    </div>
+    <div class="togrow">
+      <span class="lab">FX스왑<br>(달러 조달)</span>
+      <div class="seg swap" id="segSwap">
+        <button data-v="0" class="on">원활</button>
+        <button data-v="1">빠듯</button>
+        <button data-v="2">경색</button>
+      </div>
+    </div>
+
+    <div class="gauge"><div class="needle" id="needle" style="left:8%"></div></div>
+    <div class="gauge-lab"><span>정상</span><span>주의</span><span>위기</span></div>
+
+    <div class="verdict" id="verdict">
+      <div class="tag" id="vtag"></div>
+      <div class="big" id="vbig"></div>
+      <div class="ex" id="vex"></div>
+    </div>
+  </div>
+
+  <h2>역사가 말하는 것 — 위기 = 스왑 경색</h2>
+  <table class="hist">
+    <tr><th>시점</th><th>무슨 일</th></tr>
+    <tr><td>1997</td><td>단기 달러 롤오버가 끊김 = 수혈망 붕괴. 고환율이 아니라 <b>달러 자체가 없던</b> 사건.</td></tr>
+    <tr><td>2008</td><td>글로벌 신용경색 → FX스왑 달러 조달비용 폭발.</td></tr>
+    <tr><td>2020</td><td>코로나 패닉 → 달러 사재기, 스왑 경색 → 한미 통화스왑으로 진화.</td></tr>
+  </table>
+
+  <div class="note">⚠️ 이 자료는 영상(무자막→음성인식) 정리본의 <b>개념 프레임</b>입니다. 스왑포인트 정확 수치·특정 지표(WGBI 등)는 단정하지 않았습니다. 판단의 틀로만 보세요.</div>
+  <p class="foot">환율을 올려도 게이지는 거의 안 움직이고, FX스왑이 경색되면 위기로 치솟는다 — 그게 핵심.</p>
+</div>
+
+<script>
+  var rate=1, swap=0;
+  // 위기 점수: FX스왑이 지배(가중 큼), 환율은 보조
+  function render(){
+    var score = swap*40 + rate*6; // 0~92, 스왑이 위기를 좌우
+    var pos = Math.min(96, 6 + score);
+    document.getElementById('needle').style.left = pos+'%';
+    var v=document.getElementById('verdict'), tag=document.getElementById('vtag'),
+        big=document.getElementById('vbig'), ex=document.getElementById('vex');
+    var tier, col, t, b, e;
+    if(swap===0){ // 수혈망 정상
+      tier='normal'; col='var(--green)';
+      t='위기 아님';
+      b = rate>=2 ? '비쌀 뿐, 위기는 아니다' : (rate===1?'그냥 환율이 비쌀 뿐':'평온');
+      e = '달러는 계속 들어온다. 환율이 높아도 *조달*이 되면 그건 가격 문제지 위기가 아니다.';
+    } else if(swap===1){ // 빠듯
+      tier='warn'; col='var(--amber)';
+      t='주의 — 공포 프리미엄';
+      b='경보계가 들썩인다';
+      e='달러 조달비용이 평소보다 벌어지는 중. 아직 위기는 아니지만 FX스왑을 주시할 구간.';
+    } else { // 경색
+      tier='crisis'; col='var(--red)';
+      t='진짜 위기 신호';
+      b='달러 수혈망이 막혔다';
+      e='환율 숫자와 무관하게, 달러를 빌릴 길이 끊기면 이게 1997·2008·2020의 그 사건이다.';
+    }
+    v.style.background = 'color-mix(in srgb,'+col+' 16%, var(--card2))';
+    v.style.border = '1px solid '+col;
+    tag.textContent = t; tag.style.color=col;
+    big.textContent = b; big.style.color=col;
+    ex.textContent = e;
+  }
+  function bind(id, set){
+    var seg=document.getElementById(id);
+    seg.querySelectorAll('button').forEach(function(btn){
+      btn.onclick=function(){
+        seg.querySelectorAll('button').forEach(function(x){x.classList.remove('on')});
+        btn.classList.add('on'); set(+btn.dataset.v); render();
+      };
+    });
+  }
+  bind('segRate', function(v){rate=v}); bind('segSwap', function(v){swap=v});
+  render();
+</script>
+</body>
+</html>
