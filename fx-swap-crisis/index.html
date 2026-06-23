@@ -26,6 +26,31 @@
   .mkt.key{border-color:var(--amber)}
   .mkt.key b{color:var(--amber)}
 
+  /* 3시장 구조도 */
+  .flow{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 14px}
+  .src-node{text-align:center;background:var(--card2);border:1px solid var(--line);border-radius:10px;
+    padding:10px;font-size:13px;color:var(--sub);max-width:230px;margin:0 auto}
+  .src-node b{color:var(--ink)}
+  .branch{text-align:center;color:var(--sub);font-size:11px;margin:8px 0}
+  .cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  @media(max-width:520px){.cols{grid-template-columns:1fr;gap:10px}}
+  .col{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:11px 9px;text-align:center}
+  .col.key{border-color:var(--amber);background:color-mix(in srgb,var(--amber) 9%,var(--card2))}
+  .col .ic{font-size:13px;color:var(--sub)}
+  .col .nm{font-weight:800;font-size:15px;margin:1px 0 6px}
+  .col.key .nm{color:var(--amber)}
+  .col .role{font-size:12.5px;line-height:1.45;min-height:34px}
+  .badge{display:inline-block;font-size:10.5px;font-weight:700;border-radius:11px;padding:3px 9px;margin:7px 0 6px}
+  .badge.spot{background:rgba(124,196,255,.16);color:var(--blue)}
+  .badge.swapb{background:rgba(240,168,64,.18);color:var(--amber)}
+  .badge.ndf{background:rgba(154,166,184,.16);color:var(--sub)}
+  .col .cap{font-size:11.5px;color:var(--sub);line-height:1.5}
+  .col .cap b{color:var(--ink)}
+  .col.key .cap b{color:var(--amber)}
+  .pipe{margin-top:12px;background:#231e15;border:1px solid #4a3a1c;border-radius:10px;
+    padding:10px 12px;font-size:12.5px;color:#e7d6a8;text-align:center}
+  .pipe b{color:var(--amber)}
+
   /* 2축 판별기 */
   .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:8px}
   .togrow{display:flex;align-items:center;gap:10px;margin:12px 0}
@@ -67,10 +92,32 @@
   </div>
 
   <h2>원달러는 세 시장에서 움직인다</h2>
-  <div class="markets">
-    <div class="mkt"><b>① 현물환</b> <span class="d">— 지금 당장 원↔달러 교환. 뉴스에 뜨는 "환율 1500"이 여기.</span></div>
-    <div class="mkt key"><b>② FX스왑 ★</b> <span class="d">— 달러를 빌려오고 갚는 *조달* 시장. 여기 비용(스왑포인트)이 진짜 위기 경보계.</span></div>
-    <div class="mkt"><b>③ NDF</b> <span class="d">— 역외 차액결제선물환. 해외에서 보는 원화 베팅.</span></div>
+
+  <!-- 구조도 -->
+  <div class="flow">
+    <div class="src-node">🇰🇷 원화는 있는데<br><b>달러가 필요하다</b></div>
+    <div class="branch">▼ 세 가지 길 ▼</div>
+    <div class="cols">
+      <div class="col">
+        <div class="ic">①</div><div class="nm">현물환</div>
+        <div class="role">지금 당장<br>원 ↔ 달러 맞교환</div>
+        <div class="badge spot">가격 = 환율</div>
+        <div class="cap">"환율 1500"이 여기. <b>비싼가</b>의 문제.</div>
+      </div>
+      <div class="col key">
+        <div class="ic">②</div><div class="nm">FX스왑 ★</div>
+        <div class="role">달러를 <b>빌려오고</b><br>만기에 되갚기</div>
+        <div class="badge swapb">비용 = 스왑포인트</div>
+        <div class="cap"><b>달러 수혈망</b>. 이 파이프가 막히면 = <b>있나 없나</b>의 문제 = 위기.</div>
+      </div>
+      <div class="col">
+        <div class="ic">③</div><div class="nm">NDF</div>
+        <div class="role">역외에서<br>차액만 정산</div>
+        <div class="badge ndf">실물 X · 베팅</div>
+        <div class="cap">해외가 보는 원화 방향성. 달러가 실제로 오가진 않음.</div>
+      </div>
+    </div>
+    <div class="pipe">💉 달러가 *실제로* 들어오는 통로는 <b>②FX스왑</b> 하나. → 그래서 위기 경보계도 여기.</div>
   </div>
 
   <h2>직접 만져보기 — 환율 × FX스왑</h2>
