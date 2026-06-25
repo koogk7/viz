@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<title>중국어 어순 배열 퀴즈 — 순서배치 10문제</title>
+<style>
+  :root{--bg:#0f1217;--card:#1a1f29;--card2:#222936;--ink:#e8ecf3;--sub:#9aa6b8;
+    --accent:#ffb454;--green:#5ad19a;--red:#f0556a;--blue:#7cc4ff;--line:#2c3442}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+  body{margin:0;background:var(--bg);color:var(--ink);line-height:1.55;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","PingFang SC","Helvetica Neue",sans-serif}
+  .wrap{max-width:620px;margin:0 auto;padding:18px 14px 70px}
+  h1{font-size:18px;margin:0 0 2px}
+  .sub{color:var(--sub);font-size:12.5px;margin:0 0 14px}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .bar .prog{font-size:13px;color:var(--sub)}
+  .bar .score{margin-left:auto;font-size:13px;color:var(--green);font-weight:700}
+  .type{display:inline-block;font-size:11px;font-weight:700;color:var(--accent);
+    background:rgba(255,180,84,.14);border-radius:11px;padding:3px 10px;margin-bottom:10px}
+  .ko{background:var(--card);border-left:3px solid var(--blue);border-radius:0 10px 10px 0;
+    padding:12px 14px;font-size:15px;margin-bottom:6px}
+  .hintw{font-size:12px;color:var(--sub);margin:4px 0 14px}
+  .help{font-size:11.5px;color:var(--sub);text-align:center;margin-bottom:8px}
+  .tray{display:flex;flex-wrap:wrap;gap:9px;min-height:58px;background:var(--card2);
+    border:1.5px dashed var(--line);border-radius:12px;padding:12px;align-content:flex-start}
+  .chip{font-size:20px;font-weight:600;background:#2d3647;border:1px solid #3c485c;border-radius:10px;
+    padding:9px 14px;cursor:grab;touch-action:none;transition:transform .05s,background .12s}
+  .chip.sel{background:var(--accent);color:#1a1208;border-color:var(--accent)}
+  .chip.drag{opacity:.5}
+  .chip.correct{background:var(--green);color:#0c1a13;border-color:var(--green)}
+  .chip.wrong{background:#3a2230;color:#ff9bb0;border-color:#6b3247}
+  .btns{display:flex;gap:8px;margin-top:14px}
+  .btns button{flex:1;padding:12px;font-size:14px;font-weight:700;border-radius:11px;cursor:pointer;border:none}
+  .check{background:var(--accent);color:#1a1208}
+  .reset{background:var(--card2);color:var(--sub);border:1px solid var(--line)!important}
+  .nav{background:var(--card2);color:var(--ink);border:1px solid var(--line)!important}
+  .answer{margin-top:14px;border-radius:12px;padding:13px 14px;display:none}
+  .answer.show{display:block}
+  .answer.ok{background:color-mix(in srgb,var(--green) 13%,var(--card2));border:1px solid var(--green)}
+  .answer.no{background:color-mix(in srgb,var(--red) 13%,var(--card2));border:1px solid var(--red)}
+  .answer .a{font-size:19px;font-weight:700;margin-bottom:4px}
+  .answer .py{font-size:13px;color:var(--blue)}
+  .answer .mn{font-size:13.5px;color:var(--sub);margin-top:3px}
+  .answer .pt{font-size:12.5px;color:var(--accent);margin-top:8px;border-top:1px dashed var(--line);padding-top:8px}
+  .done{text-align:center;padding:40px 10px}
+  .done .big{font-size:42px;font-weight:800;color:var(--green)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🀄 중국어 어순 배열 퀴즈</h1>
+  <p class="sub">네 작문 실수 4유형(연동문·타동사목적어·시량보어·才就/了)으로 만든 10문제</p>
+
+  <div id="quiz">
+    <div class="bar"><span class="prog" id="prog"></span><span class="score" id="score">맞춤 0</span></div>
+    <div class="type" id="type"></div>
+    <div class="ko" id="ko"></div>
+    <div class="hintw" id="hintw"></div>
+    <div class="help">칩을 <b>드래그</b>해서 순서 맞추기 · 또는 두 칩을 <b>탭</b>해서 자리 바꾸기</div>
+    <div class="tray" id="tray"></div>
+    <div class="btns">
+      <button class="reset" onclick="shuffleCur()">섞기</button>
+      <button class="check" id="checkBtn" onclick="check()">확인</button>
+    </div>
+    <div class="answer" id="answer">
+      <div class="a" id="aSent"></div>
+      <div class="py" id="aPy"></div>
+      <div class="mn" id="aMn"></div>
+      <div class="pt" id="aPt"></div>
+      <div class="btns"><button class="nav" id="nextBtn" onclick="next()">다음 문제 →</button></div>
+    </div>
+  </div>
+
+  <div class="done" id="done" style="display:none">
+    <div class="big" id="finalScore"></div>
+    <p id="finalMsg" style="color:var(--sub)"></p>
+    <div class="btns"><button class="check" onclick="restart()">다시 풀기</button></div>
+  </div>
+</div>
+
+<script>
+const Q = [
+ {ko:"나는 동료와 훠궈를 먹으러 갔다.", ans:["我","跟同事","去吃","火锅"], py:"Wǒ gēn tóngshì qù chī huǒguō.", type:"연동문 어순", pt:"먼저 하는 동작(去)이 앞 — 가서→먹다. 吃去 ✗"},
+ {ko:"나는 동료를 동기부여하고 싶다.", ans:["我","想","激励","我的同事"], py:"Wǒ xiǎng jīlì wǒ de tóngshì.", type:"타동사 목적어", pt:"激励는 타동사 → 목적어 직행. 让…激励 ✗"},
+ {ko:"나는 매일 30분 일찍 일어난다.", ans:["我","每天","早起","30分钟"], py:"Wǒ měitiān zǎoqǐ 30 fēnzhōng.", type:"시량보어 위치", pt:"시량(30分钟)은 동사 뒤. 30分钟早起 ✗"},
+ {ko:"아직 30분 있어야 회의가 시작해.", ans:["还有","半小时","才","开会"], py:"Hái yǒu bàn xiǎoshí cái kāihuì.", type:"才(늦음)", pt:"才는 동사 앞·늦음. 끝에 了 안 붙임"},
+ {ko:"두 정거장이면 곧 내려.", ans:["还有","两站","就","下车了"], py:"Hái yǒu liǎng zhàn jiù xiàchē le.", type:"就…了(빠름)", pt:"就는 임박, 문장 끝 了와 짝"},
+ {ko:"나는 내일부터 다시 헬스하기로 굳게 결심했다.", ans:["我","下定决心","从明天","重新","健身"], py:"Wǒ xià dìng juéxīn cóng míngtiān chóngxīn jiànshēn.", type:"결심 내용 위치", pt:"下定决心 뒤에 결심 내용. 重新=재개"},
+ {ko:"소통이 원활하지 않아 프로젝트가 지연됐다.", ans:["沟通不畅","导致","项目","延期了"], py:"Gōutōng bùchàng dǎozhì xiàngmù yánqī le.", type:"导致 인과", pt:"A导致B, 접속사 없이 인과 성립(나쁜 결과)"},
+ {ko:"우리는 줄을 너무 오래 서서 그냥 갔다.", ans:["我们","排队","排","太久","就走了"], py:"Wǒmen páiduì pái tài jiǔ jiù zǒu le.", type:"동사중복", pt:"목적어(队)가 끼면 동사 복사: 排队+排太久"},
+ {ko:"나는 양측의 이해를 명확히 정리했다.", ans:["我","厘清了","双方的","理解"], py:"Wǒ líqīng le shuāngfāng de lǐjiě.", type:"了 위치", pt:"완료 了는 동사 직후·목적어 앞"},
+ {ko:"아스날 우승 소식을 들었을 때, 눈물이 고였다.", ans:["听到阿森纳夺冠的消息时","我","热泪盈眶"], py:"Tīngdào Āsēnnà duóguàn de xiāoxī shí, wǒ rèlèi yíngkuàng.", type:"当…时 / 夺冠", pt:"우승=夺冠(한국어 섞기 X), 시간절+주어+술어"},
+ {ko:"나는 솔선수범하여 팀원을 이끌고 싶다.", ans:["我","想","以身作则","带领团队"], py:"Wǒ xiǎng yǐ shēn zuò zé dàilǐng tuánduì.", type:"성어 어순", pt:"以身作则(솔선수범)+동작. 성어는 통째로"},
+];
+
+let idx=0, score=0, order=[], sel=-1, answered=false;
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=(i*7+3)%(i+1);[a[i],a[j]]=[a[j],a[i]];}
+  // ensure not already correct
+  if(a.join('|')===Q[idx].ans.join('|')) a.reverse();
+  return a;}
+function load(){
+  answered=false; sel=-1;
+  const q=Q[idx];
+  document.getElementById('prog').textContent=`${idx+1} / ${Q.length}`;
+  document.getElementById('type').textContent=q.type;
+  document.getElementById('ko').textContent=q.ko;
+  document.getElementById('hintw').textContent='조각: '+q.ans.length+'개';
+  order=shuffle(q.ans);
+  document.getElementById('answer').className='answer';
+  document.getElementById('checkBtn').style.display='';
+  render();
+}
+function render(){
+  const tray=document.getElementById('tray'); tray.innerHTML='';
+  order.forEach((w,i)=>{
+    const c=document.createElement('div'); c.className='chip'+(sel===i?' sel':''); c.textContent=w; c.dataset.i=i;
+    if(!answered){
+      c.onclick=()=>tapChip(i);
+      c.addEventListener('pointerdown',startDrag);
+    }
+    tray.appendChild(c);
+  });
+}
+function tapChip(i){
+  if(sel===-1){sel=i;}
+  else if(sel===i){sel=-1;}
+  else {[order[sel],order[i]]=[order[i],order[sel]]; sel=-1;}
+  render();
+}
+// pointer drag reorder
+let dragI=-1, dragEl=null;
+function startDrag(e){
+  dragI=+e.currentTarget.dataset.i; dragEl=e.currentTarget; dragEl.classList.add('drag');
+  dragEl.setPointerCapture(e.pointerId);
+  dragEl.addEventListener('pointermove',moveDrag);
+  dragEl.addEventListener('pointerup',endDrag);
+}
+function moveDrag(e){
+  const el=document.elementFromPoint(e.clientX,e.clientY);
+  if(el&&el.classList.contains('chip')&&!el.classList.contains('drag')){
+    const over=+el.dataset.i;
+    if(over!==dragI){
+      const moved=order.splice(dragI,1)[0]; order.splice(over,0,moved);
+      dragI=over; sel=-1; render();
+      dragEl=document.querySelector('.chip[data-i="'+over+'"]');
+      if(dragEl){dragEl.classList.add('drag'); try{dragEl.setPointerCapture(e.pointerId);}catch(_){}
+        dragEl.addEventListener('pointermove',moveDrag); dragEl.addEventListener('pointerup',endDrag);}
+    }
+  }
+}
+function endDrag(e){ if(dragEl)dragEl.classList.remove('drag'); dragI=-1; dragEl=null; render(); }
+
+function shuffleCur(){ if(answered)return; order=shuffle(Q[idx].ans); sel=-1; render(); }
+function check(){
+  if(answered)return; answered=true;
+  const q=Q[idx], ok=order.join('|')===q.ans.join('|');
+  if(ok)score++;
+  document.getElementById('score').textContent='맞춤 '+score;
+  // color chips
+  document.querySelectorAll('#tray .chip').forEach((c,i)=>{
+    c.classList.remove('sel');
+    c.classList.add(order[i]===q.ans[i]?'correct':'wrong');
+    c.onclick=null;
+  });
+  const a=document.getElementById('answer');
+  a.className='answer show '+(ok?'ok':'no');
+  document.getElementById('aSent').textContent=(ok?'✅ 정답! ':'정답: ')+q.ans.join('');
+  document.getElementById('aPy').textContent=q.py;
+  document.getElementById('aMn').textContent=q.ko;
+  document.getElementById('aPt').textContent='📐 '+q.pt;
+  document.getElementById('checkBtn').style.display='none';
+  document.getElementById('nextBtn').textContent = idx<Q.length-1?'다음 문제 →':'결과 보기';
+}
+function next(){ if(idx<Q.length-1){idx++; load();} else finish(); }
+function finish(){
+  document.getElementById('quiz').style.display='none';
+  const d=document.getElementById('done'); d.style.display='block';
+  document.getElementById('finalScore').textContent=score+' / '+Q.length;
+  let m; if(score>=9)m='어순 마스터 🏆'; else if(score>=6)m='틀 잡혀간다 — 틀린 유형만 다시!'; else m='순서배치 집중 연습 구간. 한 번 더!';
+  document.getElementById('finalMsg').textContent=m;
+}
+function restart(){ idx=0;score=0; document.getElementById('done').style.display='none';
+  document.getElementById('quiz').style.display='block'; document.getElementById('score').textContent='맞춤 0'; load(); }
+load();
+</script>
+</body>
+</html>
