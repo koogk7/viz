@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
-<title>중국어 어순 배열 퀴즈 — 순서배치 10문제</title>
+<title>중국어 어순 배열 퀴즈 — 18문제</title>
 <style>
   :root{--bg:#0f1217;--card:#1a1f29;--card2:#222936;--ink:#e8ecf3;--sub:#9aa6b8;
     --accent:#ffb454;--green:#5ad19a;--red:#f0556a;--blue:#7cc4ff;--line:#2c3442}
@@ -51,7 +51,7 @@
 <body>
 <div class="wrap">
   <h1>🀄 중국어 어순 배열 퀴즈</h1>
-  <p class="sub">네 작문 실수 4유형(연동문·타동사목적어·시량보어·才就/了)으로 만든 10문제</p>
+  <p class="sub">작문 실수 유형(연동문·어순·才就·没有·수량술어문·跟~一样)으로 만든 18문제</p>
 
   <div id="quiz">
     <div class="bar"><span class="prog" id="prog"></span><span class="score" id="score">맞춤 0</span></div>
@@ -93,6 +93,14 @@ const Q = [
  {ko:"나는 양측의 이해를 명확히 정리했다.", ans:["我","厘清了","双方的","理解"], py:"Wǒ líqīng le shuāngfāng de lǐjiě.", type:"了 위치", pt:"완료 了는 동사 직후·목적어 앞"},
  {ko:"아스날 우승 소식을 들었을 때, 눈물이 고였다.", ans:["听到阿森纳夺冠的消息时","我","热泪盈眶"], py:"Tīngdào Āsēnnà duóguàn de xiāoxī shí, wǒ rèlèi yíngkuàng.", type:"当…时 / 夺冠", pt:"우승=夺冠(한국어 섞기 X), 시간절+주어+술어"},
  {ko:"나는 솔선수범하여 팀원을 이끌고 싶다.", ans:["我","想","以身作则","带领团队"], py:"Wǒ xiǎng yǐ shēn zuò zé dàilǐng tuánduì.", type:"성어 어순", pt:"以身作则(솔선수범)+동작. 성어는 통째로"},
+ // ── 신규 7문제 (2026-06-28 추가: 수량명사술어문·跟~一样·没有·说漏嘴·任何地方·提前) ──
+ {ko:"이 물건들은 총 8개다.", ans:["这些东西","一共","8个"], py:"Zhèxiē dōngxi yīgòng 8 gè.", type:"수량명사술어문", pt:"수량·날짜·가격은 是 없이 수량사가 바로 술어. 是一共 ✗ / 这个(단수)→这些(복수)"},
+ {ko:"이것들은 총합 모두 새것과 같다.", ans:["这些东西","一共","都","跟新的","一样"], py:"Zhèxiē dōngxi yīgòng dōu gēn xīn de yīyàng.", type:"一共+都+跟~一样", pt:"一共(통계)↔跟~一样(상태) 사이는 都로 연결. 都 없으면 비문"},
+ {ko:"나는 술에 취해서 상대방 입장에서 생각하지 못하고 말실수를 했다.", ans:["我","喝醉了","没有","站在对方的角度","说漏嘴了"], py:"Wǒ hē zuì le, méiyǒu zhàn zài duìfāng de jiǎodù, shuō lòu zuǐ le.", type:"没有 위치 (부정형)", pt:"没有 빠지면 의미 반전(못했다→했다). 喝醉(喝 필수) / 站在对方的角度 관용 구조"},
+ {ko:"나는 취해서 부장님 앞에서 말실수를 해버렸다.", ans:["我","喝醉了","在部长面前","说漏嘴了"], py:"Wǒ hē zuì le, zài bùzhǎng miànqián shuō lòu zuǐ le.", type:"개사구(在…面前) 위치", pt:"개사구(在部长面前)는 동사 앞. 说漏嘴=입이 미끄러지다"},
+ {ko:"어느 곳의 사람과도 연락할 수 있다.", ans:["可以","和任何地方的人","进行","联系"], py:"Kěyǐ hé rènhé dìfāng de rén jìnxíng liánxì.", type:"任何地方 + 进行+명사", pt:"地放(오타)→地方(dìfāng). 进行+명사=격식체. 구어는 可以联系任何地方的人"},
+ {ko:"연휴가 끝난 후 다시 헬스를 시작하기로 굳게 결심했다.", ans:["假期结束后","我","下定决心","重新","开始健身"], py:"Jiàqī jiéshù hòu, wǒ xià dìng juéxīn chóngxīn kāishǐ jiànshēn.", type:"결심+重新 위치", pt:"假期=연휴(年息 ✗). 重新(재개·끊기고 다시)은 동사 앞. 下定决心 뒤에 결심 내용"},
+ {ko:"그는 30분 앞당겨 출발했다.", ans:["他","提前","30分钟","出发"], py:"Tā tíqián 30 fēnzhōng chūfā.", type:"提前+시량+동사", pt:"提前[시량][동사] — 기준보다 앞당김(상대적). 早는 절대적으로 이른 것"},
 ];
 
 let idx=0, score=0, order=[], sel=-1, answered=false;
