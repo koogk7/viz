@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>운전자본 사이클 & 현금전환주기(CCC)</title>
+<!--
+  월가아재 입문자 멘토링 2회차 4강(재무비율) — 운전자본 3종 발생 과정 시각화.
+  매입채무·재고자산·매출채권이 시간축에서 어떻게 발생하고, 현금이 며칠 묶이는지(CCC)를
+  슬라이더로 만져본다. self-contained(외부 CDN 0). 모델: CCC = DIO + DSO - DPO.
+-->
+<style>
+  :root{--bg:#0f1419;--panel:#1a2029;--line:#2a323d;--txt:#e6e9ee;--muted:#8b97a7;
+    --inv:#5b8def;   /* 재고자산 */
+    --ar:#f0b429;    /* 매출채권 */
+    --ap:#a06cd5;    /* 매입채무 */
+    --ccc:#4dd0a7;   /* 현금전환주기 */
+    --bad:#e05c5c;--good:#27ae60;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);padding:22px;max-width:920px;margin:0 auto;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif;line-height:1.5}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}
+  .panel h2{font-size:12px;color:var(--muted);margin:0 0 14px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+
+  /* 흐름 단계 */
+  .flow{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap}
+  .step{flex:1;min-width:120px;background:#11161d;border:1px solid var(--line);border-radius:10px;padding:11px 12px}
+  .step .t{font-size:12px;color:var(--muted);margin-bottom:3px}
+  .step .d{font-size:13px;font-weight:600}
+  .step .ev{font-size:11px;margin-top:6px;font-variant-numeric:tabular-nums}
+  .arrow{display:flex;align-items:center;color:var(--muted);font-size:18px}
+  @media(max-width:680px){.arrow{display:none}.step{min-width:0;flex-basis:47%}}
+
+  /* 슬라이더 */
+  .ctrls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+  @media(max-width:680px){.ctrls{grid-template-columns:1fr}}
+  .ctrl label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+  .ctrl label .nm{display:flex;align-items:center;gap:6px}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+  .ctrl label b{font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;height:4px}
+  #dio{accent-color:var(--inv)} #dso{accent-color:var(--ar)} #dpo{accent-color:var(--ap)}
+
+  /* 타임라인 */
+  .tl-wrap{position:relative;margin:8px 0 4px}
+  .track{position:relative;height:30px;margin-bottom:8px}
+  .track .lbl{position:absolute;left:0;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted);width:74px}
+  .track .lane{position:absolute;left:80px;right:0;top:0;bottom:0}
+  .seg{position:absolute;top:4px;height:22px;border-radius:4px;font-size:11px;color:#0f1419;
+    font-weight:700;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;
+    transition:left .15s,width .15s;overflow:hidden;white-space:nowrap}
+  .axis{position:absolute;left:80px;right:0;height:1px;background:var(--line)}
+  .tick{position:absolute;top:0;font-size:10px;color:var(--muted);transform:translateX(-50%);padding-top:4px}
+  .tick:before{content:'';position:absolute;top:-4px;left:50%;width:1px;height:4px;background:var(--line)}
+  .mark{position:absolute;top:-20px;font-size:15px;transform:translateX(-50%);transition:left .15s}
+  .ccc-band{position:absolute;top:0;bottom:0;background:rgba(77,208,167,.13);border-left:2px dashed var(--ccc);
+    border-right:2px dashed var(--ccc);transition:left .15s,width .15s}
+
+  /* KPI */
+  .kpi{display:flex;gap:10px;flex-wrap:wrap}
+  .card{flex:1;min-width:130px;background:#11161d;border:1px solid var(--line);border-radius:10px;padding:13px 15px}
+  .card .v{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+  .card .l{font-size:11px;color:var(--muted);margin-top:2px}
+  .card.hl{border-color:var(--ccc)}
+  .card.hl.neg{border-color:var(--good)} .card.hl.pos{border-color:var(--bad)}
+  .msg{font-size:13px;margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+  .presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+  .pchip{background:#11161d;border:1px solid var(--line);color:var(--txt);border-radius:20px;
+    padding:6px 13px;font-size:12px;cursor:pointer}
+  .pchip:hover{border-color:var(--ccc)}
+  .eq{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;background:#11161d;
+    border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:6px;font-variant-numeric:tabular-nums}
+  .note{font-size:12px;color:var(--muted);margin-top:14px}
+</style>
+</head>
+<body>
+  <h1>운전자본 사이클 &amp; 현금전환주기(CCC)</h1>
+  <p class="sub">중간재 기업이 <b>원자재를 납품받아 → 가공·재고 → 대기업 납품 → 현금 회수</b>하는 동안
+    현금이 며칠 묶이는가. 슬라이더를 움직이면 실시간 재계산.</p>
+
+  <!-- 사이클 흐름 -->
+  <div class="panel">
+    <h2>① 운전자본 3종은 언제 발생하나 — 사이클 흐름</h2>
+    <div class="flow">
+      <div class="step">
+        <div class="t">Day 0 · 원자재 납품받음</div>
+        <div class="d">재고 입고</div>
+        <div class="ev"><span style="color:var(--ap)">＋매입채무</span> (아직 안 갚음)<br><span style="color:var(--inv)">＋재고자산</span></div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="step">
+        <div class="t">Day <span id="f-dpo">40</span> · 대금 지급</div>
+        <div class="d">💸 현금 유출</div>
+        <div class="ev"><span style="color:var(--ap)">－매입채무</span> 소멸</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="step">
+        <div class="t">Day <span id="f-dio">60</span> · 대기업 납품</div>
+        <div class="d">재고 → 매출</div>
+        <div class="ev"><span style="color:var(--inv)">－재고자산</span><br><span style="color:var(--ar)">＋매출채권</span> (아직 못 받음)</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="step">
+        <div class="t">Day <span id="f-end">110</span> · 대금 회수</div>
+        <div class="d">💰 현금 유입</div>
+        <div class="ev"><span style="color:var(--ar)">－매출채권</span> 소멸</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 슬라이더 -->
+  <div class="panel">
+    <h2>② 회전일수 조절</h2>
+    <div class="ctrls">
+      <div class="ctrl"><label><span class="nm"><i class="dot" style="background:var(--inv)"></i>재고자산 회전일수 (DIO)</span><b id="dioV">60</b></label>
+        <input type="range" id="dio" min="0" max="120" value="60" step="1"></div>
+      <div class="ctrl"><label><span class="nm"><i class="dot" style="background:var(--ar)"></i>매출채권 회전일수 (DSO)</span><b id="dsoV">50</b></label>
+        <input type="range" id="dso" min="0" max="120" value="50" step="1"></div>
+      <div class="ctrl"><label><span class="nm"><i class="dot" style="background:var(--ap)"></i>매입채무 회전일수 (DPO)</span><b id="dpoV">40</b></label>
+        <input type="range" id="dpo" min="0" max="180" value="40" step="1"></div>
+    </div>
+    <div class="presets">
+      <span class="pchip" data-p="60,50,40">중간재 기업 (을)</span>
+      <span class="pchip" data-p="45,40,30">일반 제조업</span>
+      <span class="pchip" data-p="30,10,80">대기업 갑 (CCC 음수)</span>
+      <span class="pchip" data-p="20,5,60">코스트코·인튜이트형</span>
+    </div>
+  </div>
+
+  <!-- 타임라인 -->
+  <div class="panel">
+    <h2>③ 시간축에서 본 운전자본 — 현금이 묶이는 구간</h2>
+    <div class="tl-wrap" id="tl">
+      <div class="track">
+        <span class="lbl" style="color:var(--inv)">재고자산</span>
+        <div class="lane"><div class="seg" id="seg-inv" style="background:var(--inv)"></div></div>
+      </div>
+      <div class="track">
+        <span class="lbl" style="color:var(--ar)">매출채권</span>
+        <div class="lane"><div class="seg" id="seg-ar" style="background:var(--ar)"></div></div>
+      </div>
+      <div class="track">
+        <span class="lbl" style="color:var(--ap)">매입채무</span>
+        <div class="lane">
+          <div class="seg" id="seg-ap" style="background:var(--ap)"></div>
+          <div class="ccc-band" id="ccc-band"></div>
+          <div class="mark" id="mk-out" title="현금 유출">💸</div>
+          <div class="mark" id="mk-in" title="현금 유입">💰</div>
+        </div>
+      </div>
+      <div class="track" style="height:18px">
+        <div class="axis" style="top:0"></div>
+        <div class="lane"><div id="ticks"></div></div>
+      </div>
+    </div>
+    <div class="note">💸 대금 지급(현금 유출) ~ 💰 대금 회수(현금 유입) 사이의 초록 띠 =
+      <b style="color:var(--ccc)">현금전환주기(CCC)</b> = 회사 돈으로 메워야 하는 기간.</div>
+  </div>
+
+  <!-- 결과 -->
+  <div class="panel">
+    <h2>④ 현금전환주기 (Cash Conversion Cycle)</h2>
+    <div class="kpi">
+      <div class="card"><div class="v" style="color:var(--inv)" id="o-dio">60</div><div class="l">재고 보유 (DIO)</div></div>
+      <div class="card"><div class="v" style="color:var(--ar)" id="o-dso">50</div><div class="l">＋ 매출채권 회수 (DSO)</div></div>
+      <div class="card"><div class="v" style="color:var(--ap)" id="o-dpo">40</div><div class="l">－ 매입채무 지급 (DPO)</div></div>
+      <div class="card hl" id="cccCard"><div class="v" id="o-ccc">70</div><div class="l">＝ 현금전환주기 (일)</div></div>
+    </div>
+    <div class="eq" id="eq">CCC = 60 + 50 − 40 = <b>70일</b></div>
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <p class="note">DIO=Days Inventory Outstanding · DSO=Days Sales Outstanding · DPO=Days Payable Outstanding.
+    회전일수 = 365 ÷ 회전율. CCC가 음수면 <b style="color:var(--good)">납품처에서 돈을 먼저 받고 나중에 갚는 '갑'</b>의 위치다.</p>
+
+<script>
+  const $ = id => document.getElementById(id);
+  ['dio','dso','dpo'].forEach(i => $(i).addEventListener('input', compute));
+  document.querySelectorAll('.pchip').forEach(c => c.addEventListener('click', () => {
+    const [a,b,d] = c.dataset.p.split(',').map(Number);
+    $('dio').value=a; $('dso').value=b; $('dpo').value=d; compute();
+  }));
+
+  function compute(){
+    const DIO = +$('dio').value, DSO = +$('dso').value, DPO = +$('dpo').value;
+    $('dioV').textContent=DIO; $('dsoV').textContent=DSO; $('dpoV').textContent=DPO;
+
+    // ===== MODEL =====
+    const opCycle = DIO + DSO;          // 영업주기: 입고 → 현금회수
+    const CCC = DIO + DSO - DPO;        // 현금전환주기
+    // =================
+
+    // 흐름 단계 날짜
+    $('f-dpo').textContent = DPO;
+    $('f-dio').textContent = DIO;
+    $('f-end').textContent = opCycle;
+
+    // KPI
+    $('o-dio').textContent=DIO; $('o-dso').textContent=DSO; $('o-dpo').textContent=DPO;
+    $('o-ccc').textContent = (CCC>=0?'+':'') + CCC;
+    $('eq').innerHTML = `CCC = ${DIO} + ${DSO} − ${DPO} = <b>${CCC}일</b>`;
+
+    const card = $('cccCard');
+    card.classList.toggle('neg', CCC < 0);
+    card.classList.toggle('pos', CCC >= 0);
+    $('o-ccc').style.color = CCC < 0 ? 'var(--good)' : (CCC>60?'var(--bad)':'var(--ccc)');
+
+    if(CCC < 0){
+      $('msg').innerHTML = `🟢 <b style="color:var(--good)">CCC ${CCC}일 — '갑'의 위치.</b> 매입처에 갚기 전에 이미 판매대금이 들어온다.
+        남의 돈(매입채무)으로 운전자본을 굴리니 외부 자금이 거의 필요 없다. <b>코스트코·인튜이트</b>처럼 소비자에게 즉시 받고 공급사엔 늦게 갚는 구조.`;
+    } else if(CCC > 60){
+      $('msg').innerHTML = `🔴 <b style="color:var(--bad)">CCC ${CCC}일 — 현금이 오래 묶인다.</b> 입고 후 ${CCC}일치 운전자본을 회사 돈(또는 차입)으로 메워야 한다.
+        대기업이 매출채권 대금을 늦게 줄수록(DSO↑) 중간재 '을' 기업의 동맥경화가 심해진다.`;
+    } else {
+      $('msg').innerHTML = `🟡 <b style="color:var(--ccc)">CCC ${CCC}일.</b> 입고 후 약 ${CCC}일치 현금을 자체 부담한다.
+        DSO·DIO를 줄이고(빨리 받고 빨리 팔고) DPO를 늘리면(늦게 갚고) CCC가 짧아진다.`;
+    }
+
+    // ===== 타임라인 =====
+    const maxDay = Math.max(opCycle, DPO, 1);
+    const pct = d => (d / maxDay * 100);
+    // 재고: 0 ~ DIO
+    seg($('seg-inv'), 0, DIO, maxDay, DIO+'일');
+    // 매출채권: DIO ~ DIO+DSO
+    seg($('seg-ar'), DIO, opCycle, maxDay, DSO+'일');
+    // 매입채무(미지급 기간): 0 ~ DPO
+    seg($('seg-ap'), 0, DPO, maxDay, DPO+'일');
+    // 현금 유출/유입 마커
+    $('mk-out').style.left = pct(DPO)+'%';
+    $('mk-in').style.left  = pct(opCycle)+'%';
+    // CCC 밴드: DPO ~ opCycle (CCC<0이면 opCycle ~ DPO 방향이지만 시각상 겹치므로 min/max)
+    const lo = Math.min(DPO, opCycle), hi = Math.max(DPO, opCycle);
+    const band = $('ccc-band');
+    band.style.left = pct(lo)+'%'; band.style.width = pct(hi-lo)+'%';
+    band.style.borderLeftColor = band.style.borderRightColor = CCC<0?'var(--good)':'var(--ccc)';
+    band.style.background = CCC<0?'rgba(39,174,96,.13)':'rgba(77,208,167,.13)';
+
+    // 눈금 (0, 1/4, 1/2, 3/4, max)
+    let t='';
+    for(let k=0;k<=4;k++){const day=Math.round(maxDay*k/4);t+=`<span class="tick" style="left:${k*25}%">${day}</span>`;}
+    $('ticks').innerHTML=t;
+  }
+  function seg(el, from, to, maxDay, label){
+    const l = from/maxDay*100, w = (to-from)/maxDay*100;
+    el.style.left = l+'%'; el.style.width = w+'%';
+    el.textContent = w>9 ? label : '';
+  }
+  compute();
+</script>
+</body>
+</html>
