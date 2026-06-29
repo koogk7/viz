@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>벤포드 법칙 시뮬레이터</title>
+<style>
+  :root{--bg:#0f1419;--panel:#1a2029;--line:#2a323d;--txt:#e6e9ee;--muted:#8b97a7;
+    --a:#5b8def;--b:#f0b429;--c:#27ae60;--bad:#e05c5c;--accent:#4dd0a7;--sim:#e05c5c;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);padding:20px;max-width:860px;margin:0 auto;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif;line-height:1.5}
+  h1{font-size:19px;margin:0 0 3px}
+  .sub{color:var(--muted);font-size:12px;margin:0 0 18px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .panel h2{font-size:12px;color:var(--muted);margin:0 0 12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+  .ctrl{margin-bottom:14px}
+  .ctrl label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}
+  .ctrl label b{color:var(--accent);font-variant-numeric:tabular-nums;font-size:13px}
+  input[type=range]{width:100%;accent-color:var(--accent);height:4px;cursor:pointer}
+  .kpi{display:flex;gap:8px;flex-wrap:wrap}
+  .card{flex:1;min-width:100px;background:#11161d;border:1px solid var(--line);border-radius:10px;padding:10px 13px}
+  .card .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+  .card .l{font-size:11px;color:var(--muted);margin-top:2px}
+  .ok{color:var(--c)}
+  .hi{color:var(--accent)}
+  /* chart */
+  .chart-wrap{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+  .chart-wrap h2{font-size:12px;color:var(--muted);margin:0 0 8px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+  .chart{display:flex;align-items:flex-end;gap:6px;height:180px;position:relative;border-bottom:1px solid var(--line);padding-bottom:2px}
+  .col{flex:1;display:flex;flex-direction:column-reverse;align-items:center;height:100%;position:relative;gap:2px}
+  .bar-wrap{width:100%;flex:1;display:flex;flex-direction:column-reverse;align-items:stretch;gap:2px}
+  .bar-theory{border-radius:3px 3px 0 0;transition:height .3s;background:var(--a);opacity:.85}
+  .bar-sim{border-radius:3px 3px 0 0;transition:height .3s;background:var(--sim);opacity:.75}
+  .bar-uniform{border-radius:3px 3px 0 0;background:var(--muted);opacity:.25}
+  .col .lbl{position:absolute;bottom:-20px;font-size:11px;color:var(--muted);font-weight:600}
+  .col .pct{font-size:10px;color:var(--txt);position:absolute;top:-18px;width:100%;text-align:center;opacity:.8}
+  .legend{display:flex;gap:14px;margin-top:24px;flex-wrap:wrap}
+  .legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+  .legend-dot{width:12px;height:12px;border-radius:2px;flex-shrink:0}
+  /* btn */
+  .btn-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  button{background:var(--accent);color:#0f1419;border:none;border-radius:8px;padding:8px 18px;
+    font-size:13px;font-weight:700;cursor:pointer;transition:opacity .15s}
+  button:hover{opacity:.85}
+  button.secondary{background:var(--panel);color:var(--txt);border:1px solid var(--line)}
+  .note{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px;margin-top:4px}
+  .formula{font-family:monospace;font-size:13px;background:#11161d;border:1px solid var(--line);
+    border-radius:6px;padding:8px 12px;color:var(--b);margin:8px 0}
+</style>
+</head>
+<body>
+<h1>벤포드 법칙 시뮬레이터</h1>
+<p class="sub">자연 발생 데이터의 첫 번째 숫자 분포 — "곱셈 반복이 1을 수렴시킨다"</p>
+
+<div class="grid">
+  <div class="panel">
+    <h2>시뮬레이션 파라미터</h2>
+    <div class="ctrl">
+      <label>표본 수 (N) <b><span id="nV">2000</span>개</b></label>
+      <input type="range" id="n" min="200" max="10000" value="2000" step="200">
+    </div>
+    <div class="ctrl">
+      <label>곱셈 반복 횟수 (K) <b><span id="kV">5</span>회</b></label>
+      <input type="range" id="k" min="0" max="20" value="5" step="1">
+    </div>
+    <div class="btn-row">
+      <button id="runBtn" onclick="runSim()">시뮬레이션 실행</button>
+      <button class="secondary" onclick="clearSim()">초기화</button>
+    </div>
+    <div class="formula">P(d) = log₁₀(1 + 1/d)</div>
+    <div class="note">K=0 : 균등분포(각 11.1%) · K가 클수록 벤포드 수렴</div>
+  </div>
+  <div class="panel">
+    <h2>결과 요약</h2>
+    <div class="kpi">
+      <div class="card">
+        <div class="v hi" id="d1theory">30.1%</div>
+        <div class="l">이론: d=1</div>
+      </div>
+      <div class="card">
+        <div class="v" id="d1sim">—</div>
+        <div class="l">시뮬: d=1</div>
+      </div>
+    </div>
+    <div class="kpi" style="margin-top:8px">
+      <div class="card">
+        <div class="v ok" id="d9theory">4.6%</div>
+        <div class="l">이론: d=9</div>
+      </div>
+      <div class="card">
+        <div class="v" id="d9sim">—</div>
+        <div class="l">시뮬: d=9</div>
+      </div>
+    </div>
+    <div class="note" style="margin-top:10px" id="simMsg">← 시뮬레이션을 실행하면 이론값에 수렴합니다.</div>
+  </div>
+</div>
+
+<div class="chart-wrap">
+  <h2>앞자리 분포 비교 (1~9)</h2>
+  <div class="chart" id="chart"></div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--a)"></div>벤포드 이론값</div>
+    <div class="legend-item" id="simLeg" style="display:none"><div class="legend-dot" style="background:var(--sim)"></div>시뮬레이션 결과</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--muted);opacity:.4"></div>균등분포 (11.1%)</div>
+  </div>
+</div>
+
+<!-- 분포표 -->
+<div class="panel">
+  <h2>벤포드 법칙 이론값표</h2>
+  <div style="overflow-x:auto">
+  <table style="width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums">
+    <thead>
+      <tr style="color:var(--muted);border-bottom:1px solid var(--line)">
+        <th style="padding:6px 8px;text-align:left">첫자리 (d)</th>
+        <th style="padding:6px 8px;text-align:right">P(d) = log₁₀(1+1/d)</th>
+        <th style="padding:6px 8px;text-align:right">균등분포</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  </div>
+  <div class="note" style="margin-top:8px">
+    장부 조작 탐지: 실제 데이터의 d=1 비율이 30.1%에서 크게 벗어나면 인위적 조작 의심.
+    자연 발생 데이터(인구·주가·강 길이·물리상수 등)는 모두 이 분포를 따름.
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let simResult = null;
+
+function benford(d){ return Math.log10(1 + 1/d); }
+
+function leadingDigit(n){
+  if(n <= 0) return null;
+  while(n >= 10) n = Math.floor(n / 10);
+  while(n < 1)  n *= 10;
+  const d = Math.floor(n);
+  return (d >= 1 && d <= 9) ? d : null;
+}
+
+// Build theory distribution
+const THEORY = Array.from({length:9}, (_,i) => benford(i+1));
+
+// Build table
+(function buildTable(){
+  const tb = $('tbody');
+  for(let d=1;d<=9;d++){
+    const p = benford(d)*100;
+    const tr = document.createElement('tr');
+    tr.style.borderBottom = '1px solid var(--line)';
+    tr.innerHTML = `
+      <td style="padding:5px 8px;font-weight:${d===1?700:400};color:${d===1?'var(--accent)':'var(--txt)'}">${d}</td>
+      <td style="padding:5px 8px;text-align:right;font-weight:${d===1?700:400};color:${d===1?'var(--accent)':'var(--txt)'}">${p.toFixed(1)}%</td>
+      <td style="padding:5px 8px;text-align:right;color:var(--muted)">11.1%</td>`;
+    tb.appendChild(tr);
+  }
+})();
+
+function buildChart(simDist){
+  const MAX_HEIGHT = 160;
+  const maxVal = Math.max(...THEORY, ...(simDist||[]), 1/9) * 1.05;
+  const scale = v => Math.max(2, (v/maxVal)*MAX_HEIGHT);
+
+  let html = '';
+  for(let d=1;d<=9;d++){
+    const th = THEORY[d-1];
+    const pctTh = (th*100).toFixed(1);
+    const simH = simDist ? scale(simDist[d-1]) : 0;
+    const uniH = scale(1/9);
+
+    html += `<div class="col">
+      <div class="bar-uniform" style="height:${uniH}px;width:100%"></div>
+      <div class="bar-theory" style="height:${scale(th)}px;width:100%"></div>
+      ${simDist ? `<div class="bar-sim" style="height:${simH}px;width:100%"></div>` : ''}
+      <span class="pct">${pctTh}</span>
+      <span class="lbl">${d}</span>
+    </div>`;
+  }
+  $('chart').innerHTML = html;
+}
+
+function runSim(){
+  const N = +$('n').value;
+  const K = +$('k').value;
+
+  // Generate N random starting numbers (1~99)
+  let nums = Array.from({length:N}, () => Math.floor(Math.random()*99)+1);
+
+  // Multiply K times by random 1~9
+  for(let k=0;k<K;k++){
+    nums = nums.map(n => n * (Math.floor(Math.random()*9)+1));
+  }
+
+  // Count leading digits
+  const counts = new Array(10).fill(0);
+  for(const n of nums){
+    const d = leadingDigit(n);
+    if(d) counts[d]++;
+  }
+  const dist = Array.from({length:9}, (_,i) => counts[i+1]/N);
+  simResult = dist;
+
+  // Update KPI
+  const d1pct = (dist[0]*100).toFixed(1);
+  const d9pct = (dist[8]*100).toFixed(1);
+  $('d1sim').textContent = d1pct + '%';
+  $('d9sim').textContent = d9pct + '%';
+  $('d1sim').style.color = Math.abs(dist[0]-THEORY[0]) < 0.03 ? 'var(--c)' : 'var(--bad)';
+  $('d9sim').style.color = Math.abs(dist[8]-THEORY[8]) < 0.02 ? 'var(--c)' : 'var(--bad)';
+
+  const diff1 = ((dist[0]-THEORY[0])*100).toFixed(1);
+  const sign = diff1 >= 0 ? '+' : '';
+  $('simMsg').innerHTML = `K=${K}회 반복 후 d=1 비율: <b style="color:var(--accent)">${d1pct}%</b> (이론 30.1%, 차이 ${sign}${diff1}pp)`;
+
+  $('simLeg').style.display = 'flex';
+  buildChart(dist);
+}
+
+function clearSim(){
+  simResult = null;
+  $('d1sim').textContent = '—';
+  $('d9sim').textContent = '—';
+  $('d1sim').style.color = 'var(--txt)';
+  $('d9sim').style.color = 'var(--txt)';
+  $('simMsg').textContent = '← 시뮬레이션을 실행하면 이론값에 수렴합니다.';
+  $('simLeg').style.display = 'none';
+  buildChart(null);
+}
+
+// Slider live update
+['n','k'].forEach(id => $(id).addEventListener('input', () => {
+  $('nV').textContent = $('n').value;
+  $('kV').textContent = $('k').value;
+}));
+
+// Initial chart
+buildChart(null);
+</script>
+</body>
+</html>
