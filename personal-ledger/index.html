@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>개인 원장 — 라이프로그 소화 시각화</title>
+<style>
+/* ── Design tokens ─────────────────────────────── */
+:root {
+  --bg:       #fcfcfb;
+  --bg2:      #f4f3f0;
+  --panel:    #ffffff;
+  --line:     #e5e4de;
+  --txt:      #0b0b0b;
+  --muted:    #52514e;
+  --muted2:   #8a8980;
+  --s1:       #2a78d6;   /* blue  — YouTube */
+  --s2:       #1baf7a;   /* aqua  — 일기 */
+  --s3:       #eda100;   /* amber — Inbox */
+  --s4:       #008300;   /* green — 세션 */
+  --s5:       #9085e9;   /* violet */
+  --good:     #1baf7a;
+  --warn:     #eda100;
+  --neutral:  #8a8980;
+  --shadow:   0 1px 3px rgba(0,0,0,.08), 0 1px 8px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:     #111110;
+    --bg2:    #1a1a19;
+    --panel:  #1e1e1d;
+    --line:   #2e2e2c;
+    --txt:    #f0ede8;
+    --muted:  #c3c2b7;
+    --muted2: #7a7970;
+    --s1:     #3987e5;
+    --s2:     #199e70;
+    --s3:     #c98500;
+    --s4:     #008300;
+    --s5:     #9085e9;
+    --good:   #199e70;
+    --warn:   #c98500;
+    --neutral:#7a7970;
+    --shadow: 0 1px 3px rgba(0,0,0,.3);
+  }
+}
+
+/* ── Reset & base ──────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--txt);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+               "Pretendard", "Segoe UI", sans-serif;
+  line-height: 1.55;
+  padding: 24px 20px 48px;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+/* ── Typography ────────────────────────────────── */
+h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+.subtitle { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+.sec-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--muted); margin-bottom: 12px;
+}
+a { color: var(--s1); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { font-family: "SF Mono", "Fira Code", monospace; font-size: .85em;
+       background: var(--bg2); border-radius: 3px; padding: 1px 4px; }
+
+/* ── Panel ─────────────────────────────────────── */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+  margin-bottom: 18px;
+}
+.panel-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px;
+}
+
+/* ── KPI row ───────────────────────────────────── */
+.kpi-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+.kpi-card {
+  flex: 1; min-width: 100px;
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow);
+}
+.kpi-v { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.kpi-l { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+/* ── Toggle ────────────────────────────────────── */
+.toggle-row { display: flex; gap: 6px; }
+.toggle-btn {
+  background: var(--bg2); border: 1px solid var(--line); color: var(--muted);
+  font-size: 11px; font-weight: 600; padding: 4px 12px;
+  border-radius: 20px; cursor: pointer; transition: all .15s;
+}
+.toggle-btn.on {
+  background: var(--s1); color: #fff; border-color: var(--s1);
+}
+
+/* ── Stream chart ──────────────────────────────── */
+.bar-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 8px; border-radius: 8px; cursor: pointer;
+  transition: background .1s;
+  margin-bottom: 4px;
+}
+.bar-row:hover { background: var(--bg2); }
+.bar-lbl { width: 64px; font-size: 13px; font-weight: 500; flex-shrink: 0; }
+.bar-track {
+  flex: 1; height: 24px; background: var(--bg2);
+  border-radius: 5px; overflow: visible; position: relative;
+}
+.bar-fill {
+  height: 100%; border-radius: 5px;
+  transition: width .4s cubic-bezier(.4,0,.2,1);
+  position: relative;
+}
+.bar-fill::after {
+  content: attr(data-tip);
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  font-size: 11px; font-weight: 600; color: rgba(255,255,255,.9);
+  white-space: nowrap; pointer-events: none;
+}
+.bar-meta { width: 96px; font-size: 12px; color: var(--muted); text-align: right;
+            flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.bar-detail {
+  display: none;
+  background: var(--bg2); border-radius: 8px;
+  padding: 10px 14px; margin: 0 8px 8px 72px;
+  font-size: 12px; color: var(--muted); line-height: 1.6;
+  border-left: 3px solid;
+}
+.bar-detail.open { display: block; }
+
+/* ── Funnel ────────────────────────────────────── */
+.funnel-wrap { display: flex; flex-direction: column; align-items: stretch; }
+.f-stage { cursor: pointer; margin-bottom: 2px; }
+.f-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 0; min-height: 44px;
+}
+.f-label { width: 88px; font-size: 13px; font-weight: 500; text-align: right;
+           flex-shrink: 0; padding-right: 10px; }
+.f-bar-wrap {
+  flex: 1; position: relative; height: 36px;
+  display: flex; align-items: center;
+}
+.f-bar {
+  height: 36px; border-radius: 6px;
+  display: flex; align-items: center; padding: 0 10px;
+  font-size: 13px; font-weight: 700; color: rgba(255,255,255,.95);
+  font-variant-numeric: tabular-nums;
+  transition: all .3s cubic-bezier(.4,0,.2,1);
+  position: relative; white-space: nowrap; min-width: 44px;
+  justify-content: center;
+}
+.f-bar:hover { filter: brightness(1.1); }
+.f-meta { width: 110px; font-size: 11px; color: var(--muted); flex-shrink: 0;
+          font-variant-numeric: tabular-nums; padding-left: 8px; }
+.f-detail {
+  display: none;
+  background: var(--bg2); border-radius: 8px;
+  padding: 10px 14px; margin: 0 0 8px 98px;
+  font-size: 12px; color: var(--muted); line-height: 1.65;
+  border-left: 3px solid;
+}
+.f-detail.open { display: block; }
+.f-connector {
+  text-align: left; padding-left: 109px;
+  color: var(--muted2); font-size: 13px; line-height: 1;
+  margin: 1px 0;
+}
+.f-drop {
+  font-size: 11px; color: var(--warn); margin-left: 4px;
+}
+
+/* ── Concept diagram ───────────────────────────── */
+.concept-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+@media (max-width: 560px) { .concept-grid { grid-template-columns: 1fr; } }
+.c-card {
+  background: var(--bg2); border: 1px solid var(--line);
+  border-radius: 10px; padding: 14px 16px;
+}
+.c-chip {
+  display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 12px; margin-bottom: 8px; letter-spacing: .03em;
+}
+.chip-consumed { background: rgba(42,120,214,.15); color: var(--s1); }
+.chip-curated  { background: rgba(237,161,0,.15);  color: var(--s3); }
+.c-card h3 { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.c-card p  { font-size: 12px; color: var(--muted); line-height: 1.6; }
+.c-card .eg {
+  margin-top: 8px; font-size: 11px; color: var(--muted2);
+  border-top: 1px solid var(--line); padding-top: 8px;
+}
+.timeline { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.tl-row   { display: flex; align-items: center; gap: 8px; }
+.tl-dot   { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.tl-line  { flex: 1; height: 1px; background: var(--line); }
+.tl-label { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.tl-new   { font-size: 11px; color: var(--good); font-weight: 600; white-space: nowrap; }
+
+/* ── Footer ────────────────────────────────────── */
+.footer { font-size: 11px; color: var(--muted2); text-align: center; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<h1>개인 원장 — 라이프로그 소화 시각화</h1>
+<p class="subtitle">
+  라이프로그를 append-only 이벤트 원장으로 다루기 ·
+  <a href="https://koogk7.github.io/personal-ledger/">블로그 원문</a> ·
+  2026-07-05 기준 스냅샷
+</p>
+
+<!-- ── KPI ─────────────────────────────────────── -->
+<div class="kpi-row">
+  <div class="kpi-card">
+    <div class="kpi-v">2,649</div>
+    <div class="kpi-l">전체 이벤트</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-v">4</div>
+    <div class="kpi-l">활성 스트림</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-v" style="color:var(--s3)">529h</div>
+    <div class="kpi-l">YouTube 누적 시청</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-v" style="color:var(--good)">1</div>
+    <div class="kpi-l">published ← 이 글</div>
+  </div>
+</div>
+
+<!-- ── 스트림 분포 ──────────────────────────────── -->
+<div class="panel">
+  <div class="panel-head">
+    <div class="sec-label" style="margin:0">스트림 분포 — 탭하면 상세</div>
+    <div class="toggle-row">
+      <button class="toggle-btn on" id="btnN" onclick="setMode('n')">건수</button>
+      <button class="toggle-btn"   id="btnP" onclick="setMode('p')">비율</button>
+    </div>
+  </div>
+  <div id="streamChart"></div>
+</div>
+
+<!-- ── 소화 깔때기 ──────────────────────────────── -->
+<div class="panel">
+  <div class="sec-label">소화 깔때기 — 단계별 전환 · 탭하면 상세</div>
+  <div class="funnel-wrap" id="funnel"></div>
+</div>
+
+<!-- ── 개념 다이어그램 ─────────────────────────── -->
+<div class="panel">
+  <div class="sec-label">라이프로그 → 회계 개념 대응</div>
+  <div class="concept-grid">
+
+    <div class="c-card">
+      <span class="c-chip chip-consumed">consumed · 체결(executed)</span>
+      <h3>소비 스트림</h3>
+      <p>시간·주의력을 실제로 지출한 기록. 지출 즉시 원장에 기입, 상태는 <code>consumed</code>.</p>
+      <div class="eg">📺 YouTube 시청 · 📝 일기 · 💬 클로드 세션</div>
+    </div>
+
+    <div class="c-card">
+      <span class="c-chip chip-curated">curated · 호가(watchlist)</span>
+      <h3>큐레이션 스트림</h3>
+      <p>읽을 후보로 인박스에 쌓인 콘텐츠. 아직 미소화, 읽으면 <code>consumed</code>로 전환.</p>
+      <div class="eg">📰 메르 블로그 · 📨 클리핑 · 🔖 아티클</div>
+    </div>
+
+    <div class="c-card">
+      <h3>append-only 원장</h3>
+      <p>과거 줄은 절대 수정하지 않는다. 상태 변화는 새 이벤트 추가 — 회계 정정 분개와 같은 원리.</p>
+      <div class="timeline">
+        <div class="tl-row">
+          <div class="tl-dot" style="background:var(--s1)"></div>
+          <div class="tl-line"></div>
+          <div class="tl-label">offered — 2026-06-01</div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-dot" style="background:var(--s3)"></div>
+          <div class="tl-line"></div>
+          <div class="tl-label">consumed — 2026-06-03</div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-dot" style="background:var(--good)"></div>
+          <div class="tl-line"></div>
+          <div class="tl-new">fermented — 2026-06-05 ← 새 이벤트 추가</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="c-card">
+      <h3>ts / ingested 분리</h3>
+      <p><code>ts</code> = 사건 발생 시각 (불변) · <code>ingested</code> = 원장 기입 시각.</p>
+      <p style="margin-top:8px">며칠 전 일기를 오늘 수집해도 사건 시각은 보존된다.</p>
+      <div class="eg" style="margin-top:8px">
+        일기 ts: 2026-06-01<br>
+        ingested: 2026-07-05 (개시일 일괄 수집)
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<p class="footer">
+  2026-07-05 기준 스냅샷 ·
+  <a href="https://koogk7.github.io/personal-ledger/">블로그 원문</a>
+</p>
+
+<script>
+/* ── Data ─────────────────────────────────────── */
+const STREAMS = [
+  { name: 'YouTube', count: 1244, color: 'var(--s1)',
+    kind: 'consumed',
+    detail: '유튜브 롱폼 시청 기록. watch-scribe 에이전트가 자막을 받아 노트화. 전체의 47%로 가장 큰 스트림. 529시간 누적. 이 원장이 처음으로 드러낸 숫자다.' },
+  { name: '일기',    count: 1086, color: 'var(--s2)',
+    kind: 'consumed',
+    detail: '노션에서 매일 작성 후 옵시디언으로 동기화. 2019년 6월부터 현재까지 7년치 축적. 수치는 낮아도 사고 밀도가 가장 높은 스트림.' },
+  { name: 'Inbox',   count:  200, color: 'var(--s3)',
+    kind: 'curated',
+    detail: '메르·네이버 블로그 자동 클리핑. curated 상태로 입력, 읽으면 consumed로 전환. 현재 196건(98%)이 offered(미소화) — 이 비율이 앞으로 second-brain PO KR-B의 분모가 된다.' },
+  { name: '세션',    count:  119, color: 'var(--s4)',
+    kind: 'consumed',
+    detail: 'Claude 대화 세션 기록. 하루 수십 건 생성되는 고밀도 사고 로그. 시스템 구축 후부터 수집 시작. 가장 최근에 추가된 스트림.' },
+];
+
+const STAGES = [
+  { name: '전체 입력',  count: 2649, color: 'var(--neutral)',
+    dropLabel: '',
+    detail: '4개 스트림에서 들어온 전체 이벤트. YouTube(1,244) + 일기(1,086) + Inbox(200) + 세션(119). 2019년 6월부터 2026년 7월까지 축적.' },
+  { name: 'consumed',   count: 2451, color: 'var(--s1)',
+    dropLabel: '→ 196건 미소화 (Inbox 대기 중)',
+    detail: '실제로 읽거나 시청하거나 대화한 완료 기록. 92.5% 달성. 남은 196건(7.4%)은 Inbox에 offered 상태로 대기 중 — 읽는 순간 이 수치로 합류한다.' },
+  { name: 'fermented',  count:    2, color: 'var(--s3)',
+    dropLabel: '→ 2,449건 소화만 되고 반추 없음',
+    detail: '피누 메모(📌 주석)가 달려 반추된 기록. 전체의 0.1% — consumed와 fermented 사이의 99.9% 탈락이 이 시스템의 가장 큰 병목. second-brain PO KR-B(소화율 ≥50%)가 이 구간을 측정한다.' },
+  { name: 'organized',  count:    0, color: 'var(--neutral)',
+    dropLabel: '→ 미구현',
+    detail: '생각정원 wiki 축 노트에 통합·정리된 상태. 아직 0건. 정원사 에이전트가 이 단계를 채울 예정.' },
+  { name: 'published',  count:    1, color: 'var(--good)',
+    dropLabel: '',
+    detail: '블로그 글로 발행된 지식 순환 완결 상태. 지금 이 시각화가 속한 글이 원장의 첫 published 이벤트다. 소화 깔때기의 출구 — 처음으로 끝까지 흘렀다.' },
+];
+
+const TOTAL = 2649;
+
+/* ── State ────────────────────────────────────── */
+let mode = 'n';
+let openBar = -1;
+let openStage = -1;
+
+/* ── Stream chart ──────────────────────────────── */
+function setMode(m) {
+  mode = m;
+  document.getElementById('btnN').classList.toggle('on', m === 'n');
+  document.getElementById('btnP').classList.toggle('on', m === 'p');
+  renderStream();
+}
+
+function renderStream() {
+  const maxCount = Math.max(...STREAMS.map(s => s.count));
+  let html = '';
+  STREAMS.forEach((s, i) => {
+    const fillW = (s.count / maxCount * 100).toFixed(1);
+    const pct   = (s.count / TOTAL * 100).toFixed(1);
+    const meta  = mode === 'n' ? `${s.count.toLocaleString()}건` : `${pct}%`;
+    const tip   = mode === 'n' ? `${pct}%` : `${s.count.toLocaleString()}건`;
+    const isOpen = openBar === i;
+    html += `
+<div class="bar-row" onclick="toggleBar(${i})" role="button" aria-expanded="${isOpen}">
+  <div class="bar-lbl">${s.name}</div>
+  <div class="bar-track">
+    <div class="bar-fill" style="width:${fillW}%;background:${s.color}" data-tip="${tip}"></div>
+  </div>
+  <div class="bar-meta">${meta}</div>
+</div>
+<div class="bar-detail${isOpen?' open':''}" style="border-color:${s.color}">${s.detail}</div>`;
+  });
+  document.getElementById('streamChart').innerHTML = html;
+}
+
+function toggleBar(i) {
+  openBar = openBar === i ? -1 : i;
+  renderStream();
+}
+
+/* ── Funnel ────────────────────────────────────── */
+function renderFunnel() {
+  const MAX_W = 100; // percent
+  let html = '';
+
+  STAGES.forEach((s, i) => {
+    // Width: proportional for large values, fixed minimum for tiny
+    let w;
+    if (s.count === 0)    w = 0;
+    else if (s.count === 1) w = 3;
+    else if (s.count <= 10) w = 6;
+    else w = Math.max(6, (s.count / TOTAL) * MAX_W);
+
+    const pct = s.count === 0 ? '—'
+      : s.count < 1 ? '<0.01%'
+      : s.pct !== undefined ? (s.count / TOTAL * 100).toFixed(s.count < 10 ? 3 : 1) + '%'
+      : (s.count / TOTAL * 100).toFixed(1) + '%';
+
+    const isOpen = openStage === i;
+    const isEmpty = s.count === 0;
+
+    html += `
+<div class="f-stage" onclick="toggleStage(${i})" role="button" aria-expanded="${isOpen}">
+  <div class="f-row">
+    <div class="f-label">${s.name}</div>
+    <div class="f-bar-wrap">
+      ${isEmpty
+        ? `<div style="font-size:11px;color:var(--muted2);padding-left:6px">— 0건 (미구현)</div>`
+        : `<div class="f-bar" style="width:${w}%;background:${s.color}">
+             ${s.count.toLocaleString()}
+           </div>`
+      }
+    </div>
+    <div class="f-meta">${s.count.toLocaleString()}건&thinsp;·&thinsp;${pct}</div>
+  </div>
+  <div class="f-detail${isOpen?' open':''}" style="border-color:${s.color}">${s.detail}</div>
+</div>`;
+
+    if (i < STAGES.length - 1 && STAGES[i+1].count < s.count) {
+      const drop = s.count - STAGES[i+1].count;
+      html += `<div class="f-connector">↓<span class="f-drop">  ${drop.toLocaleString()}건 탈락</span></div>`;
+    } else if (i < STAGES.length - 1) {
+      html += `<div class="f-connector">↓</div>`;
+    }
+  });
+
+  document.getElementById('funnel').innerHTML = html;
+}
+
+function toggleStage(i) {
+  openStage = openStage === i ? -1 : i;
+  renderFunnel();
+}
+
+/* ── Init ─────────────────────────────────────── */
+renderStream();
+renderFunnel();
+</script>
+</body>
+</html>
