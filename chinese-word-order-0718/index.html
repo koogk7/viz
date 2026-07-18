@@ -1,0 +1,507 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>어순 배열 — 2026-07-18 구문</title>
+<style>
+:root {
+  --bg: #1a1a2e;
+  --card: #16213e;
+  --accent: #0f3460;
+  --green: #4ade80;
+  --red: #f87171;
+  --yellow: #fbbf24;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --chunk-bg: #0f3460;
+  --chunk-sel: #1e40af;
+  --border: #2d3748;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --accent: #dbeafe;
+    --text: #1e293b;
+    --muted: #64748b;
+    --chunk-bg: #bfdbfe;
+    --chunk-sel: #3b82f6;
+    --border: #e2e8f0;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 16px;
+  font-variant-numeric: tabular-nums;
+}
+h1 {
+  text-align: center;
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+.subtitle { text-align: center; font-size: 0.8rem; color: var(--muted); margin-bottom: 16px; }
+.progress-bar-wrap {
+  background: var(--border);
+  border-radius: 4px;
+  height: 6px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background: var(--green);
+  border-radius: 4px;
+  transition: width .3s;
+}
+.score-row {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  max-width: 560px;
+  margin: 0 auto 24px;
+}
+.q-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.q-num { font-size: 0.75rem; color: var(--muted); }
+.q-tag {
+  font-size: 0.7rem;
+  background: var(--accent);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+.korean-sentence {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.5;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: 8px;
+  border-left: 3px solid var(--yellow);
+}
+.answer-area {
+  min-height: 48px;
+  background: var(--bg);
+  border: 1.5px dashed var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  cursor: pointer;
+}
+.answer-area.correct { border-color: var(--green); }
+.answer-area.wrong { border-color: var(--red); }
+.answer-placeholder { color: var(--muted); font-size: 0.85rem; }
+.chunks-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  min-height: 44px;
+}
+.chunk {
+  background: var(--chunk-bg);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: transform .1s, opacity .15s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  border: 1.5px solid transparent;
+}
+.chunk:active { transform: scale(.95); }
+.chunk.used { opacity: .25; pointer-events: none; }
+.answer-chip {
+  background: var(--chunk-sel);
+  color: #fff;
+  border-radius: 8px;
+  padding: 7px 13px;
+  font-size: 1rem;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+button {
+  flex: 1;
+  min-width: 80px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+}
+.btn-check { background: var(--green); color: #000; }
+.btn-reset { background: var(--border); color: var(--text); }
+.btn-reveal { background: var(--yellow); color: #000; }
+.btn-next { background: var(--green); color: #000; display: none; }
+.result-box {
+  display: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.result-box.show { display: block; }
+.result-box .answer-line { font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
+.result-box .pinyin { color: var(--muted); margin-bottom: 4px; }
+.result-box .meaning { margin-bottom: 6px; }
+.result-box .pattern {
+  font-size: 0.78rem;
+  background: var(--accent);
+  padding: 4px 8px;
+  border-radius: 5px;
+  color: var(--muted);
+}
+.tag-correct { color: var(--green); font-weight: 700; }
+.tag-wrong { color: var(--red); font-weight: 700; }
+.final-card {
+  display: none;
+  text-align: center;
+  padding: 24px;
+  background: var(--card);
+  border-radius: 12px;
+  max-width: 560px;
+  margin: 0 auto;
+  border: 1px solid var(--border);
+}
+.final-card.show { display: block; }
+.final-score { font-size: 2rem; font-weight: 700; margin: 12px 0; }
+.btn-restart { background: var(--yellow); color: #000; margin-top: 12px; font-size: 1rem; padding: 12px 24px; border-radius: 10px; width: auto; }
+</style>
+
+<h1>어순 배열 — 7월 18일 구문</h1>
+<p class="subtitle">이 세션에서 배운 패턴 10개 | 탭으로 조립 → 정답 확인</p>
+
+<div class="progress-bar-wrap">
+  <div class="progress-bar" id="pbar" style="width:0%"></div>
+</div>
+<div class="score-row" id="score-row">0 / 10 완료</div>
+
+<div id="quiz-container"></div>
+<div class="final-card" id="final-card">
+  <div style="font-size:1.4rem">완료</div>
+  <div class="final-score" id="final-score"></div>
+  <div id="final-msg" style="color:var(--muted);font-size:.9rem"></div>
+  <button class="btn-restart" onclick="restart()">다시 풀기</button>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    korean: "우리는 줄을 너무 오래 서서 그냥 갔다.",
+    chunks: ["我们", "排队", "排", "太久", "就走了"],
+    answer: ["我们", "排队", "排", "太久", "就走了"],
+    pinyin: "Wǒmen páiduì pái tài jiǔ jiù zǒu le.",
+    meaning: "우리는 줄을 너무 오래 서서 그냥 가버렸다.",
+    pattern: "V+O+V+时量 — 이합사는 동사 복사: 排队 + 排太久",
+    tag: "동사중복"
+  },
+  {
+    korean: "그는 8시간 잠을 잤다.",
+    chunks: ["他", "睡觉", "睡了", "八个小时"],
+    answer: ["他", "睡觉", "睡了", "八个小时"],
+    pinyin: "Tā shuìjiào shuì le bā gè xiǎoshí.",
+    meaning: "그는 8시간 잠을 잤다.",
+    pattern: "V+O+V+时量 — 睡觉(이합사) → 睡觉+睡了+时量",
+    tag: "동사중복"
+  },
+  {
+    korean: "도준을 오랜만에 못 봤네.",
+    chunks: ["好久", "没见到", "道俊", "了"],
+    answer: ["好久", "没见到", "道俊", "了"],
+    pinyin: "Hǎojiǔ méi jiàn dào Dàojùn le.",
+    meaning: "도준을 오랜만에 못 봤다.",
+    pattern: "好久没+V到+대상+了 — 好久不见은 눈앞 인사 전용",
+    tag: "好久没V了"
+  },
+  {
+    korean: "생각난 김에 이제 연락해야겠다.",
+    chunks: ["突然", "想起来", "该", "联系他", "了"],
+    answer: ["突然", "想起来", "该", "联系他", "了"],
+    pinyin: "Tūrán xiǎng qǐlái gāi liánxì tā le.",
+    meaning: "갑자기 생각나서 이제 연락해야겠다.",
+    pattern: "(突然)想起来+该+V+了 — 该=당위(때가 됨) ≠ 要(의지)",
+    tag: "想起来该V了"
+  },
+  {
+    korean: "내 중국어가 조금 는 것 같다.",
+    chunks: ["我觉得", "我的", "中文", "有一点", "进步了"],
+    answer: ["我觉得", "我的", "中文", "有一点", "进步了"],
+    pinyin: "Wǒ juéde wǒ de Zhōngwén yǒu yīdiǎn jìnbù le.",
+    meaning: "내 중국어가 조금 는 것 같다.",
+    pattern: "有一点+N — 一点은 有 바로 뒤. ✗有进步一点",
+    tag: "有一点N"
+  },
+  {
+    korean: "중국어가 늘었다고 느낀다. (觉得+절 구조)",
+    chunks: ["我", "觉得", "中文", "有进步"],
+    answer: ["我", "觉得", "中文", "有进步"],
+    pinyin: "Wǒ juéde Zhōngwén yǒu jìnbù.",
+    meaning: "나는 중국어가 늘었다고 느낀다.",
+    pattern: "觉得+[절] — 中文이 절의 주어, 对中文 아님",
+    tag: "觉得+절"
+  },
+  {
+    korean: "나는 HSK 4급에 합격했다.",
+    chunks: ["我", "通过了", "HSK", "四级"],
+    answer: ["我", "通过了", "HSK", "四级"],
+    pinyin: "Wǒ tōngguò le HSK sì jí.",
+    meaning: "나는 HSK 4급에 합격했다.",
+    pattern: "通过了+목적어 — ✗我得HSK四级通过",
+    tag: "通过了"
+  },
+  {
+    korean: "문법이랑 어순이 아직 많이 낯설다.",
+    chunks: ["语法", "和", "语序", "都还", "不太熟悉"],
+    answer: ["语法", "和", "语序", "都还", "不太熟悉"],
+    pinyin: "Yǔfǎ hé yǔxù dōu hái bù tài shúxī.",
+    meaning: "문법과 어순이 아직 많이 낯설다.",
+    pattern: "복수+都还不太熟悉 — 都=복수 대상 묶음",
+    tag: "都还不太熟悉"
+  },
+  {
+    korean: "시간 됐다, 이제 가야겠다.",
+    chunks: ["时间", "不早了", "该", "走了"],
+    answer: ["时间", "不早了", "该", "走了"],
+    pinyin: "Shíjiān bù zǎo le, gāi zǒu le.",
+    meaning: "시간이 늦었다, 이제 갈 때가 됐다.",
+    pattern: "该+V+了 = 갈 때가 됐다(당위) / 我要走了 = 내가 가겠다(의지)",
+    tag: "该V了"
+  },
+  {
+    korean: "중국어의 우선순위가 더 높다.",
+    chunks: ["中文", "的", "优先级", "更高"],
+    answer: ["中文", "的", "优先级", "更高"],
+    pinyin: "Zhōngwén de yōuxiānjí gèng gāo.",
+    meaning: "중국어의 우선순위가 더 높다.",
+    pattern: "优先级 = 우선순위(priority) ≠ 유창함(流利 liúlì)",
+    tag: "优先级"
+  }
+];
+
+let current = 0;
+let correct = 0;
+let selected = [];
+let revealed = false;
+let checked = false;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+let shuffledChunks = [];
+
+function render() {
+  const q = QUESTIONS[current];
+  shuffledChunks = shuffle(q.chunks);
+  selected = [];
+  revealed = false;
+  checked = false;
+
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = `
+    <div class="card" id="card-${current}">
+      <div class="q-header">
+        <span class="q-num">${current + 1} / ${QUESTIONS.length}</span>
+        <span class="q-tag">${q.tag}</span>
+      </div>
+      <div class="korean-sentence">${q.korean}</div>
+      <div class="answer-area" id="answer-area" onclick="removeLastChip()">
+        <span class="answer-placeholder" id="placeholder">단어를 탭해 순서대로 조립하세요 ▼</span>
+      </div>
+      <div class="chunks-area" id="chunks-area">
+        ${shuffledChunks.map((c, i) => `<div class="chunk" id="chunk-${i}" onclick="selectChunk(${i})">${c}</div>`).join('')}
+      </div>
+      <div class="btn-row">
+        <button class="btn-check" onclick="checkAnswer()">확인</button>
+        <button class="btn-reset" onclick="resetAnswer()">지우기</button>
+        <button class="btn-reveal" onclick="revealAnswer()">정답 보기</button>
+        <button class="btn-next" id="btn-next" onclick="nextQ()">다음 →</button>
+      </div>
+      <div class="result-box" id="result-box">
+        <div class="answer-line" id="result-verdict"></div>
+        <div class="answer-line" id="result-answer"></div>
+        <div class="pinyin" id="result-pinyin"></div>
+        <div class="meaning" id="result-meaning"></div>
+        <div class="pattern" id="result-pattern"></div>
+      </div>
+    </div>
+  `;
+  updateProgress();
+}
+
+function selectChunk(i) {
+  if (checked || revealed) return;
+  const q = QUESTIONS[current];
+  const chunk = shuffledChunks[i];
+  selected.push({ chunk, idx: i });
+  document.getElementById(`chunk-${i}`).classList.add('used');
+
+  const area = document.getElementById('answer-area');
+  const ph = document.getElementById('placeholder');
+  if (ph) ph.remove();
+
+  const chip = document.createElement('div');
+  chip.className = 'answer-chip';
+  chip.dataset.idx = selected.length - 1;
+  chip.textContent = chunk;
+  chip.onclick = (e) => { e.stopPropagation(); removeChip(chip.dataset.idx * 1); };
+  area.appendChild(chip);
+}
+
+function removeChip(pos) {
+  if (checked || revealed) return;
+  const item = selected[pos];
+  document.getElementById(`chunk-${item.idx}`).classList.remove('used');
+  selected.splice(pos, 1);
+
+  const area = document.getElementById('answer-area');
+  area.innerHTML = '';
+  if (selected.length === 0) {
+    const ph = document.createElement('span');
+    ph.className = 'answer-placeholder';
+    ph.id = 'placeholder';
+    ph.textContent = '단어를 탭해 순서대로 조립하세요 ▼';
+    area.appendChild(ph);
+  } else {
+    selected.forEach((item, i) => {
+      const chip = document.createElement('div');
+      chip.className = 'answer-chip';
+      chip.dataset.idx = i;
+      chip.textContent = item.chunk;
+      chip.onclick = (e) => { e.stopPropagation(); removeChip(chip.dataset.idx * 1); };
+      area.appendChild(chip);
+    });
+  }
+}
+
+function removeLastChip() {
+  if (selected.length === 0 || checked || revealed) return;
+  removeChip(selected.length - 1);
+}
+
+function resetAnswer() {
+  if (checked || revealed) return;
+  selected = [];
+  shuffledChunks.forEach((_, i) => {
+    const el = document.getElementById(`chunk-${i}`);
+    if (el) el.classList.remove('used');
+  });
+  const area = document.getElementById('answer-area');
+  area.className = 'answer-area';
+  area.innerHTML = '<span class="answer-placeholder" id="placeholder">단어를 탭해 순서대로 조립하세요 ▼</span>';
+}
+
+function checkAnswer() {
+  if (checked || revealed) return;
+  const q = QUESTIONS[current];
+  const userAnswer = selected.map(s => s.chunk);
+  const isCorrect = JSON.stringify(userAnswer) === JSON.stringify(q.answer);
+
+  checked = true;
+  const area = document.getElementById('answer-area');
+  area.classList.add(isCorrect ? 'correct' : 'wrong');
+
+  if (isCorrect) correct++;
+  showResult(isCorrect ? '정답' : '오답', isCorrect);
+}
+
+function revealAnswer() {
+  if (checked) return;
+  revealed = true;
+  showResult('정답 보기', null);
+}
+
+function showResult(label, isCorrect) {
+  const q = QUESTIONS[current];
+  const box = document.getElementById('result-box');
+  const verdict = document.getElementById('result-verdict');
+  const answerEl = document.getElementById('result-answer');
+  const pinyinEl = document.getElementById('result-pinyin');
+  const meaningEl = document.getElementById('result-meaning');
+  const patternEl = document.getElementById('result-pattern');
+
+  if (isCorrect === true) verdict.innerHTML = `<span class="tag-correct">✓ 정답</span>`;
+  else if (isCorrect === false) verdict.innerHTML = `<span class="tag-wrong">✗ 오답</span>`;
+  else verdict.innerHTML = `<span style="color:var(--yellow)">정답</span>`;
+
+  answerEl.textContent = q.answer.join('');
+  pinyinEl.textContent = q.pinyin;
+  meaningEl.textContent = q.meaning;
+  patternEl.textContent = '문법: ' + q.pattern;
+  box.classList.add('show');
+
+  document.getElementById('btn-next').style.display = 'flex';
+  updateProgress();
+}
+
+function nextQ() {
+  current++;
+  if (current >= QUESTIONS.length) {
+    document.getElementById('quiz-container').innerHTML = '';
+    const fc = document.getElementById('final-card');
+    fc.classList.add('show');
+    document.getElementById('final-score').textContent = `${correct} / ${QUESTIONS.length}`;
+    const pct = Math.round(correct / QUESTIONS.length * 100);
+    document.getElementById('final-msg').textContent =
+      pct >= 80 ? '语序 감각이 붙고 있다.' :
+      pct >= 50 ? '절반은 자동화됐다. 나머지는 다시 풀어봐.' :
+      '틀린 문제 위주로 다시 한 번.';
+    document.getElementById('pbar').style.width = '100%';
+    document.getElementById('score-row').textContent = `${correct} / ${QUESTIONS.length} 정답`;
+    return;
+  }
+  render();
+}
+
+function updateProgress() {
+  const done = current + (checked || revealed ? 1 : 0);
+  document.getElementById('pbar').style.width = `${done / QUESTIONS.length * 100}%`;
+  document.getElementById('score-row').textContent = `정답 ${correct} / ${done} 완료`;
+}
+
+function restart() {
+  current = 0;
+  correct = 0;
+  document.getElementById('final-card').classList.remove('show');
+  render();
+}
+
+render();
+</script>
