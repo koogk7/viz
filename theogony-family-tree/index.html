@@ -1,0 +1,238 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>신통기 족보 — 헤시오도스 신들의 계보</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --panel2:#1c2230; --line:#3a4763;
+    --ink:#e6edf3; --dim:#93a1b3; --gold:#e3b341;
+    --primordial:#8b6dd6; --titan:#4a9b8e; --olympian:#d1913c; --child:#5c86c9; --other:#b06a8a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    line-height:1.5;-webkit-text-size-adjust:100%}
+  .wrap{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+  header h1{font-size:1.5rem;margin:0 0 4px}
+  header p{color:var(--dim);margin:0 0 6px;font-size:.9rem}
+  .src{color:var(--dim);font-size:.78rem}
+  .src a{color:var(--gold);text-decoration:none}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 8px}
+  .chip{font-size:.75rem;padding:3px 10px;border-radius:20px;border:1px solid var(--line);color:var(--ink);display:inline-flex;align-items:center;gap:6px}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .gen{margin:22px 0;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+  .gen-h{padding:10px 16px;background:var(--panel2);border-bottom:1px solid var(--line);
+    display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .gen-h .num{color:var(--gold);font-weight:700;font-size:.8rem;letter-spacing:.5px}
+  .gen-h .ttl{font-weight:700}
+  .gen-h .sub{color:var(--dim);font-size:.8rem}
+  .gen-b{padding:16px}
+  .fam{margin:0 0 14px;padding:12px;border:1px dashed var(--line);border-radius:10px;background:#12161d}
+  .fam:last-child{margin-bottom:0}
+  .couple{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:4px}
+  .couple .plus{color:var(--gold);font-weight:700}
+  .rel{color:var(--dim);font-size:.76rem;margin:2px 0 10px}
+  .kids{display:flex;flex-wrap:wrap;gap:8px;padding-left:14px;border-left:2px solid var(--line);margin-left:6px}
+  .node{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:7px 11px;min-width:96px}
+  .node .nm{font-weight:600;font-size:.92rem}
+  .node .gr{color:var(--dim);font-size:.72rem;font-style:italic}
+  .node .role{color:var(--dim);font-size:.75rem;margin-top:2px}
+  .node.lead{border-width:2px}
+  .node.p{border-left:4px solid var(--primordial)}
+  .node.t{border-left:4px solid var(--titan)}
+  .node.o{border-left:4px solid var(--olympian)}
+  .node.c{border-left:4px solid var(--child)}
+  .node.x{border-left:4px solid var(--other)}
+  .star{color:var(--gold)}
+  .note{color:var(--dim);font-size:.78rem;margin-top:8px;padding:8px 10px;background:#12161d;border-radius:8px;border:1px solid var(--line)}
+  footer{margin-top:26px;color:var(--dim);font-size:.78rem;text-align:center}
+</style>
+<div class="wrap">
+  <header>
+    <h1>신통기(Θεογονία) 족보</h1>
+    <p>헤시오도스 <b>신통기</b> 원전 기준 — 그리스 신들의 계보. 태초 → 티탄 → 올림포스 → 제우스의 자손</p>
+    <div class="src">출처: <a href="https://www.britannica.com/topic/Theogony-by-Hesiod">Britannica · Theogony</a> · <a href="https://mythopedia.com/topics/theogony/">Mythopedia</a> · <a href="https://timelessmyths.com/classical/pantheon/creation/theogony-of-hesiod/">Timeless Myths</a></div>
+  </header>
+
+  <div class="legend">
+    <span class="chip"><span class="dot" style="background:var(--primordial)"></span>태초신 Primordial</span>
+    <span class="chip"><span class="dot" style="background:var(--titan)"></span>티탄 Titan</span>
+    <span class="chip"><span class="dot" style="background:var(--olympian)"></span>올림포스 Olympian</span>
+    <span class="chip"><span class="dot" style="background:var(--child)"></span>제우스 자손</span>
+    <span class="chip"><span class="dot" style="background:var(--other)"></span>기타 계보</span>
+    <span class="chip"><span class="star">★</span> 왕위 계승 축</span>
+  </div>
+
+  <!-- GEN 0 -->
+  <div class="gen">
+    <div class="gen-h"><span class="num">태초 · 0세대</span><span class="ttl">카오스에서 태어난 것들</span><span class="sub">스스로 생겨난 원초의 신들</span></div>
+    <div class="gen-b">
+      <div class="fam">
+        <div class="rel">태초에 <b>카오스(Chaos)</b>가 있었고, 잇달아 스스로 생겨남</div>
+        <div class="kids" style="border:none;padding-left:0;margin-left:0">
+          <div class="node p lead"><div class="nm">카오스 <span class="star">★</span></div><div class="gr">Chaos</div><div class="role">태초의 텅빔</div></div>
+          <div class="node p lead"><div class="nm">가이아 <span class="star">★</span></div><div class="gr">Gaia</div><div class="role">대지</div></div>
+          <div class="node p"><div class="nm">타르타로스</div><div class="gr">Tartaros</div><div class="role">심연·지하</div></div>
+          <div class="node p"><div class="nm">에로스</div><div class="gr">Eros</div><div class="role">사랑·생성력</div></div>
+        </div>
+      </div>
+      <div class="fam">
+        <div class="couple"><div class="node p"><div class="nm">카오스</div><div class="gr">Chaos</div></div></div>
+        <div class="rel">카오스에게서 태어남</div>
+        <div class="kids">
+          <div class="node p"><div class="nm">에레보스</div><div class="gr">Erebos</div><div class="role">암흑</div></div>
+          <div class="node p"><div class="nm">닉스</div><div class="gr">Nyx</div><div class="role">밤</div></div>
+        </div>
+      </div>
+      <div class="fam">
+        <div class="couple"><div class="node p"><div class="nm">닉스</div><div class="gr">Nyx</div></div><span class="plus">+</span><div class="node p"><div class="nm">에레보스</div><div class="gr">Erebos</div></div></div>
+        <div class="rel">밤과 암흑의 결합</div>
+        <div class="kids">
+          <div class="node p"><div class="nm">아이테르</div><div class="gr">Aither</div><div class="role">창공의 빛</div></div>
+          <div class="node p"><div class="nm">헤메라</div><div class="gr">Hemera</div><div class="role">낮</div></div>
+        </div>
+        <div class="note">닉스는 홀로 타나토스(죽음)·힙노스(잠)·모이라이(운명)·네메시스(응보) 등도 낳았다(방대해 생략).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GEN 1 -->
+  <div class="gen">
+    <div class="gen-h"><span class="num">1세대</span><span class="ttl">가이아가 홀로 낳은 것들</span><span class="sub">배우자 없이 대지에서</span></div>
+    <div class="gen-b">
+      <div class="fam">
+        <div class="couple"><div class="node p"><div class="nm">가이아</div><div class="gr">Gaia</div><div class="role">대지</div></div></div>
+        <div class="rel">가이아가 홀로 낳음</div>
+        <div class="kids">
+          <div class="node p lead"><div class="nm">우라노스 <span class="star">★</span></div><div class="gr">Uranos</div><div class="role">하늘 (뒤에 배우자가 됨)</div></div>
+          <div class="node p"><div class="nm">폰토스</div><div class="gr">Pontos</div><div class="role">바다</div></div>
+          <div class="node p"><div class="nm">우레아</div><div class="gr">Ourea</div><div class="role">산맥</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GEN 2 -->
+  <div class="gen">
+    <div class="gen-h"><span class="num">2세대 · 티탄</span><span class="ttl">가이아 + 우라노스</span><span class="sub">대지와 하늘의 자식들 — 12티탄</span></div>
+    <div class="gen-b">
+      <div class="fam">
+        <div class="couple">
+          <div class="node p"><div class="nm">가이아</div><div class="gr">Gaia</div></div>
+          <span class="plus">+</span>
+          <div class="node p"><div class="nm">우라노스</div><div class="gr">Uranos</div></div>
+        </div>
+        <div class="rel">12티탄 (남 6 · 여 6)</div>
+        <div class="kids">
+          <div class="node t"><div class="nm">오케아노스</div><div class="gr">Okeanos</div><div class="role">대양</div></div>
+          <div class="node t"><div class="nm">코이오스</div><div class="gr">Koios</div></div>
+          <div class="node t"><div class="nm">크리오스</div><div class="gr">Krios</div></div>
+          <div class="node t"><div class="nm">히페리온</div><div class="gr">Hyperion</div><div class="role">빛</div></div>
+          <div class="node t"><div class="nm">이아페토스</div><div class="gr">Iapetos</div></div>
+          <div class="node t lead"><div class="nm">크로노스 <span class="star">★</span></div><div class="gr">Kronos</div><div class="role">시간·막내, 아버지를 거세</div></div>
+          <div class="node t"><div class="nm">테이아</div><div class="gr">Theia</div></div>
+          <div class="node t lead"><div class="nm">레아 <span class="star">★</span></div><div class="gr">Rhea</div><div class="role">크로노스의 배우자</div></div>
+          <div class="node t"><div class="nm">테미스</div><div class="gr">Themis</div><div class="role">법·질서</div></div>
+          <div class="node t"><div class="nm">므네모시네</div><div class="gr">Mnemosyne</div><div class="role">기억</div></div>
+          <div class="node t"><div class="nm">포이베</div><div class="gr">Phoibe</div></div>
+          <div class="node t"><div class="nm">테티스</div><div class="gr">Tethys</div></div>
+        </div>
+        <div class="note">같은 부모에게서 <b>키클로페스</b>(외눈박이 3) — 브론테스·스테로페스·아르게스, 그리고 <b>헤카톤케이레스</b>(백수거인 3) — 코토스·브리아레오스·기게스도 태어났다.</div>
+      </div>
+      <div class="fam">
+        <div class="couple"><div class="node p"><div class="nm">우라노스</div><div class="gr">Uranos (잘린 성기)</div></div></div>
+        <div class="rel">크로노스가 아버지를 거세 → 바다 거품에서 · 대지에 떨어진 피에서</div>
+        <div class="kids">
+          <div class="node x lead"><div class="nm">아프로디테</div><div class="gr">Aphrodite</div><div class="role">미·사랑 — 헤시오도스에선 <b>제우스의 딸이 아님</b></div></div>
+          <div class="node x"><div class="nm">에리니에스</div><div class="gr">Erinyes</div><div class="role">복수의 여신들</div></div>
+          <div class="node x"><div class="nm">기간테스</div><div class="gr">Gigantes</div><div class="role">거인족</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GEN 3 -->
+  <div class="gen">
+    <div class="gen-h"><span class="num">3세대 · 올림포스</span><span class="ttl">크로노스 + 레아</span><span class="sub">크로노스가 삼킨 뒤 제우스가 토해내게 함</span></div>
+    <div class="gen-b">
+      <div class="fam">
+        <div class="couple">
+          <div class="node t"><div class="nm">크로노스</div><div class="gr">Kronos</div></div>
+          <span class="plus">+</span>
+          <div class="node t"><div class="nm">레아</div><div class="gr">Rhea</div></div>
+        </div>
+        <div class="rel">1세대 올림포스 6신 (헤시오도스 순서)</div>
+        <div class="kids">
+          <div class="node o"><div class="nm">헤스티아</div><div class="gr">Hestia</div><div class="role">화로</div></div>
+          <div class="node o"><div class="nm">데메테르</div><div class="gr">Demeter</div><div class="role">곡물·수확</div></div>
+          <div class="node o"><div class="nm">헤라</div><div class="gr">Hera</div><div class="role">제우스의 아내</div></div>
+          <div class="node o"><div class="nm">하데스</div><div class="gr">Hades</div><div class="role">지하세계</div></div>
+          <div class="node o"><div class="nm">포세이돈</div><div class="gr">Poseidon</div><div class="role">바다·지진</div></div>
+          <div class="node o lead"><div class="nm">제우스 <span class="star">★</span></div><div class="gr">Zeus</div><div class="role">막내 · 하늘·번개 · 왕</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GEN 4 -->
+  <div class="gen">
+    <div class="gen-h"><span class="num">4세대</span><span class="ttl">제우스의 자손</span><span class="sub">어머니별 — 헤시오도스가 열거한 순서</span></div>
+    <div class="gen-b">
+      <div class="fam">
+        <div class="couple"><div class="node o lead"><div class="nm">제우스</div></div><span class="plus">+</span><div class="node t"><div class="nm">메티스</div><div class="gr">Metis</div><div class="role">지혜 (제우스가 삼킴)</div></div></div>
+        <div class="kids"><div class="node c"><div class="nm">아테나</div><div class="gr">Athena</div><div class="role">지혜·전쟁 — 제우스 머리에서 탄생</div></div></div>
+      </div>
+      <div class="fam">
+        <div class="couple"><div class="node o lead"><div class="nm">제우스</div></div><span class="plus">+</span><div class="node t"><div class="nm">테미스</div><div class="gr">Themis</div></div></div>
+        <div class="kids">
+          <div class="node c"><div class="nm">호라이</div><div class="gr">Horai</div><div class="role">계절 (에우노미아·디케·에이레네)</div></div>
+          <div class="node c"><div class="nm">모이라이</div><div class="gr">Moirai</div><div class="role">운명의 세 여신</div></div>
+        </div>
+      </div>
+      <div class="fam">
+        <div class="couple"><div class="node o lead"><div class="nm">제우스</div></div><span class="plus">+</span><div class="node x"><div class="nm">에우리노메</div><div class="gr">Eurynome</div></div></div>
+        <div class="kids"><div class="node c"><div class="nm">카리테스</div><div class="gr">Charites</div><div class="role">우아함의 세 여신</div></div></div>
+      </div>
+      <div class="fam">
+        <div class="couple"><div class="node o lead"><div class="nm">제우스</div></div><span class="plus">+</span><div class="node o"><div class="nm">데메테르</div><div class="gr">Demeter</div></div></div>
+        <div class="kids"><div class="node c"><div class="nm">페르세포네</div><div class="gr">Persephone</div><div class="role">지하세계의 여왕</div></div></div>
+      </div>
+      <div class="fam">
+        <div class="couple"><div class="node o lead"><div class="nm">제우스</div></div><span class="plus">+</span><div class="node t"><div class="nm">므네모시네</div><div class="gr">Mnemosyne</div></div></div>
+        <div class="kids"><div class="node c"><div class="nm">무사이 (9뮤즈)</div><div class="gr">Mousai</div><div class="role">예술·학문의 여신들</div></div></div>
+      </div>
+      <div class="fam">
+        <div class="couple"><div class="node o lead"><div class="nm">제우스</div></div><span class="plus">+</span><div class="node x"><div class="nm">레토</div><div class="gr">Leto</div></div></div>
+        <div class="kids">
+          <div class="node c"><div class="nm">아폴론</div><div class="gr">Apollon</div><div class="role">태양·음악·예언</div></div>
+          <div class="node c"><div class="nm">아르테미스</div><div class="gr">Artemis</div><div class="role">달·사냥</div></div>
+        </div>
+      </div>
+      <div class="fam">
+        <div class="couple"><div class="node o lead"><div class="nm">제우스</div></div><span class="plus">+</span><div class="node o"><div class="nm">헤라</div><div class="gr">Hera</div><div class="role">정실 아내</div></div></div>
+        <div class="kids">
+          <div class="node c"><div class="nm">아레스</div><div class="gr">Ares</div><div class="role">전쟁</div></div>
+          <div class="node c"><div class="nm">헤베</div><div class="gr">Hebe</div><div class="role">청춘</div></div>
+          <div class="node c"><div class="nm">에일레이티이아</div><div class="gr">Eileithyia</div><div class="role">출산</div></div>
+        </div>
+        <div class="note">헤파이스토스(Hephaistos, 대장장이)는 헤시오도스에선 <b>헤라가 홀로</b> 낳았다(제우스가 아테나를 낳은 데 대한 응수).</div>
+      </div>
+      <div class="fam">
+        <div class="couple"><div class="node o lead"><div class="nm">제우스</div></div><span class="plus">+</span><div class="node x"><div class="nm">마이아</div><div class="gr">Maia</div></div></div>
+        <div class="kids"><div class="node c"><div class="nm">헤르메스</div><div class="gr">Hermes</div><div class="role">전령·상업</div></div></div>
+      </div>
+      <div class="fam">
+        <div class="couple"><div class="node o lead"><div class="nm">제우스</div></div><span class="plus">+</span><div class="node x"><div class="nm">세멜레</div><div class="gr">Semele</div><div class="role">인간</div></div></div>
+        <div class="kids"><div class="node c"><div class="nm">디오니소스</div><div class="gr">Dionysos</div><div class="role">포도주·도취</div></div></div>
+      </div>
+      <div class="fam">
+        <div class="couple"><div class="node o lead"><div class="nm">제우스</div></div><span class="plus">+</span><div class="node x"><div class="nm">알크메네</div><div class="gr">Alkmene</div><div class="role">인간</div></div></div>
+        <div class="kids"><div class="node c"><div class="nm">헤라클레스</div><div class="gr">Herakles</div><div class="role">영웅 (뒤에 신격화)</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    ★ = 카오스 → 가이아 → 우라노스 → 크로노스 → 제우스로 이어지는 왕위 계승 축.<br>
+    헤시오도스 <b>신통기</b> 계보 중심 (로마신화·호메로스 이설은 배제). 방대한 방계는 주요 축 위주로 축약.
+  </footer>
+</div>
