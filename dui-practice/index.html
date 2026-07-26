@@ -184,14 +184,60 @@
     margin-top: 20px;
     line-height: 1.6;
   }
+  .start-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .start-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 16px 16px;
+    color: var(--text);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    gap: 4px;
+  }
+  .start-btn:active { transform: scale(0.99); }
+  .start-btn-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+  .start-btn-desc {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .start-btn-adv {
+    border-color: var(--accent);
+    background: rgba(110, 168, 254, 0.08);
+  }
+  .start-btn-adv .start-btn-title { color: var(--accent); }
 </style>
 </head>
 <body>
 
 <h1>对 연습문제</h1>
-<p class="subtitle">对는 "~에 대해"의 만능 번역이 아니다. 방향(对他说) · 특정 조합(有兴趣·满意·负责·重要) · "맞다" 3갈래만 성립한다. 아래 8문항으로 어제 오용 패턴의 새 변형을 점검한다.</p>
+<p class="subtitle" id="subtitleText">对는 "~에 대해"의 만능 번역이 아니다. 방향(对他说) · 특정 조합(有兴趣·满意·负责·重要) · "맞다" 3갈래만 성립한다. 기초 8문항 + 심화 7문항(对来说·对于·向·跟·感到·성어) 총 15문항.</p>
 
-<div class="progress-wrap">
+<div class="start-screen" id="startScreen">
+  <button class="start-btn" id="startAllBtn">
+    <span class="start-btn-title">① 처음부터</span>
+    <span class="start-btn-desc">기초~심화 전체 15문항</span>
+  </button>
+  <button class="start-btn start-btn-adv" id="startAdvBtn">
+    <span class="start-btn-title">② 심화 문제부터</span>
+    <span class="start-btn-desc">기초 8문항은 이미 풀었다면 여기서 바로 — 对来说 · 对于 · 向/跟 경합 · 확장 콜로케이션 · 성어 (7문항)</span>
+  </button>
+</div>
+
+<div class="progress-wrap" id="progressWrap" style="display:none;">
   <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
   <div class="progress-label" id="progressLabel">0 / 8</div>
 </div>
@@ -280,29 +326,113 @@ const QUESTIONS = [
       { zh: "你对说了。", py: "Nǐ duì shuōle.", correct: false }
     ],
     explain: "对의 세 번째 갈래 \"맞다\"는 <b>说得对</b>(정도보어) 또는 <b>说对了</b> 형태로 쓴다. 두 번째 문장은 对를 술어처럼 오용해 문법적으로 성립하지 않는다."
+  },
+  {
+    tag: "심화 · 对来说",
+    prompt: "\"그의 입장에서 보면, 돈은 중요하지 않다\" (관점 전체를 여는 표지)",
+    options: [
+      { zh: "对他来说，钱不重要。", py: "Duì tā lái shuō, qián bú zhòngyào.", correct: true },
+      { zh: "对他，钱不重要。", py: "Duì tā, qián bú zhòngyào.", correct: false }
+    ],
+    explain: "<b>对+대상+来说</b>는 \"~의 입장/관점에서 보면\"이라는 뜻으로 <b>뒤에 오는 절 전체</b>를 감싸는 표지다. 来说 없이 对+대상만 쓰면 그 뒤 술어가 반드시 그 대상을 <b>직접 겨냥</b>해야 한다(对他好·对他重要처럼). 여기서는 钱不重要가 他를 직접 겨냥하지 않고 독립된 주장이므로 来说가 필수 — 어제 배운 술어-겨냥 对와는 다른 갈래다."
+  },
+  {
+    tag: "심화 · 对/对于",
+    prompt: "\"그는 나에게 매우 잘해준다\" (사람 사이의 태도·관계)",
+    options: [
+      { zh: "他对我很好。", py: "Tā duì wǒ hěn hǎo.", correct: true },
+      { zh: "他对于我很好。", py: "Tā duìyú wǒ hěn hǎo.", correct: false }
+    ],
+    explain: "对于는 <b>추상적 사안·주제</b>(问题·现象·情况)를 다룰 때만 쓰는 서면어투 전치사다. <b>사람 사이의 태도·감정</b>(对…好/坏/热情/耐心)은 반드시 순수 <b>对</b>만 쓴다 — 对于我很好는 원어민이 쓰지 않는 조합이다."
+  },
+  {
+    tag: "심화 · 对 vs 向",
+    prompt: "\"우리는 그를 본받아 배워야 한다\" (모범으로 삼는 대상)",
+    options: [
+      { zh: "我们应该向他学习。", py: "Wǒmen yīnggāi xiàng tā xuéxí.", correct: true },
+      { zh: "我们应该对他学习。", py: "Wǒmen yīnggāi duì tā xuéxí.", correct: false }
+    ],
+    explain: "学习의 대상(모범으로 삼는 사람)을 가리킬 때는 <b>向</b>만 쓴다(向他学习·向雷锋学习). 对는 说·满意·负责·重要처럼 <b>정해진 동사·형용사 조합</b>에만 붙는 전치사라 学习와는 결합하지 않는다 — \"对는 만능이 아니다\"의 대표 사례."
+  },
+  {
+    tag: "심화 · 对 vs 跟",
+    prompt: "\"나는 그와 이 일을 상의했다\" (쌍방향 행위)",
+    options: [
+      { zh: "我跟他商量了这件事。", py: "Wǒ gēn tā shāngliangle zhè jiàn shì.", correct: true },
+      { zh: "我对他商量了这件事。", py: "Wǒ duì tā shāngliangle zhè jiàn shì.", correct: false }
+    ],
+    explain: "商量(상의하다)·聊天·合作처럼 <b>쌍방이 함께 하는 행위</b>는 跟/和만 쓴다. 对는 说·抱怨·解释처럼 <b>화자→대상으로 향하는 일방향 행위</b>에만 쓰인다. 商量에 对를 붙이면 방향성 자체가 어긋나는 오류."
+  },
+  {
+    tag: "심화 · 확장 콜로케이션",
+    prompt: "\"그는 결과에 실망했다\" (对+대상+感到+감정형용사)",
+    options: [
+      { zh: "他对结果感到很失望。", py: "Tā duì jiéguǒ gǎndào hěn shīwàng.", correct: true },
+      { zh: "他给结果感到很失望。", py: "Tā gěi jiéguǒ gǎndào hěn shīwàng.", correct: false }
+    ],
+    explain: "<b>对+대상+感到+감정형용사</b>(对…感到失望/满意/惊讶/自豪)는 어제 배운 对+满意/负责 조합의 확장판이다. 给는 수혜·전달의 대상(给他打电话)에 쓰이지 감정이 향하는 대상에는 쓰이지 않는다."
+  },
+  {
+    tag: "심화 · 성어",
+    prompt: "\"그에게 아무리 도리를 설명해도 소용없다\"를 관용적으로 표현하면?",
+    options: [
+      { zh: "跟他说道理，简直是对牛弹琴。", py: "Gēn tā shuō dàoli, jiǎnzhí shì duì niú tán qín.", correct: true },
+      { zh: "跟他说道理，简直是对牛说话。", py: "Gēn tā shuō dàoli, jiǎnzhí shì duì niú shuōhuà.", correct: false }
+    ],
+    explain: "<b>对牛弹琴</b>(소에게 거문고를 타다)은 \"말이 안 통하는 상대에게 애써 설명한다\"는 뜻의 고정 성어다. 구조 자체는 对(소를 향해)+弹(동사)+琴(목적어)로 어제 배운 <b>对의 방향성</b>과 같은 원리지만, 弹琴을 다른 말로 바꾸면(对牛说话) 성어가 깨져 어색한 직역이 된다."
+  },
+  {
+    tag: "심화 · 뉘앙스 비교",
+    prompt: "선생님이 학생들 전체에게 공지하듯 말했다: \"내일 시험이 있다\" — 격식 있는 일방향 공지 뉘앙스에 더 맞는 것은?",
+    options: [
+      { zh: "老师对学生们说：\"明天有考试。\"", py: "Lǎoshī duì xuéshengmen shuō: \"Míngtiān yǒu kǎoshì.\"", correct: true },
+      { zh: "老师跟学生们说：\"明天有考试。\"", py: "Lǎoshī gēn xuéshengmen shuō: \"Míngtiān yǒu kǎoshì.\"", correct: false }
+    ],
+    explain: "이 문항은 <b>둘 다 문법적으로 맞다</b> — 다만 뉘앙스가 다르다. <b>对+대상+说</b>는 화자→대상으로 향하는 <b>격식 있는 일방향 발화</b>(공지·발표)에 어울리고, <b>跟+대상+说</b>는 <b>대화·잡담처럼 쌍방향 뉘앙스</b>가 있는 캐주얼한 어투다. 오답 처리했지만 실제로는 오답이 아니라 \"덜 어울리는 선택\"에 가깝다."
   }
 ];
 
+const ADVANCED_START = 8; // QUESTIONS[8] = 9번 문항부터 심화
+
+let activeQuestions = QUESTIONS;
 let current = 0;
 let score = 0;
 let answered = false;
 
 const quizEl = document.getElementById('quiz');
+const startScreen = document.getElementById('startScreen');
+const progressWrap = document.getElementById('progressWrap');
 const progressFill = document.getElementById('progressFill');
 const progressLabel = document.getElementById('progressLabel');
 const resultCard = document.getElementById('resultCard');
 const resultScore = document.getElementById('resultScore');
 const resultMsg = document.getElementById('resultMsg');
+const subtitleText = document.getElementById('subtitleText');
+
+function beginQuiz(fromAdvanced) {
+  activeQuestions = fromAdvanced ? QUESTIONS.slice(ADVANCED_START) : QUESTIONS;
+  current = 0;
+  score = 0;
+  subtitleText.textContent = fromAdvanced
+    ? '심화 문제부터 시작 — 对来说 · 对于 · 向/跟 경합 · 확장 콜로케이션 · 성어, 총 ' + activeQuestions.length + '문항.'
+    : '기초 8문항 + 심화 7문항, 총 ' + activeQuestions.length + '문항.';
+  startScreen.style.display = 'none';
+  progressWrap.style.display = '';
+  renderQuestion();
+}
+
+document.getElementById('startAllBtn').addEventListener('click', () => beginQuiz(false));
+document.getElementById('startAdvBtn').addEventListener('click', () => beginQuiz(true));
 
 function renderQuestion() {
   answered = false;
-  const q = QUESTIONS[current];
-  progressFill.style.width = (current / QUESTIONS.length * 100) + '%';
-  progressLabel.textContent = `${current} / ${QUESTIONS.length}`;
+  const q = activeQuestions[current];
+  progressFill.style.width = (current / activeQuestions.length * 100) + '%';
+  progressLabel.textContent = `${current} / ${activeQuestions.length}`;
 
   let html = `<div class="card">
     <div class="q-meta">
-      <span class="q-num">문항 ${current + 1} / ${QUESTIONS.length}</span>
+      <span class="q-num">문항 ${current + 1} / ${activeQuestions.length}</span>
       <span class="q-tag">${q.tag}</span>
     </div>
     <div class="q-prompt">${q.prompt}</div>`;
@@ -328,7 +458,7 @@ function onSelect(e) {
   if (answered) return;
   answered = true;
   const idx = parseInt(e.currentTarget.dataset.idx, 10);
-  const q = QUESTIONS[current];
+  const q = activeQuestions[current];
 
   document.querySelectorAll('.option').forEach((btn, i) => {
     btn.classList.add('disabled');
@@ -350,10 +480,10 @@ function onSelect(e) {
     nextBtn.className = 'retry-btn';
     nextBtn.style.width = '100%';
     nextBtn.style.marginTop = '14px';
-    nextBtn.textContent = (current === QUESTIONS.length - 1) ? '결과 보기' : '다음 문항 →';
+    nextBtn.textContent = (current === activeQuestions.length - 1) ? '결과 보기' : '다음 문항 →';
     nextBtn.addEventListener('click', () => {
       current++;
-      if (current >= QUESTIONS.length) {
+      if (current >= activeQuestions.length) {
         showResult();
       } else {
         renderQuestion();
@@ -367,30 +497,28 @@ function onSelect(e) {
 function showResult() {
   quizEl.innerHTML = '';
   progressFill.style.width = '100%';
-  progressLabel.textContent = `${QUESTIONS.length} / ${QUESTIONS.length}`;
-  resultScore.textContent = `${score} / ${QUESTIONS.length}`;
+  progressLabel.textContent = `${activeQuestions.length} / ${activeQuestions.length}`;
+  resultScore.textContent = `${score} / ${activeQuestions.length}`;
 
   let msg;
-  if (score === QUESTIONS.length) {
-    msg = '对 3갈래(방향·특정조합·맞다)를 완전히 구분했다. 다음은 실제 작문에서 자연스럽게 나오는지가 관건.';
-  } else if (score >= QUESTIONS.length - 2) {
-    msg = '대부분 잡았다. 틀린 문항의 패턴(어순 vs 자리)만 한 번 더 짚으면 된다.';
+  if (score === activeQuestions.length) {
+    msg = '对의 방향·특정조합·맞다 갈래는 물론 对来说·对于·向·跟 경합까지 완전히 구분했다. 다음은 실제 작문에서 자연스럽게 나오는지가 관건.';
+  } else if (score >= activeQuestions.length - 2) {
+    msg = '대부분 잡았다. 틀린 문항의 패턴(어순 vs 콜로케이션 경합)만 한 번 더 짚으면 된다.';
   } else {
-    msg = '对의 자리(술어 앞)와 说의 목적어 규칙이 아직 헷갈린다. 오답 문항 위주로 다시 풀어보자.';
+    msg = '对의 자리·콜로케이션 규칙이 아직 헷갈린다. 오답 문항 위주로 다시 풀어보자.';
   }
   resultMsg.textContent = msg;
   resultCard.classList.add('show');
 }
 
 document.getElementById('retryBtn').addEventListener('click', () => {
-  current = 0;
-  score = 0;
   resultCard.classList.remove('show');
-  renderQuestion();
+  startScreen.style.display = '';
+  progressWrap.style.display = 'none';
+  subtitleText.textContent = '기초 8문항 + 심화 7문항(对来说·对于·向·跟·感到·성어) 총 15문항.';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
-
-renderQuestion();
 </script>
 
 </body>
