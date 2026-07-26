@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>对 연습문제</title>
+<style>
+  :root {
+    --bg: #14161a;
+    --card: #1e2127;
+    --card-border: #2c3038;
+    --text: #e8e9ec;
+    --text-dim: #9a9ea8;
+    --accent: #6ea8fe;
+    --good: #3ecf8e;
+    --good-bg: rgba(62, 207, 142, 0.12);
+    --bad: #ff6b6b;
+    --bad-bg: rgba(255, 107, 107, 0.12);
+    --pinyin: #7ee0c3;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  body { padding: 20px 14px 60px; max-width: 640px; margin: 0 auto; }
+  h1 {
+    font-size: 1.35rem;
+    margin: 4px 0 2px;
+    line-height: 1.3;
+  }
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 0.88rem;
+    margin: 0 0 18px;
+    line-height: 1.5;
+  }
+  .progress-wrap {
+    position: sticky; top: 0;
+    background: var(--bg);
+    padding: 10px 0 14px;
+    z-index: 5;
+  }
+  .progress-bar {
+    height: 6px;
+    background: var(--card-border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+  .progress-label {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-top: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 18px 16px;
+    margin-bottom: 14px;
+  }
+  .q-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .q-num {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .q-tag {
+    font-size: 0.7rem;
+    color: var(--accent);
+    background: rgba(110, 168, 254, 0.12);
+    padding: 3px 9px;
+    border-radius: 999px;
+  }
+  .q-prompt {
+    font-size: 1rem;
+    line-height: 1.55;
+    margin-bottom: 14px;
+    color: var(--text);
+  }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: #262a32;
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 14px 14px;
+    margin-bottom: 10px;
+    color: var(--text);
+    font-size: 1.08rem;
+    line-height: 1.5;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 48px;
+  }
+  .option .zh { font-size: 1.15rem; }
+  .option .py {
+    display: block;
+    color: var(--pinyin);
+    font-size: 0.82rem;
+    margin-top: 4px;
+    font-family: -apple-system, sans-serif;
+  }
+  .option:active { transform: scale(0.99); }
+  .option.correct {
+    background: var(--good-bg);
+    border-color: var(--good);
+  }
+  .option.wrong {
+    background: var(--bad-bg);
+    border-color: var(--bad);
+  }
+  .option.disabled { pointer-events: none; opacity: 0.85; }
+  .option .mark {
+    float: right;
+    font-size: 1.1rem;
+  }
+  .explain {
+    margin-top: 10px;
+    padding: 12px 14px;
+    background: #171a20;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--text-dim);
+    display: none;
+  }
+  .explain.show { display: block; }
+  .explain b { color: var(--text); }
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--accent);
+    border-radius: 14px;
+    padding: 26px 18px;
+    text-align: center;
+    display: none;
+  }
+  .result-card.show { display: block; }
+  .result-score {
+    font-size: 2.2rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    margin: 6px 0;
+  }
+  .result-msg {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 18px;
+  }
+  .retry-btn {
+    background: var(--accent);
+    color: #14161a;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 28px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 48px;
+  }
+  .hint-footer {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.78rem;
+    margin-top: 20px;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<h1>对 연습문제</h1>
+<p class="subtitle">对는 "~에 대해"의 만능 번역이 아니다. 방향(对他说) · 특정 조합(有兴趣·满意·负责·重要) · "맞다" 3갈래만 성립한다. 아래 8문항으로 어제 오용 패턴의 새 변형을 점검한다.</p>
+
+<div class="progress-wrap">
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-label" id="progressLabel">0 / 8</div>
+</div>
+
+<div id="quiz"></div>
+
+<div class="result-card" id="resultCard">
+  <div style="font-size:0.9rem;color:var(--text-dim);">최종 점수</div>
+  <div class="result-score" id="resultScore">0 / 8</div>
+  <div class="result-msg" id="resultMsg"></div>
+  <button class="retry-btn" id="retryBtn">다시 풀기</button>
+</div>
+
+<p class="hint-footer">틀린 문항은 나중에 Anki 약점 카드로 만들 수 있다.</p>
+
+<script>
+const QUESTIONS = [
+  {
+    tag: "최소대립쌍",
+    prompt: "\"나는 그에게 이 계획에 대해 말했다\" (대상=그, 주제=이 계획)",
+    options: [
+      { zh: "我对他说了这个计划。", py: "Wǒ duì tā shuōle zhège jìhuà.", correct: true },
+      { zh: "我对这个计划说了他。", py: "Wǒ duì zhège jìhuà shuōle tā.", correct: false }
+    ],
+    explain: "说과 쓰이는 对는 반드시 <b>对+사람(대상)</b>이다. 주제(计划)는 说의 직접 목적어로 그대로 온다. 두 번째 문장은 对 뒤에 주제를 넣은 오류 — 어제의 <b>说对AI</b>와 같은 함정 패턴이다."
+  },
+  {
+    tag: "어순 오류수정",
+    prompt: "\"건강이 나에게 중요하다\"",
+    options: [
+      { zh: "健康对我很重要。", py: "Jiànkāng duì wǒ hěn zhòngyào.", correct: true },
+      { zh: "我对健康很重要。", py: "Wǒ duì jiànkāng hěn zhòngyào.", correct: false }
+    ],
+    explain: "구조는 <b>[사물] 对 [사람] 重要</b> — ~가 ~에게 중요하다. 두 번째 문장은 주어와 대상이 뒤바뀌어 \"내가 건강에게 중요하다\"는 뜻이 되어버린다."
+  },
+  {
+    tag: "번역 함정",
+    prompt: "\"이 소설에 대해 이야기해보자\"를 올바르게 번역한 것은?",
+    options: [
+      { zh: "我们说说这本小说吧。", py: "Wǒmen shuōshuo zhè běn xiǎoshuō ba.", correct: true },
+      { zh: "我们对这本小说说说吧。", py: "Wǒmen duì zhè běn xiǎoshuō shuōshuo ba.", correct: false }
+    ],
+    explain: "说는 주제를 <b>직접 목적어</b>로 받는다 (说说+주제). 对+주제+说 형태는 존재하지 않는다 — 어제의 说对AI 오류와 완전히 같은 함정이다."
+  },
+  {
+    tag: "어순 오류수정",
+    prompt: "\"그는 이 결과에 매우 만족한다\"",
+    options: [
+      { zh: "他对这个结果很满意。", py: "Tā duì zhège jiéguǒ hěn mǎnyì.", correct: true },
+      { zh: "他很满意对这个结果。", py: "Tā hěn mǎnyì duì zhège jiéguǒ.", correct: false }
+    ],
+    explain: "对+대상은 <b>술어(满意) 앞</b>에 온다. 술어 뒤에 对를 놓는 두 번째 문장은 어순 오류다."
+  },
+  {
+    tag: "어순 오류수정",
+    prompt: "\"나는 이 일에 책임감이 있다\"",
+    options: [
+      { zh: "我对这件事很负责。", py: "Wǒ duì zhè jiàn shì hěn fùzé.", correct: true },
+      { zh: "我负责对这件事。", py: "Wǒ fùzé duì zhè jiàn shì.", correct: false }
+    ],
+    explain: "负责도 满意처럼 <b>对+대상이 술어 앞</b>에 온다. 负责 자체가 이미 \"책임지다\"라는 동사라 뒤에 对를 또 붙이면 이중 오류가 된다."
+  },
+  {
+    tag: "최소대립쌍",
+    prompt: "\"이 책에 관한 정보\" (명사를 꾸미는 관형어)",
+    options: [
+      { zh: "关于这本书的信息", py: "guānyú zhè běn shū de xìnxī", correct: true },
+      { zh: "对这本书的信息", py: "duì zhè běn shū de xìnxī", correct: false }
+    ],
+    explain: "명사를 꾸미는 \"~에 관한\"은 <b>关于</b>만 가능하다. 对는 이런 관형어 자리에 들어갈 수 없다."
+  },
+  {
+    tag: "최소대립쌍",
+    prompt: "\"나는 그에게 이 소식을 말했다\" (대상=그)",
+    options: [
+      { zh: "我对他说了这个消息。", py: "Wǒ duì tā shuōle zhège xiāoxi.", correct: true },
+      { zh: "我关于他说了这个消息。", py: "Wǒ guānyú tā shuōle zhège xiāoxi.", correct: false }
+    ],
+    explain: "关于는 문장 맨 앞에서 전체 주제를 여는 전치사다(关于他，我说了这个消息처럼). 술어 바로 앞에서 <b>대상(사람)</b>을 가리키는 자리는 对의 자리다."
+  },
+  {
+    tag: "对/不对",
+    prompt: "\"네 말이 맞아\"",
+    options: [
+      { zh: "你说得对。", py: "Nǐ shuō de duì.", correct: true },
+      { zh: "你对说了。", py: "Nǐ duì shuōle.", correct: false }
+    ],
+    explain: "对의 세 번째 갈래 \"맞다\"는 <b>说得对</b>(정도보어) 또는 <b>说对了</b> 형태로 쓴다. 두 번째 문장은 对를 술어처럼 오용해 문법적으로 성립하지 않는다."
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+const quizEl = document.getElementById('quiz');
+const progressFill = document.getElementById('progressFill');
+const progressLabel = document.getElementById('progressLabel');
+const resultCard = document.getElementById('resultCard');
+const resultScore = document.getElementById('resultScore');
+const resultMsg = document.getElementById('resultMsg');
+
+function renderQuestion() {
+  answered = false;
+  const q = QUESTIONS[current];
+  progressFill.style.width = (current / QUESTIONS.length * 100) + '%';
+  progressLabel.textContent = `${current} / ${QUESTIONS.length}`;
+
+  let html = `<div class="card">
+    <div class="q-meta">
+      <span class="q-num">문항 ${current + 1} / ${QUESTIONS.length}</span>
+      <span class="q-tag">${q.tag}</span>
+    </div>
+    <div class="q-prompt">${q.prompt}</div>`;
+
+  q.options.forEach((opt, i) => {
+    html += `<button class="option" data-idx="${i}">
+      <span class="zh">${opt.zh}</span>
+      <span class="py">${opt.py}</span>
+    </button>`;
+  });
+
+  html += `<div class="explain" id="explainBox">${q.explain}</div>
+  </div>`;
+
+  quizEl.innerHTML = html;
+
+  document.querySelectorAll('.option').forEach(btn => {
+    btn.addEventListener('click', onSelect);
+  });
+}
+
+function onSelect(e) {
+  if (answered) return;
+  answered = true;
+  const idx = parseInt(e.currentTarget.dataset.idx, 10);
+  const q = QUESTIONS[current];
+
+  document.querySelectorAll('.option').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if (q.options[i].correct) {
+      btn.classList.add('correct');
+      btn.innerHTML += '<span class="mark">✅</span>';
+    } else if (i === idx) {
+      btn.classList.add('wrong');
+      btn.innerHTML += '<span class="mark">❌</span>';
+    }
+  });
+
+  if (q.options[idx].correct) score++;
+
+  document.getElementById('explainBox').classList.add('show');
+
+  setTimeout(() => {
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'retry-btn';
+    nextBtn.style.width = '100%';
+    nextBtn.style.marginTop = '14px';
+    nextBtn.textContent = (current === QUESTIONS.length - 1) ? '결과 보기' : '다음 문항 →';
+    nextBtn.addEventListener('click', () => {
+      current++;
+      if (current >= QUESTIONS.length) {
+        showResult();
+      } else {
+        renderQuestion();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+    document.querySelector('.card').appendChild(nextBtn);
+  }, 100);
+}
+
+function showResult() {
+  quizEl.innerHTML = '';
+  progressFill.style.width = '100%';
+  progressLabel.textContent = `${QUESTIONS.length} / ${QUESTIONS.length}`;
+  resultScore.textContent = `${score} / ${QUESTIONS.length}`;
+
+  let msg;
+  if (score === QUESTIONS.length) {
+    msg = '对 3갈래(방향·특정조합·맞다)를 완전히 구분했다. 다음은 실제 작문에서 자연스럽게 나오는지가 관건.';
+  } else if (score >= QUESTIONS.length - 2) {
+    msg = '대부분 잡았다. 틀린 문항의 패턴(어순 vs 자리)만 한 번 더 짚으면 된다.';
+  } else {
+    msg = '对의 자리(술어 앞)와 说의 목적어 규칙이 아직 헷갈린다. 오답 문항 위주로 다시 풀어보자.';
+  }
+  resultMsg.textContent = msg;
+  resultCard.classList.add('show');
+}
+
+document.getElementById('retryBtn').addEventListener('click', () => {
+  current = 0;
+  score = 0;
+  resultCard.classList.remove('show');
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+renderQuestion();
+</script>
+
+</body>
+</html>
