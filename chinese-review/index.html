@@ -1,0 +1,390 @@
+<title>중국어 복습 — 최근 물어본 표현</title>
+<style>
+:root{
+  --bg:#0b0d10; --card:#15181d; --card2:#1c2028; --text:#eef1f4; --sub:#9aa4b2;
+  --accent:#5ee6c8; --accent2:#7aa2ff; --bad:#ff6b6b; --good:#5ee68a;
+  --border:#262b33;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#f4f5f7; --card:#ffffff; --card2:#eef0f3; --text:#1a1d21; --sub:#5b6472;
+    --accent:#0e9c7f; --accent2:#3f63d6; --bad:#d6423a; --good:#1c9a52; --border:#e1e4e9; }
+}
+:root[data-theme="dark"]{
+  --bg:#0b0d10; --card:#15181d; --card2:#1c2028; --text:#eef1f4; --sub:#9aa4b2;
+  --accent:#5ee6c8; --accent2:#7aa2ff; --bad:#ff6b6b; --good:#5ee68a; --border:#262b33;
+}
+:root[data-theme="light"]{
+  --bg:#f4f5f7; --card:#ffffff; --card2:#eef0f3; --text:#1a1d21; --sub:#5b6472;
+  --accent:#0e9c7f; --accent2:#3f63d6; --bad:#d6423a; --good:#1c9a52; --border:#e1e4e9;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+  min-height:100vh; padding:16px; padding-bottom:48px;
+}
+.wrap{ max-width:520px; margin:0 auto; }
+header{ text-align:center; margin:8px 0 18px; }
+header h1{ font-size:1.15rem; margin:0 0 4px; }
+header p{ font-size:0.8rem; color:var(--sub); margin:0; }
+
+.tabs{ display:flex; gap:8px; margin-bottom:16px; }
+.tab-btn{
+  flex:1; padding:10px 8px; border-radius:10px; border:1px solid var(--border);
+  background:var(--card); color:var(--text); font-size:0.85rem; font-weight:600;
+  cursor:pointer;
+}
+.tab-btn.active{ background:var(--accent); color:#06110d; border-color:var(--accent); }
+
+.progress-row{ display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+.progress-bar{ flex:1; height:7px; background:var(--card2); border-radius:99px; overflow:hidden; }
+.progress-fill{ height:100%; background:var(--accent); width:0%; transition:width .25s ease; }
+.progress-label{ font-size:0.75rem; color:var(--sub); white-space:nowrap; }
+
+.card{
+  background:var(--card); border:1px solid var(--border); border-radius:18px;
+  padding:28px 20px; min-height:280px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center; gap:14px;
+  cursor:pointer; user-select:none; position:relative;
+}
+.hanzi{ font-size:3rem; font-weight:700; letter-spacing:1px; }
+.pinyin{ font-size:1.05rem; color:var(--accent2); }
+.hint{ font-size:0.75rem; color:var(--sub); position:absolute; bottom:12px; }
+.flip-back{ display:none; width:100%; }
+.card.flipped .flip-front{ display:none; }
+.card.flipped .flip-back{ display:flex; flex-direction:column; gap:10px; align-items:center; }
+.meaning{ font-size:1.25rem; font-weight:600; }
+.pattern-box{
+  background:var(--card2); border-radius:10px; padding:10px 12px; width:100%;
+  font-size:0.85rem; color:var(--text);
+}
+.pattern-box .label{ color:var(--accent); font-weight:700; font-size:0.72rem; letter-spacing:.03em; display:block; margin-bottom:4px; }
+.example{ font-size:0.95rem; }
+.example-pinyin{ font-size:0.78rem; color:var(--sub); }
+.example-meaning{ font-size:0.82rem; color:var(--sub); }
+
+.controls{ display:flex; gap:10px; margin-top:16px; }
+.controls button{
+  flex:1; padding:13px 8px; border-radius:12px; border:1px solid var(--border);
+  background:var(--card2); color:var(--text); font-size:0.9rem; font-weight:600; cursor:pointer;
+}
+.controls button.primary{ background:var(--accent); color:#06110d; border-color:var(--accent); }
+.controls button:active{ transform:scale(.97); }
+
+/* quiz mode */
+.quiz-q{ font-size:1.1rem; margin-bottom:4px; }
+.quiz-sub{ font-size:0.8rem; color:var(--sub); margin-bottom:16px; }
+.choices{ display:flex; flex-direction:column; gap:10px; width:100%; }
+.choice-btn{
+  width:100%; padding:14px 12px; border-radius:12px; border:1px solid var(--border);
+  background:var(--card2); color:var(--text); font-size:1rem; text-align:left; cursor:pointer;
+}
+.choice-btn:active{ transform:scale(.98); }
+.choice-btn.correct{ background:rgba(94,230,138,.18); border-color:var(--good); color:var(--good); }
+.choice-btn.wrong{ background:rgba(255,107,107,.18); border-color:var(--bad); color:var(--bad); }
+.choice-btn[disabled]{ pointer-events:none; }
+
+.explain{
+  margin-top:14px; padding:12px 14px; border-radius:12px; background:var(--card2);
+  font-size:0.85rem; line-height:1.5; display:none;
+}
+.explain.show{ display:block; }
+
+.result-screen{ text-align:center; padding:40px 12px; }
+.result-score{ font-size:2.4rem; font-weight:800; margin:10px 0; }
+.result-msg{ color:var(--sub); font-size:0.9rem; margin-bottom:20px; }
+
+.hidden{ display:none !important; }
+footer{ text-align:center; color:var(--sub); font-size:0.72rem; margin-top:28px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>🀄 중국어 복습 — 최근 물어본 표현</h1>
+    <p>08-02 기준 · 亏·顺·贴/帖·吃灰·困惑·瞬间·攒局·查询·却·享受·定时 + 가능보어·越来越</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-flash">🔄 플래시카드</button>
+    <button class="tab-btn" id="tab-quiz">✏️ 퀴즈</button>
+  </div>
+
+  <div class="progress-row">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 / 0</div>
+  </div>
+
+  <!-- FLASHCARD MODE -->
+  <div id="flashMode">
+    <div class="card" id="flashCard">
+      <div class="flip-front">
+        <div class="hanzi" id="fHanzi">亏</div>
+        <div class="hint">탭해서 뒤집기</div>
+      </div>
+      <div class="flip-back">
+        <div class="hanzi" id="bHanzi">亏</div>
+        <div class="pinyin" id="bPinyin">kuī</div>
+        <div class="meaning" id="bMeaning">손해보다·부족하다</div>
+        <div class="pattern-box">
+          <span class="label">구문 틀</span>
+          <span id="bPattern">幸亏___，不然___</span>
+        </div>
+        <div>
+          <div class="example" id="bExample">幸亏我提前卖了，不然亏大了。</div>
+          <div class="example-pinyin" id="bExamplePinyin">Xìngkuī wǒ tíqián mài le, bùrán kuī dà le.</div>
+          <div class="example-meaning" id="bExampleMeaning">다행히 미리 팔았어, 안 그랬으면 크게 손해 볼 뻔했어.</div>
+        </div>
+      </div>
+    </div>
+    <div class="controls">
+      <button id="flashPrev">← 이전</button>
+      <button id="flashShuffle">🔀 셔플</button>
+      <button id="flashNext" class="primary">다음 →</button>
+    </div>
+  </div>
+
+  <!-- QUIZ MODE -->
+  <div id="quizMode" class="hidden">
+    <div id="quizPlay">
+      <div class="card" style="min-height:auto; padding:22px 18px; cursor:default; align-items:flex-start; text-align:left;">
+        <div class="quiz-q" id="quizQ">문제</div>
+        <div class="quiz-sub" id="quizSub">보조 설명</div>
+        <div class="choices" id="quizChoices"></div>
+        <div class="explain" id="quizExplain"></div>
+      </div>
+      <div class="controls">
+        <button id="quizShuffle">🔀 셔플</button>
+        <button id="quizNext" class="primary" disabled>다음 →</button>
+      </div>
+    </div>
+    <div id="quizResult" class="result-screen hidden">
+      <div>퀴즈 완료</div>
+      <div class="result-score" id="resultScore">0 / 0</div>
+      <div class="result-msg" id="resultMsg"></div>
+      <div class="controls">
+        <button id="quizRetry" class="primary">🔁 다시 하기</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>chinese-learning-po · vault: 50 Agents/chinese-learning-po/knowledge</footer>
+</div>
+
+<script>
+const DATA = [
+  { hanzi:"亏", pinyin:"kuī", meaning:"손해보다·부족하다", pattern:"幸亏___，不然___ (다행히 A, 안 그랬으면 나쁜 결과 B)",
+    example:"幸亏我提前卖了，不然亏大了。", examplePinyin:"Xìngkuī wǒ tíqián mài le, bùrán kuī dà le.", exampleMeaning:"다행히 미리 팔았어, 안 그랬으면 크게 손해 볼 뻔했어." },
+  { hanzi:"顺", pinyin:"shùn", meaning:"순조롭다·따르다·~하는 김에", pattern:"顺便+V (~하는 김에) / 顺着+N+走 (~을 따라)",
+    example:"我去超市，顺便帮你买瓶水。", examplePinyin:"Wǒ qù chāoshì, shùnbiàn bāng nǐ mǎi píng shuǐ.", exampleMeaning:"슈퍼 가는 김에 물 한 병 사다 줄게." },
+  { hanzi:"贴", pinyin:"tiē", meaning:"붙이다·밀착하다·보태다", pattern:"贴心的___ (마음에 와닿는 ~) / 补贴 (보조금)",
+    example:"这是一项很贴心的服务。", examplePinyin:"Zhè shì yī xiàng hěn tiēxīn de fúwù.", exampleMeaning:"이건 아주 마음에 와닿는(자상한) 서비스다." },
+  { hanzi:"帖", pinyin:"tiě", meaning:"게시글·포스트 (SNS)", pattern:"发帖 (글 올리다) / 回帖 (댓글 달다)",
+    example:"我在网上发了一个帖子。", examplePinyin:"Wǒ zài wǎngshàng fā le yī gè tiězi.", exampleMeaning:"나는 인터넷에 게시글을 하나 올렸다." },
+  { hanzi:"吃灰", pinyin:"chī huī", meaning:"(안 쓰이고) 방치되다·먼지 쌓이다", pattern:"N + 一直/在 + 吃灰",
+    example:"我买了那个健身环，结果一直在吃灰。", examplePinyin:"Wǒ mǎi le nàge jiànshēnhuán, jiéguǒ yìzhí zài chī huī.", exampleMeaning:"그 홈짐 링을 샀는데, 결국 계속 방치되고 있다." },
+  { hanzi:"困惑", pinyin:"kùnhuò", meaning:"곤혹스럽다·갈피를 못 잡다", pattern:"对…感到困惑 / 陷入困惑",
+    example:"我对这个需求感到困惑。", examplePinyin:"Wǒ duì zhège xūqiú gǎndào kùnhuò.", exampleMeaning:"나는 이 요구사항이 곤혹스럽다(갈피를 못 잡겠다)." },
+  { hanzi:"瞬间", pinyin:"shùnjiān", meaning:"순간·찰나", pattern:"在…的瞬间 (~하는 순간에) / 一瞬间",
+    example:"那一瞬间，我什么都想到了。", examplePinyin:"Nà yī shùnjiān, wǒ shénme dōu xiǎngdào le.", exampleMeaning:"그 순간 온갖 생각이 다 들었다." },
+  { hanzi:"攒局", pinyin:"zǎn jú", meaning:"(사람 모아) 모임·자리를 만들다", pattern:"攒(个/了)+局 (이합사, 사이에 성분 삽입)",
+    example:"周末攒个局吧。", examplePinyin:"Zhōumò zǎn gè jú ba.", exampleMeaning:"주말에 모임 한번 잡자." },
+  { hanzi:"查询", pinyin:"chá xún", meaning:"조회하다·문의하다 (DB 쿼리)", pattern:"查询 + N (조회 대상)",
+    example:"数据库查询语句需要优化。", examplePinyin:"Shùjùkù cháxún yǔjù xūyào yōuhuà.", exampleMeaning:"데이터베이스 쿼리문을 최적화해야 한다." },
+  { hanzi:"却", pinyin:"què", meaning:"그러나·오히려·도리어 (역접 부사)", pattern:"A，(주어) + 却 + V/adj (但是와 달리 주어 뒤·술어 앞에 위치 고정)",
+    example:"我努力了，却失败了。", examplePinyin:"Wǒ nǔlì le, què shībài le.", exampleMeaning:"노력했는데 오히려 실패했다." },
+  { hanzi:"享受", pinyin:"xiǎngshòu", meaning:"누리다·즐기다", pattern:"享受 + N (享受生活·享受美食)",
+    example:"这是一种享受。", examplePinyin:"Zhè shì yī zhǒng xiǎngshòu.", exampleMeaning:"이건 하나의 누림(호사)이다." },
+  { hanzi:"定时", pinyin:"dìngshí", meaning:"정시·정해진 시간에·타이머", pattern:"定时任务 (예약 작업=cron) / 定时器 (타이머)",
+    example:"这个定时任务每天06:55执行。", examplePinyin:"Zhège dìngshí rènwù měitiān liù diǎn wǔshíwǔ fēn zhíxíng.", exampleMeaning:"이 예약 작업(cron)은 매일 06:55에 실행된다." },
+  { hanzi:"买不起", pinyin:"mǎi bu qǐ", meaning:"(형편이 안 돼서) 못 산다", pattern:"V不起 = 경제력·형편 부족 (买不起/租不起/请不起)",
+    example:"这个公寓我买不起。", examplePinyin:"Zhège gōngyù wǒ mǎi bu qǐ.", exampleMeaning:"이 아파트는 나한텐 너무 비싸서 못 산다." },
+  { hanzi:"坐不下", pinyin:"zuò bu xià", meaning:"(공간이 없어서) 못 앉는다", pattern:"V不下 = 공간·수용 불가 (坐不下/放不下/吃不下)",
+    example:"这张桌子坐不下五个人。", examplePinyin:"Zhè zhāng zhuōzi zuò bu xià wǔ gè rén.", exampleMeaning:"이 테이블은 다섯 명이 앉을 자리가 안 된다." },
+  { hanzi:"越来越", pinyin:"yuè lái yuè", meaning:"갈수록·점점 더", pattern:"S + 越来越 + Adj/V(+了) / 越A越B (A할수록 B)",
+    example:"天气越来越热了。", examplePinyin:"Tiānqì yuè lái yuè rè le.", exampleMeaning:"날씨가 갈수록 더워진다." },
+];
+
+let flashIdx = 0;
+let flashOrder = DATA.map((_,i)=>i);
+
+function shuffleArr(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+const flashCard = document.getElementById('flashCard');
+const progressFill = document.getElementById('progressFill');
+const progressLabel = document.getElementById('progressLabel');
+
+function renderFlash(){
+  const d = DATA[flashOrder[flashIdx]];
+  flashCard.classList.remove('flipped');
+  document.getElementById('fHanzi').textContent = d.hanzi;
+  document.getElementById('bHanzi').textContent = d.hanzi;
+  document.getElementById('bPinyin').textContent = d.pinyin;
+  document.getElementById('bMeaning').textContent = d.meaning;
+  document.getElementById('bPattern').textContent = d.pattern;
+  document.getElementById('bExample').textContent = d.example;
+  document.getElementById('bExamplePinyin').textContent = d.examplePinyin;
+  document.getElementById('bExampleMeaning').textContent = d.exampleMeaning;
+  updateProgress(flashIdx+1, DATA.length);
+}
+
+function updateProgress(cur, total){
+  progressFill.style.width = (total? (cur/total*100):0) + '%';
+  progressLabel.textContent = cur + ' / ' + total;
+}
+
+flashCard.addEventListener('click', ()=> flashCard.classList.toggle('flipped'));
+document.getElementById('flashNext').addEventListener('click', ()=>{
+  flashIdx = (flashIdx+1) % DATA.length;
+  renderFlash();
+});
+document.getElementById('flashPrev').addEventListener('click', ()=>{
+  flashIdx = (flashIdx-1+DATA.length) % DATA.length;
+  renderFlash();
+});
+document.getElementById('flashShuffle').addEventListener('click', ()=>{
+  flashOrder = shuffleArr(DATA.map((_,i)=>i));
+  flashIdx = 0;
+  renderFlash();
+});
+
+// ---- QUIZ MODE ----
+let quizOrder = [];
+let quizIdx = 0;
+let quizScore = 0;
+let quizAnswered = false;
+
+function buildQuiz(){
+  quizOrder = shuffleArr(DATA.map((_,i)=>i));
+  quizIdx = 0;
+  quizScore = 0;
+  document.getElementById('quizResult').classList.add('hidden');
+  document.getElementById('quizPlay').classList.remove('hidden');
+  renderQuiz();
+}
+
+function makeChoices(correctIdx, key){
+  // key: 'meaning' (한자→뜻) or 'hanzi' (뜻→한자)
+  const pool = DATA.map((d,i)=>i).filter(i=>i!==correctIdx);
+  shuffleArr(pool);
+  const wrongs = pool.slice(0,3);
+  const choiceIdxs = shuffleArr([correctIdx, ...wrongs]);
+  return choiceIdxs;
+}
+
+function renderQuiz(){
+  quizAnswered = false;
+  const total = quizOrder.length;
+  updateProgress(quizIdx, total);
+  document.getElementById('quizNext').disabled = true;
+  document.getElementById('quizExplain').classList.remove('show');
+  document.getElementById('quizExplain').textContent = '';
+
+  const dataIdx = quizOrder[quizIdx];
+  const d = DATA[dataIdx];
+  const askHanzi = Math.random() < 0.5; // true: 한자 보여주고 뜻 고르기 / false: 뜻 보여주고 한자 고르기
+
+  const qEl = document.getElementById('quizQ');
+  const subEl = document.getElementById('quizSub');
+  const choicesEl = document.getElementById('quizChoices');
+  choicesEl.innerHTML = '';
+
+  let choiceIdxs;
+  if(askHanzi){
+    qEl.innerHTML = '<span style="font-size:2rem;">' + d.hanzi + '</span> <span style="color:var(--sub); font-size:0.9rem;">(' + d.pinyin + ')</span>';
+    subEl.textContent = '뜻을 고르세요';
+    choiceIdxs = makeChoices(dataIdx, 'meaning');
+    choiceIdxs.forEach(ci=>{
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = DATA[ci].meaning;
+      btn.addEventListener('click', ()=> selectAnswer(btn, ci===dataIdx, dataIdx));
+      choicesEl.appendChild(btn);
+    });
+  } else {
+    qEl.textContent = d.meaning;
+    subEl.textContent = '알맞은 한자를 고르세요';
+    choiceIdxs = makeChoices(dataIdx, 'hanzi');
+    choiceIdxs.forEach(ci=>{
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.innerHTML = '<span style="font-size:1.2rem;">' + DATA[ci].hanzi + '</span> <span style="color:var(--sub); font-size:0.8rem;">(' + DATA[ci].pinyin + ')</span>';
+      btn.addEventListener('click', ()=> selectAnswer(btn, ci===dataIdx, dataIdx));
+      choicesEl.appendChild(btn);
+    });
+  }
+}
+
+function selectAnswer(btn, isCorrect, dataIdx){
+  if(quizAnswered) return;
+  quizAnswered = true;
+  const d = DATA[dataIdx];
+  const buttons = document.querySelectorAll('#quizChoices .choice-btn');
+  buttons.forEach(b=> b.disabled = true);
+  if(isCorrect){
+    btn.classList.add('correct');
+    quizScore++;
+  } else {
+    btn.classList.add('wrong');
+  }
+  const explain = document.getElementById('quizExplain');
+  explain.classList.add('show');
+  explain.innerHTML =
+    '<b>' + d.hanzi + '</b> (' + d.pinyin + ') — ' + d.meaning + '<br>' +
+    '<span style="color:var(--accent);">구문 틀</span> ' + d.pattern + '<br>' +
+    d.example + ' <span style="color:var(--sub);">' + d.examplePinyin + '</span><br>' +
+    '<span style="color:var(--sub);">' + d.exampleMeaning + '</span>';
+  document.getElementById('quizNext').disabled = false;
+}
+
+document.getElementById('quizNext').addEventListener('click', ()=>{
+  quizIdx++;
+  if(quizIdx >= quizOrder.length){
+    showQuizResult();
+  } else {
+    renderQuiz();
+  }
+});
+document.getElementById('quizShuffle').addEventListener('click', buildQuiz);
+document.getElementById('quizRetry').addEventListener('click', buildQuiz);
+
+function showQuizResult(){
+  document.getElementById('quizPlay').classList.add('hidden');
+  const resultEl = document.getElementById('quizResult');
+  resultEl.classList.remove('hidden');
+  document.getElementById('resultScore').textContent = quizScore + ' / ' + quizOrder.length;
+  const pct = Math.round(quizScore / quizOrder.length * 100);
+  let msg = pct >= 80 ? '탄탄해요. 구문 틀까지 산출로 옮겨보세요.' : (pct >= 50 ? '반은 잡았어요. 틀린 것만 골라 Anki로 보강하세요.' : '아직 낯설어요. 플래시카드로 한 바퀴 더.');
+  document.getElementById('resultMsg').textContent = msg;
+  updateProgress(quizOrder.length, quizOrder.length);
+}
+
+// ---- TABS ----
+const tabFlash = document.getElementById('tab-flash');
+const tabQuiz = document.getElementById('tab-quiz');
+const flashModeEl = document.getElementById('flashMode');
+const quizModeEl = document.getElementById('quizMode');
+
+tabFlash.addEventListener('click', ()=>{
+  tabFlash.classList.add('active');
+  tabQuiz.classList.remove('active');
+  flashModeEl.classList.remove('hidden');
+  quizModeEl.classList.add('hidden');
+  renderFlash();
+});
+tabQuiz.addEventListener('click', ()=>{
+  tabQuiz.classList.add('active');
+  tabFlash.classList.remove('active');
+  quizModeEl.classList.remove('hidden');
+  flashModeEl.classList.add('hidden');
+  buildQuiz();
+});
+
+// init
+renderFlash();
+</script>
