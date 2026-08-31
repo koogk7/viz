@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>돈의 크기 사다리</title>
+<style>
+  :root{
+    --bg:#0e1013; --panel:#171a1f; --panel2:#1e222a; --line:#2a2f39;
+    --tx:#e8eaed; --dim:#9aa3b2; --gold:#f2c14e; --grn:#4ade80; --red:#f87171; --blu:#60a5fa;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tx);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",Roboto,sans-serif;
+    font-size:15px;line-height:1.5;-webkit-text-size-adjust:100%}
+  .wrap{max-width:640px;margin:0 auto;padding:18px 16px 60px}
+  h1{font-size:22px;margin:.2em 0 .1em;letter-spacing:-.01em}
+  .sub{color:var(--dim);font-size:13px;margin-bottom:16px}
+  .tnum{font-variant-numeric:tabular-nums}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 15px;margin:12px 0}
+  label{display:block;color:var(--dim);font-size:12px;margin-bottom:6px}
+  .inputrow{display:flex;gap:8px}
+  input[type=number]{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);color:var(--tx);
+    border-radius:10px;padding:12px 12px;font-size:19px;font-weight:600;-webkit-appearance:none;font-variant-numeric:tabular-nums}
+  select{background:var(--panel2);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:0 10px;font-size:16px;font-weight:600}
+  input:focus,select:focus{outline:none;border-color:var(--gold)}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+  .chip{background:var(--panel2);border:1px solid var(--line);color:var(--tx);border-radius:999px;
+    padding:7px 12px;font-size:13px;cursor:pointer;transition:.12s}
+  .chip:active{transform:scale(.96)} .chip.on{background:var(--gold);color:#111;border-color:var(--gold);font-weight:700}
+  .headline{font-size:15px;color:var(--dim);margin:2px 0 2px}
+  .big{font-size:30px;font-weight:800;letter-spacing:-.02em;color:var(--gold);font-variant-numeric:tabular-nums;line-height:1.15}
+  .usd{color:var(--grn);font-size:15px;font-weight:600}
+  /* ladder */
+  .ladder{position:relative;height:430px;margin:6px 4px 2px;border-left:2px solid var(--line)}
+  .tick{position:absolute;left:0;right:0;display:flex;align-items:center;gap:8px;transform:translateY(50%)}
+  .tick .dot{width:7px;height:7px;border-radius:50%;background:var(--line);margin-left:-4.5px;flex:none}
+  .tick .lbl{font-size:11.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tick .amt{font-size:10.5px;color:#6b7280;margin-left:auto;flex:none;font-variant-numeric:tabular-nums}
+  .tick.tier-me .dot{background:#8b93a4}
+  .tick.tier-corp .dot{background:var(--blu)}
+  .tick.tier-market .dot{background:#a78bfa}
+  .tick.tier-nation .dot{background:var(--grn)}
+  .you{position:absolute;left:0;right:0;transform:translateY(50%);z-index:5;display:flex;align-items:center;gap:7px}
+  .you .bar{position:absolute;left:-2px;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent)}
+  .you .pin{width:13px;height:13px;border-radius:50%;background:var(--gold);margin-left:-7px;
+    border:2px solid var(--bg);outline:2px solid var(--gold);flex:none;z-index:6}
+  .you .tag{background:var(--gold);color:#111;font-weight:800;font-size:12px;padding:2px 8px;border-radius:6px;
+    white-space:nowrap;font-variant-numeric:tabular-nums;z-index:6}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .cmp{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:11px 12px}
+  .cmp .k{font-size:11.5px;color:var(--dim);margin-bottom:3px}
+  .cmp .v{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .cmp .v small{font-size:12px;color:var(--dim);font-weight:600}
+  .sec-t{font-size:12px;color:var(--dim);letter-spacing:.02em;margin:16px 2px 2px;text-transform:uppercase}
+  .note{color:var(--dim);font-size:11.5px;margin-top:14px;line-height:1.6}
+  .pct{color:var(--blu)} .mult{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>💰 돈의 크기 사다리</h1>
+  <div class="sub">뉴스·시장의 금액이 <b>어느 척도의 얼마</b>인지 — 로그 사다리 위 위치 + 앵커 대비 배율로 감각 잡기</div>
+
+  <div class="card">
+    <label>금액 입력</label>
+    <div class="inputrow">
+      <input type="number" id="amt" value="1" min="0" step="any" inputmode="decimal">
+      <select id="unit">
+        <option value="1">원</option>
+        <option value="10000">만원</option>
+        <option value="100000000">억원</option>
+        <option value="1000000000000" selected>조원</option>
+      </select>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <div class="card">
+    <div class="headline">입력액</div>
+    <div class="big" id="won">₩1조</div>
+    <div class="usd" id="usd">≈ $7.1억 (US$714M)</div>
+    <div class="ladder" id="ladder"></div>
+  </div>
+
+  <div class="sec-t">⏱ 시간으로</div>
+  <div class="grid">
+    <div class="cmp"><div class="k">하루 100만원씩 쓰면</div><div class="v" id="t1">—</div></div>
+    <div class="cmp"><div class="k">하루 1억원씩 쓰면</div><div class="v" id="t2">—</div></div>
+  </div>
+
+  <div class="sec-t">👥 1인당 · 실물</div>
+  <div class="grid">
+    <div class="cmp"><div class="k">전 국민(5,100만) 나누면</div><div class="v" id="pc">—</div></div>
+    <div class="cmp"><div class="k">최저임금 연봉(2,500만)</div><div class="v" id="wage">—</div></div>
+    <div class="cmp"><div class="k">서울 아파트(10억)</div><div class="v" id="apt">—</div></div>
+    <div class="cmp"><div class="k">로또 1등(20억)</div><div class="v" id="lotto">—</div></div>
+  </div>
+
+  <div class="sec-t">⚖️ 큰 척도 대비</div>
+  <div class="grid" id="ratios"></div>
+
+  <div class="note" id="foot"></div>
+</div>
+
+<script>
+(function(){
+  var FX=1400; // 원/달러
+  var POP=51000000;
+  // 앵커 (원). tier: me/corp/market/nation
+  var ANCH=[
+    {l:"최저임금 연봉", w:2.5e7, t:"me"},
+    {l:"1인당 GDP", w:3.7e7, t:"me"},
+    {l:"서울 아파트(중위)", w:1e9, t:"me"},
+    {l:"로또 1등", w:2e9, t:"me"},
+    {l:"토스 밸류", w:9e12, t:"corp"},
+    {l:"유니콘 ($1B)", w:1.4e12, t:"corp"},
+    {l:"삼성전자 시총", w:4.5e14, t:"corp"},
+    {l:"엔비디아 시총 ($4T)", w:5.6e15, t:"corp"},
+    {l:"애플 시총 ($3.5T)", w:4.9e15, t:"corp"},
+    {l:"코스피 시총", w:2.1e15, t:"market"},
+    {l:"한국 1년 예산", w:6.6e14, t:"nation"},
+    {l:"한국 GDP", w:2.5e15, t:"nation"},
+    {l:"미국 GDP ($29T)", w:4.06e16, t:"nation"}
+  ];
+  // 비율 카드용 (대표 척도)
+  var RAT=[
+    {l:"한국 GDP", w:2.5e15},
+    {l:"삼성전자 시총", w:4.5e14},
+    {l:"한국 1년 예산", w:6.6e14},
+    {l:"코스피 시총", w:2.1e15}
+  ];
+  var PRESETS=[
+    {l:"1조원", w:1e12},{l:"100억", w:1e10},{l:"1000억", w:1e11},
+    {l:"삼성 시총", w:4.5e14},{l:"토스 밸류", w:9e12},{l:"한국 예산", w:6.6e14},
+    {l:"엔비디아($4T)", w:5.6e15}
+  ];
+  var LMIN=Math.log10(1e4), LMAX=Math.log10(4.06e16); // 1만원 ~ 미국GDP
+
+  var el=function(id){return document.getElementById(id)};
+  function fmtWon(w){
+    if(w<1e4) return "₩"+Math.round(w).toLocaleString();
+    var jo=Math.floor(w/1e12), eok=Math.floor((w%1e12)/1e8), man=Math.floor((w%1e8)/1e4);
+    var s="";
+    if(jo>0) s+=jo.toLocaleString()+"조 ";
+    if(eok>0) s+=eok.toLocaleString()+"억 ";
+    if(jo===0 && man>0) s+=man.toLocaleString()+"만 ";
+    if(!s) s=Math.round(w).toLocaleString()+" ";
+    return "₩"+s.trim();
+  }
+  function fmtUsd(w){
+    var d=w/FX;
+    if(d>=1e12) return "≈ $"+(d/1e12).toFixed(2)+"조 (US$"+(d/1e12).toFixed(2)+"T)";
+    if(d>=1e8) return "≈ $"+(d/1e8).toFixed(1)+"억 (US$"+(d/1e6).toFixed(0)+"M)";
+    if(d>=1e4) return "≈ $"+(d/1e4).toFixed(1)+"만";
+    return "≈ $"+Math.round(d).toLocaleString();
+  }
+  function mult(a,b){ // a는 b의 몇 배 / 몇 %
+    var r=a/b;
+    if(r>=1) return '<span class="mult">'+ (r>=100? Math.round(r).toLocaleString() : r.toFixed(r>=10?0:1)) +'배</span>';
+    return '<span class="pct">'+ (r*100>=10? (r*100).toFixed(0) : (r*100).toFixed(1)) +'%</span>';
+  }
+  function human(n,unit){ // 개수
+    if(n>=1e8) return (n/1e8).toFixed(1)+"억"+unit;
+    if(n>=1e4) return (n/1e4).toFixed(n>=1e5?0:1)+"만"+unit;
+    if(n>=1) return Math.round(n).toLocaleString()+unit;
+    return n.toFixed(2)+unit;
+  }
+  function years(w, perDay){
+    var days=w/perDay;
+    if(days<1) return "하루 안";
+    if(days<365) return Math.round(days).toLocaleString()+"일";
+    var y=days/365;
+    return (y>=100? Math.round(y).toLocaleString() : y.toFixed(1))+"년";
+  }
+
+  function buildLadder(){
+    var L=el("ladder"); L.innerHTML="";
+    // 앵커를 로그 위치로 (아래=작음, 위=큼). top% = (1 - (log-LMIN)/(LMAX-LMIN))
+    ANCH.slice().sort(function(a,b){return a.w-b.w}).forEach(function(a){
+      var p=(Math.log10(a.w)-LMIN)/(LMAX-LMIN);
+      var d=document.createElement("div");
+      d.className="tick tier-"+a.t; d.style.bottom=(p*100)+"%";
+      d.innerHTML='<span class="dot"></span><span class="lbl">'+a.l+'</span><span class="amt">'+fmtWon(a.w).replace("₩","")+'</span>';
+      L.appendChild(d);
+    });
+    var you=document.createElement("div"); you.id="you"; you.className="you";
+    you.innerHTML='<span class="bar"></span><span class="pin"></span><span class="tag" id="youtag"></span>';
+    L.appendChild(you);
+  }
+
+  function render(){
+    var v=parseFloat(el("amt").value)||0;
+    var u=parseFloat(el("unit").value);
+    var w=v*u;
+    el("won").textContent=fmtWon(w);
+    el("usd").textContent=fmtUsd(w);
+    // ladder marker
+    var p=Math.max(0,Math.min(1,(Math.log10(Math.max(w,1))-LMIN)/(LMAX-LMIN)));
+    var you=el("you"); if(you){ you.style.bottom=(p*100)+"%"; el("youtag").textContent=fmtWon(w); }
+    // 시간
+    el("t1").innerHTML=years(w,1e6);
+    el("t2").innerHTML=years(w,1e8);
+    // 1인당·실물
+    el("pc").innerHTML="1인당 "+fmtWon(w/POP).replace("₩","")+"<small>원</small>".replace("원원","원");
+    el("pc").innerHTML="1인당 "+ (w/POP>=1e4? (w/POP/1e4).toFixed(1)+"만원" : Math.round(w/POP).toLocaleString()+"원");
+    el("wage").innerHTML=human(w/2.5e7,"명")+" <small>1년치</small>";
+    el("apt").innerHTML=human(w/1e9,"채");
+    el("lotto").innerHTML=human(w/2e9,"번");
+    // 비율
+    var R=el("ratios"); R.innerHTML="";
+    RAT.forEach(function(a){
+      var d=document.createElement("div"); d.className="cmp";
+      d.innerHTML='<div class="k">'+a.l+' 대비</div><div class="v">'+mult(w,a.w)+'</div>';
+      R.appendChild(d);
+    });
+    // chip active
+    document.querySelectorAll(".chip").forEach(function(c){ c.classList.toggle("on", Math.abs(parseFloat(c.dataset.w)-w)<1); });
+    el("foot").innerHTML="※ 대략값(환율 $1=1,400원·인구 5,100만 기준). 앵커는 감각용 근사치라 시점에 따라 변함. "
+      +"핵심은 정확한 숫자가 아니라 <b>자릿수와 앵커 대비 배율</b>.";
+  }
+
+  // build chips
+  var C=el("chips");
+  PRESETS.forEach(function(p){
+    var b=document.createElement("button"); b.className="chip"; b.textContent=p.l; b.dataset.w=p.w;
+    b.onclick=function(){ setWon(p.w); };
+    C.appendChild(b);
+  });
+  function setWon(w){
+    // 조 단위면 조로, 억 단위면 억으로 표시
+    var u,val;
+    if(w>=1e12){u=1e12;} else if(w>=1e8){u=1e8;} else if(w>=1e4){u=1e4;} else {u=1;}
+    val=w/u;
+    el("unit").value=String(u); el("amt").value=(val%1===0?val:val.toFixed(2));
+    render();
+  }
+
+  el("amt").addEventListener("input",render);
+  el("unit").addEventListener("change",render);
+  buildLadder(); render();
+})();
+</script>
+</body>
+</html>
