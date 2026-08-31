@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>결과보어 好 — 동작 완결 인터랙티브</title>
+<title>결과보어 好 — 동작 완결 인터랙티브 (260831)</title>
 <style>
   :root {
     --bg: #0f1117;
@@ -19,6 +19,7 @@
     --red: #f87171;
     --blue: #60a5fa;
     --orange: #fb923c;
+    --purple: #c084fc;
     --success: #22c55e;
     --error: #ef4444;
     --radius: 10px;
@@ -32,533 +33,464 @@
     font-size: 15px;
     line-height: 1.6;
     padding: 16px;
-    max-width: 680px;
+    max-width: 700px;
     margin: 0 auto;
   }
   h1 { font-size: 1.3rem; margin-bottom: 4px; color: #fff; }
-  .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 24px; }
+  .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 4px; }
+  .date-badge {
+    display: inline-block; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 2px 10px; font-size: 0.75rem; color: var(--muted);
+    margin-bottom: 20px;
+  }
   h2 { font-size: 1rem; color: var(--accent); margin-bottom: 12px; letter-spacing: 0.01em; }
 
-  /* ─── Tab Navigation ─── */
+  /* Tabs */
   .tabs { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
   .tab-btn {
-    padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border);
+    padding: 7px 13px; border-radius: 20px; border: 1px solid var(--border);
     background: var(--surface); color: var(--muted); cursor: pointer;
-    font-size: 0.88rem; transition: all 0.15s;
+    font-size: 0.82rem; transition: all 0.15s;
   }
   .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
 
-  /* ─── Section Card ─── */
-  .card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 20px; margin-bottom: 16px;
-  }
+  /* Tone */
+  .t1{color:var(--blue)} .t2{color:var(--green)} .t3{color:var(--yellow)} .t4{color:var(--red)} .tn{color:var(--muted)}
 
-  /* ─── Verb Builder ─── */
-  .verb-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  /* ── BUILDER ── */
+  .verb-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
   .verb-btn {
-    padding: 10px 16px; border-radius: var(--radius-sm);
+    padding: 9px 14px; border-radius: var(--radius-sm);
     border: 1px solid var(--border); background: var(--surface2);
-    color: var(--text); cursor: pointer; font-size: 1.1rem;
-    transition: all 0.15s; font-weight: 500;
+    color: var(--text); cursor: pointer; font-size: 1rem; transition: all 0.15s; font-weight: 500;
   }
   .verb-btn:hover { border-color: var(--accent); color: var(--accent); }
   .verb-btn.selected { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+  .result-box { background: var(--surface2); border-radius: var(--radius); padding: 18px; min-height: 110px; }
+  .result-empty { color: var(--muted); text-align: center; padding: 20px 0; font-size: 0.9rem; }
+  .verb-combo { display: flex; align-items: center; gap: 4px; margin-bottom: 10px; flex-wrap: wrap; }
+  .combo-verb,.combo-hao,.combo-result { font-size: 1.9rem; font-weight: 700; }
+  .combo-hao,.combo-result { color: var(--accent); }
+  .combo-plus,.combo-eq { font-size: 1.2rem; color: var(--muted); margin: 0 4px; }
+  .row2 { display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap; }
+  .col { flex: 1; min-width: 130px; }
+  .col-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 3px; }
+  .col-py { font-size: 0.88rem; color: var(--muted); font-style: italic; margin-bottom: 2px; }
+  .col-ko-before { color: var(--muted); font-size: 0.95rem; }
+  .col-ko-after { color: var(--green); font-size: 0.95rem; font-weight: 600; }
+  .mech { font-size: 0.8rem; color: var(--muted); margin-top: 8px; }
+  .ex-block { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+  .ex-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 5px; }
+  .ex-pos { color: var(--green); font-size: 0.93rem; margin-bottom: 3px; }
+  .ex-neg { color: var(--orange); font-size: 0.93rem; margin-bottom: 3px; }
+  .ex-ko { color: var(--muted); font-size: 0.82rem; }
 
-  .result-box {
-    background: var(--surface2); border-radius: var(--radius);
-    padding: 20px; min-height: 120px;
-  }
-  .result-empty { color: var(--muted); text-align: center; padding: 24px 0; font-size: 0.9rem; }
-  .verb-combo { display: flex; align-items: center; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
-  .combo-verb { font-size: 2rem; font-weight: 700; color: var(--text); }
-  .combo-plus { font-size: 1.4rem; color: var(--muted); margin: 0 4px; }
-  .combo-hao { font-size: 2rem; font-weight: 700; color: var(--accent); }
-  .combo-eq { font-size: 1.2rem; color: var(--muted); margin: 0 8px; }
-  .combo-result { font-size: 2rem; font-weight: 700; color: var(--accent); }
-
-  .meaning-row { display: flex; gap: 16px; margin-top: 4px; flex-wrap: wrap; }
-  .meaning-block { flex: 1; min-width: 140px; }
-  .meaning-label { font-size: 0.75rem; color: var(--muted); margin-bottom: 4px; letter-spacing: 0.04em; text-transform: uppercase; }
-  .meaning-before { color: var(--muted); font-size: 1rem; }
-  .meaning-arrow { color: var(--muted); margin: 0 6px; }
-  .meaning-after { color: var(--green); font-size: 1rem; font-weight: 600; }
-  .pinyin-row { display: flex; gap: 16px; margin-top: 10px; flex-wrap: wrap; }
-  .pinyin-block { flex: 1; min-width: 140px; }
-  .pinyin { font-size: 0.9rem; color: var(--muted); font-style: italic; }
-  .example-row { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px; }
-  .example-label { font-size: 0.75rem; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
-  .example-pos { color: var(--green); font-size: 0.95rem; margin-bottom: 4px; }
-  .example-neg { color: var(--orange); font-size: 0.95rem; margin-bottom: 4px; }
-  .example-ko { color: var(--muted); font-size: 0.85rem; }
-
-  /* ─── Tone Colors ─── */
-  .t1 { color: var(--blue); }
-  .t2 { color: var(--green); }
-  .t3 { color: var(--yellow); }
-  .t4 { color: var(--red); }
-  .tn { color: var(--muted); }
-
-  /* ─── 想 Complement Cards ─── */
-  .comp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  @media (max-width: 440px) { .comp-grid { grid-template-columns: 1fr; } }
+  /* ── 想 CARDS ── */
+  .comp-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
+  @media(max-width:440px){.comp-grid{grid-template-columns:1fr;}}
   .comp-card {
     background: var(--surface2); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 16px; cursor: pointer;
-    transition: all 0.15s; user-select: none;
+    border-radius: var(--radius); padding: 14px; cursor: pointer; transition: all 0.15s;
   }
-  .comp-card:hover { border-color: var(--accent); }
-  .comp-card.expanded { border-color: var(--accent); }
-  .comp-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
-  .comp-zh { font-size: 1.6rem; font-weight: 700; }
-  .comp-py { font-size: 0.85rem; color: var(--muted); font-style: italic; }
-  .comp-ko-short { font-size: 0.9rem; color: var(--green); }
-  .comp-detail { display: none; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+  .comp-card:hover,.comp-card.expanded { border-color: var(--accent); }
+  .comp-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 3px; }
+  .comp-zh { font-size: 1.5rem; font-weight: 700; }
+  .comp-py { font-size: 0.82rem; color: var(--muted); font-style: italic; }
+  .comp-ko-short { font-size: 0.88rem; color: var(--green); }
+  .comp-detail { display: none; margin-top: 9px; border-top: 1px solid var(--border); padding-top: 9px; }
   .comp-card.expanded .comp-detail { display: block; }
-  .comp-mech { font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; }
-  .comp-example { font-size: 0.9rem; color: var(--text); margin-bottom: 3px; }
-  .comp-example-ko { font-size: 0.82rem; color: var(--muted); margin-bottom: 8px; }
-  .tap-hint { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 8px; }
+  .comp-mech { font-size: 0.82rem; color: var(--muted); margin-bottom: 7px; }
+  .comp-ex { font-size: 0.88rem; color: var(--text); margin-bottom: 2px; }
+  .comp-ex-ko { font-size: 0.8rem; color: var(--muted); margin-bottom: 7px; }
+  .tap-hint { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 6px; }
 
-  /* ─── Quiz ─── */
-  .quiz-card {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 20px; margin-bottom: 12px;
+  /* ── COMPARISON TABLES ── */
+  .cmp-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 0.88rem; }
+  th { background: var(--surface2); color: var(--accent); font-weight: 600; padding: 9px 10px; text-align: left; border: 1px solid var(--border); }
+  td { padding: 8px 10px; border: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  .tag-完 { color: var(--orange); font-weight: 600; }
+  .tag-好 { color: var(--accent); font-weight: 600; }
+  .tag-行 { color: var(--purple); font-weight: 600; }
+  .tag-计 { color: var(--green); font-weight: 600; }
+
+  /* ── 의념피동 ── */
+  .passive-ex {
+    background: var(--surface2); border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 12px 14px; margin-bottom: 10px;
   }
-  .quiz-q { font-size: 1rem; margin-bottom: 14px; font-weight: 500; }
+  .passive-zh { font-size: 1.1rem; font-weight: 600; margin-bottom: 2px; }
+  .passive-ko { font-size: 0.88rem; color: var(--green); margin-bottom: 4px; }
+  .passive-parse { font-size: 0.8rem; color: var(--muted); }
+  .badge {
+    display: inline-block; border-radius: 4px; padding: 1px 7px;
+    font-size: 0.72rem; font-weight: 600; margin-right: 4px;
+  }
+  .badge-subj { background: rgba(108,140,255,0.2); color: var(--accent); }
+  .badge-pred { background: rgba(74,222,128,0.15); color: var(--green); }
+  .badge-no-bei { background: rgba(248,113,113,0.15); color: var(--red); }
+
+  /* ── QUIZ ── */
+  .quiz-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 12px; }
+  .quiz-q { font-size: 0.98rem; margin-bottom: 13px; font-weight: 500; }
   .quiz-q .ko { color: var(--accent); }
-  .options { display: flex; flex-direction: column; gap: 8px; }
+  .options { display: flex; flex-direction: column; gap: 7px; }
   .opt-btn {
-    padding: 10px 14px; border-radius: var(--radius-sm);
+    padding: 9px 13px; border-radius: var(--radius-sm);
     border: 1px solid var(--border); background: var(--surface);
-    color: var(--text); cursor: pointer; text-align: left;
-    font-size: 0.95rem; transition: all 0.15s;
+    color: var(--text); cursor: pointer; text-align: left; font-size: 0.92rem; transition: all 0.15s;
   }
   .opt-btn:hover:not([disabled]) { border-color: var(--accent); }
-  .opt-btn.correct { background: rgba(34,197,94,0.15); border-color: var(--success); color: var(--success); }
-  .opt-btn.wrong { background: rgba(239,68,68,0.12); border-color: var(--error); color: var(--error); }
+  .opt-btn.correct { background: rgba(34,197,94,0.13); border-color: var(--success); color: var(--success); }
+  .opt-btn.wrong { background: rgba(239,68,68,0.1); border-color: var(--error); color: var(--error); }
   .opt-btn[disabled] { cursor: default; }
-  .explanation {
-    display: none; margin-top: 12px; padding: 12px;
-    background: var(--surface); border-radius: var(--radius-sm);
-    font-size: 0.88rem; line-height: 1.6;
-  }
+  .explanation { display: none; margin-top: 11px; padding: 11px; background: var(--surface); border-radius: var(--radius-sm); font-size: 0.85rem; line-height: 1.6; }
   .explanation.show { display: block; }
   .explanation .key { color: var(--accent); font-weight: 600; }
-  .quiz-progress { color: var(--muted); font-size: 0.82rem; margin-bottom: 16px; }
-  .quiz-score {
-    text-align: center; padding: 20px; font-size: 1.1rem;
-    display: none; background: var(--surface2); border-radius: var(--radius);
-    border: 1px solid var(--border);
-  }
+  .quiz-progress { color: var(--muted); font-size: 0.82rem; margin-bottom: 14px; }
+  .quiz-score { text-align: center; padding: 20px; display: none; background: var(--surface2); border-radius: var(--radius); border: 1px solid var(--border); }
   .quiz-score.show { display: block; }
   .score-num { font-size: 2rem; font-weight: 700; color: var(--accent); }
-  .reset-btn {
-    margin-top: 12px; padding: 10px 24px; border-radius: 20px;
-    border: 1px solid var(--accent); background: transparent;
-    color: var(--accent); cursor: pointer; font-size: 0.9rem;
-  }
+  .reset-btn { margin-top: 11px; padding: 9px 22px; border-radius: 20px; border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer; font-size: 0.88rem; }
   .reset-btn:hover { background: var(--accent-glow); }
+
+  .info-box { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 14px; font-size: 0.88rem; }
+  .info-box strong { color: var(--accent); }
 </style>
 </head>
 <body>
 
-<h1>결과보어 好</h1>
-<p class="subtitle">동사 + 好 = 동작이 완결·확정 상태에 도달</p>
+<h1>결과보어 好 · 여정 문법</h1>
+<p class="subtitle">동사+好=완결 · 好vs完 · 行程vs计划 · 주제어·의념피동</p>
+<span class="date-badge">2026-08-31 업데이트</span>
 
 <div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('builder')">① 好 빌더</button>
-  <button class="tab-btn" onclick="switchTab('xiang')">② 想 보어 비교</button>
-  <button class="tab-btn" onclick="switchTab('quiz')">③ 퀴즈</button>
+  <button class="tab-btn active" onclick="switchTab(event,'builder')">① 好 빌더</button>
+  <button class="tab-btn" onclick="switchTab(event,'xiang')">② 想 보어</button>
+  <button class="tab-btn" onclick="switchTab(event,'hao-wan')">③ 好 vs 完</button>
+  <button class="tab-btn" onclick="switchTab(event,'itinerary')">④ 行程·计划</button>
+  <button class="tab-btn" onclick="switchTab(event,'passive')">⑤ 의념피동</button>
+  <button class="tab-btn" onclick="switchTab(event,'quiz')">⑥ 퀴즈</button>
 </div>
 
-<!-- ══════════════ TAB 1: BUILDER ══════════════ -->
+<!-- ══ TAB 1: BUILDER ══ -->
 <div id="tab-builder" class="tab-panel active">
   <h2>동사를 골라봐</h2>
   <div class="verb-grid" id="verbGrid"></div>
   <div class="result-box" id="resultBox">
-    <div class="result-empty">위에서 동사를 탭하면<br>+好 결합 결과가 여기에 나와요</div>
+    <div class="result-empty">위에서 동사를 탭하면<br>+好 결합 결과가 나와요</div>
   </div>
 </div>
 
-<!-- ══════════════ TAB 2: 想 COMPLEMENTS ══════════════ -->
+<!-- ══ TAB 2: 想 ══ -->
 <div id="tab-xiang" class="tab-panel">
-  <h2>想 뒤에 무엇이 붙느냐에 따라 뜻이 갈린다</h2>
-  <p style="color:var(--muted);font-size:0.88rem;margin-bottom:14px;">카드를 탭하면 원리와 예문이 펼쳐져요</p>
+  <h2>想 뒤 보어에 따라 뜻이 갈린다</h2>
+  <p class="tap-hint" style="margin-bottom:12px">카드를 탭하면 상세 정보가 펼쳐져요</p>
   <div class="comp-grid" id="compGrid"></div>
 </div>
 
-<!-- ══════════════ TAB 3: QUIZ ══════════════ -->
+<!-- ══ TAB 3: 好 vs 完 ══ -->
+<div id="tab-hao-wan" class="tab-panel">
+  <h2>好 vs 完 — 한 줄 판단법</h2>
+  <div class="info-box">
+    <strong>"그냥 끝났다/다 했다"</strong> → 完 (양적 종료·소진)<br>
+    <strong>"제대로 됐다/쓸 준비 됐다"</strong> → 好 (질적 완성·준비됨)
+  </div>
+  <div class="cmp-wrap">
+    <table>
+      <tr><th>보어</th><th>병음</th><th>방점</th><th>영어 감각</th></tr>
+      <tr><td><span class="tag-完">完</span> wán</td><td>—</td><td>양적 종료·소진</td><td>done / finished</td></tr>
+      <tr><td><span class="tag-好">好</span> hǎo</td><td>—</td><td>질적 완성·준비됨</td><td>done right / ready</td></tr>
+    </table>
+  </div>
+  <h2>예문 대조</h2>
+  <div class="cmp-wrap">
+    <table>
+      <tr><th>상황</th><th><span class="tag-完">V完</span></th><th><span class="tag-好">V好</span></th></tr>
+      <tr>
+        <td>숙제</td>
+        <td>作业做<span class="tag-完">完</span>了。<br><span style="color:var(--muted);font-size:0.8rem">zuòwán — 분량 종료, 질 모름</span></td>
+        <td>作业做<span class="tag-好">好</span>了。<br><span style="color:var(--muted);font-size:0.8rem">zuòhǎo — 제출할 수 있게 완성</span></td>
+      </tr>
+      <tr>
+        <td>밥</td>
+        <td>饭吃<span class="tag-完">完</span>了。<br><span style="color:var(--muted);font-size:0.8rem">밥 다 먹었어 (소진)</span></td>
+        <td>饭做<span class="tag-好">好</span>了。<br><span style="color:var(--muted);font-size:0.8rem">밥 다 됐어 (먹을 수 있는 상태)</span></td>
+      </tr>
+      <tr>
+        <td>편지</td>
+        <td>信写<span class="tag-完">完</span>了。<br><span style="color:var(--muted);font-size:0.8rem">쓰는 행위 종료</span></td>
+        <td>信写<span class="tag-好">好</span>了。<br><span style="color:var(--muted);font-size:0.8rem">보낼 준비 완료</span></td>
+      </tr>
+      <tr>
+        <td>일</td>
+        <td>任务做<span class="tag-完">完</span>了。<br><span style="color:var(--muted);font-size:0.8rem">할 일 체크 종료</span></td>
+        <td>任务做<span class="tag-好">好</span>了。<br><span style="color:var(--muted);font-size:0.8rem">임무 완수 (제대로 해냄)</span></td>
+      </tr>
+    </table>
+  </div>
+  <div class="info-box" style="font-size:0.85rem;color:var(--muted)">
+    <strong>준备(준비하다)</strong>는 好만 자연스럽다: 准备好了 ✅ / 准备完了 ⚠️ — "끝냄"보다 "쓸 준비"가 핵심인 동사.
+  </div>
+</div>
+
+<!-- ══ TAB 4: 行程·计划 ══ -->
+<div id="tab-itinerary" class="tab-panel">
+  <h2>行程 vs 计划</h2>
+  <div class="cmp-wrap">
+    <table>
+      <tr><th></th><th><span class="tag-计">计划 jìhuà</span></th><th><span class="tag-行">行程 xíngchéng</span></th></tr>
+      <tr><td>뜻</td><td>계획·구상·플랜</td><td>여정·일정·이동 경로</td></tr>
+      <tr><td>성격</td><td>추상적·의도</td><td>구체적·시간순</td></tr>
+      <tr><td>문맥</td><td>모든 계획</td><td>여행·출장 특화</td></tr>
+      <tr><td>품사</td><td>동사+명사 모두</td><td>주로 명사</td></tr>
+    </table>
+  </div>
+  <div class="info-box">
+    <strong>관계:</strong> 计划(하려는 것)을 세우면 → 行程(실제 언제 어디 갈지 표)가 된다
+  </div>
+  <h2>예문</h2>
+  <div class="passive-ex">
+    <div class="passive-zh">我还没有<span class="tag-计">计划</span>。</div>
+    <div class="passive-ko">Wǒ hái méiyǒu jìhuà. — 아직 계획이 없어. (구상 자체 없음)</div>
+  </div>
+  <div class="passive-ex">
+    <div class="passive-zh"><span class="tag-行">行程</span>还没安排好。</div>
+    <div class="passive-ko">Xíngchéng hái méi ānpái hǎo. — 일정이 아직 안 짜졌어. (구체 스케줄 미완)</div>
+  </div>
+  <div class="passive-ex">
+    <div class="passive-zh">三天的<span class="tag-行">行程</span>安排得很满。</div>
+    <div class="passive-ko">Sān tiān de xíngchéng ānpái de hěn mǎn. — 3일 일정이 빡빡하게 짜졌어.</div>
+  </div>
+  <div class="passive-ex">
+    <div class="passive-zh">台湾旅游的<span class="tag-计">计划</span>定好了。</div>
+    <div class="passive-ko">Táiwān lǚyóu de jìhuà dìng hǎo le. — 대만 여행 계획 잡혔어. (큰 그림 완료)</div>
+  </div>
+</div>
+
+<!-- ══ TAB 5: 의념피동 ══ -->
+<div id="tab-passive" class="tab-panel">
+  <h2>주제-술어 + 의념피동(意念被动)</h2>
+  <div class="info-box">
+    중국어는 <strong>"무언가가 어떻게 됐다"</strong>를 말할 때<br>
+    <strong>피동 대상을 주어로 놓고 동사는 능동형 그대로</strong> 쓴다.<br>
+    <span class="badge badge-no-bei">被 없음</span>이 정상.
+  </div>
+
+  <h2>구조 분해</h2>
+  <div class="passive-ex">
+    <div class="passive-zh">行程 还没 安排好。</div>
+    <div class="passive-ko">일정이 아직 안 짜였어.</div>
+    <div class="passive-parse">
+      <span class="badge badge-subj">대상 주어</span>行程 &nbsp;
+      <span class="badge badge-pred">능동 동사+결과보어</span>安排好 &nbsp;
+      <span class="badge badge-no-bei">被 없음</span>
+    </div>
+  </div>
+
+  <h2>같은 원리 예문</h2>
+  <div class="passive-ex">
+    <div class="passive-zh">门 开了。</div>
+    <div class="passive-ko">Mén kāi le. — 문 열렸어.</div>
+    <div class="passive-parse"><span class="badge badge-subj">대상</span>门 <span class="badge badge-pred">능동</span>开 <span class="badge badge-no-bei">被 없음</span></div>
+  </div>
+  <div class="passive-ex">
+    <div class="passive-zh">饭 做好了。</div>
+    <div class="passive-ko">Fàn zuò hǎo le. — 밥 다 됐어.</div>
+    <div class="passive-parse"><span class="badge badge-subj">대상</span>饭 <span class="badge badge-pred">능동+결과보어</span>做好 <span class="badge badge-no-bei">被 없음</span></div>
+  </div>
+  <div class="passive-ex">
+    <div class="passive-zh">衣服 洗好了。</div>
+    <div class="passive-ko">Yīfu xǐ hǎo le. — 옷 빨았어 (다 됐어).</div>
+    <div class="passive-parse"><span class="badge badge-subj">대상</span>衣服 <span class="badge badge-pred">능동+결과보어</span>洗好 <span class="badge badge-no-bei">被 없음</span></div>
+  </div>
+  <div class="passive-ex">
+    <div class="passive-zh">作业 做完了。</div>
+    <div class="passive-ko">Zuòyè zuò wán le. — 숙제 다 했어.</div>
+    <div class="passive-parse"><span class="badge badge-subj">대상</span>作业 <span class="badge badge-pred">능동+결과보어</span>做完 <span class="badge badge-no-bei">被 없음</span></div>
+  </div>
+
+  <h2 style="margin-top:16px">왜 被를 안 쓰나</h2>
+  <div class="info-box" style="font-size:0.88rem">
+    중국어 被는 주로:<br>
+    ① 피해·부정적 사건 (他被骗了 — 사기당했어)<br>
+    ② 행위자를 특별히 강조할 때 (行程被公司安排好了 — 회사가 일정을 짜줬어)<br><br>
+    일상 "~됐다/~해졌다"는 <strong>의념피동(无标记)</strong>이 훨씬 자연스러워.
+  </div>
+
+  <div class="info-box" style="font-size:0.85rem;color:var(--muted)">
+    <strong>今日 복습 — 행程还没安排好 한 문장에 3가지:</strong><br>
+    1. 주제-술어 — 行程(대상)이 주제 자리<br>
+    2. 결과보어 好 — 安排+好=완결 짜임<br>
+    3. 의념피동 — 被 없이 대상이 주어, 능동 동사
+  </div>
+</div>
+
+<!-- ══ TAB 6: QUIZ ══ -->
 <div id="tab-quiz" class="tab-panel">
   <div id="quizProgress" class="quiz-progress"></div>
   <div id="quizContainer"></div>
   <div id="quizScore" class="quiz-score">
     <div>최종 점수</div>
     <div class="score-num" id="scoreNum"></div>
-    <div style="color:var(--muted);font-size:0.88rem;margin-top:6px;" id="scoreMsg"></div>
+    <div style="color:var(--muted);font-size:0.85rem;margin-top:5px" id="scoreMsg"></div>
     <button class="reset-btn" onclick="resetQuiz()">다시 풀기</button>
   </div>
 </div>
 
 <script>
-// ─── DATA ───────────────────────────────────────────────
+// ── DATA ──────────────────────────────────────────────────
 
 const verbs = [
-  {
-    zh: '想', py: 'xiǎng', ko: '생각하다',
-    combo_py: 'xiǎnghǎo',
-    before_ko: '(그냥) 생각하다',
-    after_ko: '생각을 정하다 · 결정하다',
-    mech: '생각(想)이 완결(好) → 결론·매듭이 남',
-    ex_pos: '你想好了吗？', ex_pos_ko: '결정했어?',
-    ex_neg: '我还没想好。', ex_neg_ko: '아직 못 정했어.',
-    tones: [3,3]
-  },
-  {
-    zh: '做', py: 'zuò', ko: '하다',
-    combo_py: 'zuòhǎo',
-    before_ko: '하다 (진행)',
-    after_ko: '다 해내다 · 완성하다',
-    mech: '行为(做)가 만족스러운 상태(好)에 도달',
-    ex_pos: '任务做好了！', ex_pos_ko: '임무 완수!',
-    ex_neg: '还没做好，等一下。', ex_neg_ko: '아직 다 못 됐어, 잠깐.',
-    tones: [4,3]
-  },
-  {
-    zh: '写', py: 'xiě', ko: '쓰다',
-    combo_py: 'xiěhǎo',
-    before_ko: '쓰다 (과정)',
-    after_ko: '다 썼다 · 완성해서 쓰다',
-    mech: '쓰기(写)가 완결 상태(好)에 도달',
-    ex_pos: '作业写好了吗？', ex_pos_ko: '숙제 다 썼어?',
-    ex_neg: '报告还没写好。', ex_neg_ko: '보고서 아직 다 못 썼어.',
-    tones: [3,3]
-  },
-  {
-    zh: '准备', py: 'zhǔnbèi', ko: '준비하다',
-    combo_py: 'zhǔnbèihǎo',
-    before_ko: '준비하다 (과정)',
-    after_ko: '준비 다 됐다 · 완료',
-    mech: '준비(准备)가 완결(好) = 이제 시작할 수 있는 상태',
-    ex_pos: '我准备好了！', ex_pos_ko: '준비 다 됐어!',
-    ex_neg: '还没准备好，稍等。', ex_neg_ko: '아직 준비 안 됐어, 잠깐.',
-    tones: [3,4]
-  },
-  {
-    zh: '说', py: 'shuō', ko: '말하다',
-    combo_py: 'shuōhǎo',
-    before_ko: '말하다 (과정)',
-    after_ko: '약속을 정하다 · 협의하다',
-    mech: '말(说)이 완결(好) = 쌍방 확인·합의가 됨',
-    ex_pos: '我们说好了，周五见。', ex_pos_ko: '우리 약속했어, 금요일에 봐.',
-    ex_neg: '还没说好去哪。', ex_neg_ko: '어디 갈지 아직 못 정했어.',
-    tones: [1,3]
-  },
-  {
-    zh: '吃', py: 'chī', ko: '먹다',
-    combo_py: 'chīhǎo',
-    before_ko: '먹다 (과정)',
-    after_ko: '배불리/잘 먹다 · 식사 완료',
-    mech: '먹기(吃)가 만족(好) = 충분히 먹은 상태',
-    ex_pos: '吃好了，谢谢！', ex_pos_ko: '잘 먹었어요, 감사해요!',
-    ex_neg: '还没吃好，再来一碗。', ex_neg_ko: '아직 못 다 먹었어, 한 그릇 더.',
-    tones: [1,3]
-  },
-  {
-    zh: '安排', py: 'ānpái', ko: '계획하다/배치하다',
-    combo_py: 'ānpáihǎo',
-    before_ko: '계획하다 (과정)',
-    after_ko: '다 준비해두다 · 다 정해두다',
-    mech: '일정 배치(安排)가 완결(好) = 전부 확정된 상태',
-    ex_pos: '行程安排好了。', ex_pos_ko: '일정 다 잡았어.',
-    ex_neg: '台湾的行程还没安排好。', ex_neg_ko: '대만 일정 아직 다 못 잡았어.',
-    tones: [1,2]
-  },
-  {
-    zh: '学', py: 'xué', ko: '배우다',
-    combo_py: 'xuéhǎo',
-    before_ko: '배우다 (과정)',
-    after_ko: '완전히 익히다 · 마스터하다',
-    mech: '학습(学)이 완결(好) = 내 것이 된 상태',
-    ex_pos: '这个语法学好了，感觉不一样。', ex_pos_ko: '이 문법 완전히 익혔어, 느낌이 달라.',
-    ex_neg: '结果补语还没学好。', ex_neg_ko: '결과보어 아직 완전히 안 됐어.',
-    tones: [2,3]
-  }
+  { zh:'想', py:'xiǎng', ko:'생각하다', combo_py:'xiǎnghǎo', before_ko:'생각하다', after_ko:'결정하다·정하다', mech:'생각(想)이 완결(好) → 결론·매듭', ex_pos:'你想好了吗？', ex_pos_ko:'결정했어?', ex_neg:'我还没想好。', ex_neg_ko:'아직 못 정했어.' },
+  { zh:'做', py:'zuò', ko:'하다', combo_py:'zuòhǎo', before_ko:'하다 (진행)', after_ko:'다 해내다·완성하다', mech:'행위(做)가 만족 상태(好)에 도달', ex_pos:'任务做好了！', ex_pos_ko:'임무 완수!', ex_neg:'还没做好，等一下。', ex_neg_ko:'아직 다 못 됐어, 잠깐.' },
+  { zh:'写', py:'xiě', ko:'쓰다', combo_py:'xiěhǎo', before_ko:'쓰다', after_ko:'다 써서 완성하다', mech:'쓰기(写)가 완결 상태(好)에 도달', ex_pos:'报告写好了吗？', ex_pos_ko:'보고서 다 썼어?', ex_neg:'报告还没写好。', ex_neg_ko:'보고서 아직 다 못 썼어.' },
+  { zh:'准备', py:'zhǔnbèi', ko:'준비하다', combo_py:'zhǔnbèihǎo', before_ko:'준비하다', after_ko:'준备 다 됐다·완료', mech:'준비(准备)가 완결(好) → 이제 시작 가능한 상태', ex_pos:'我准备好了！', ex_pos_ko:'준비 다 됐어!', ex_neg:'还没准备好，稍等。', ex_neg_ko:'아직 준비 안 됐어, 잠깐.' },
+  { zh:'说', py:'shuō', ko:'말하다', combo_py:'shuōhǎo', before_ko:'말하다', after_ko:'약속을 정하다·합의하다', mech:'말(说)이 완결(好) → 쌍방 확인된 상태', ex_pos:'我们说好了，周五见。', ex_pos_ko:'약속했어, 금요일에 봐.', ex_neg:'还没说好去哪。', ex_neg_ko:'어디 갈지 아직 못 정했어.' },
+  { zh:'吃', py:'chī', ko:'먹다', combo_py:'chīhǎo', before_ko:'먹다', after_ko:'배불리·잘 먹다', mech:'먹기(吃)가 만족(好) → 충분히 먹은 상태', ex_pos:'吃好了，谢谢！', ex_pos_ko:'잘 먹었어요, 감사해요!', ex_neg:'还没吃好，再来一碗。', ex_neg_ko:'아직 못 다 먹었어, 한 그릇 더.' },
+  { zh:'安排', py:'ānpái', ko:'계획하다/배치하다', combo_py:'ānpáihǎo', before_ko:'계획하다', after_ko:'다 준비해두다·확정하다', mech:'일정 배치(安排)가 완결(好) → 전부 확정된 상태', ex_pos:'行程安排好了。', ex_pos_ko:'일정 다 잡았어.', ex_neg:'台湾的行程还没安排好。', ex_neg_ko:'대만 일정 아직 다 못 잡았어.' },
+  { zh:'学', py:'xué', ko:'배우다', combo_py:'xuéhǎo', before_ko:'배우다', after_ko:'완전히 익히다·마스터하다', mech:'학습(学)이 완결(好) → 내 것이 된 상태', ex_pos:'这个语法学好了！', ex_pos_ko:'이 문법 완전히 익혔어!', ex_neg:'结果补语还没学好。', ex_neg_ko:'결과보어 아직 완전히 안 됐어.' }
 ];
 
 const complements = [
-  {
-    zh: '想', combo: '想', py: 'xiǎng',
-    ko_short: '생각하다',
-    mech: '동작이 진행 중인 과정 — 결론 없음',
-    example: '我在想……', example_ko: '나 생각 중이야……',
-    example2: '你想什么呢？', example2_ko: '뭘 생각하는 거야?'
-  },
-  {
-    zh: '想', combo: '想好', py: 'xiǎng hǎo',
-    ko_short: '결정하다 · 정하다',
-    mech: '好 = 결과보어. 생각이 완결·확정 상태에 도달',
-    example: '我想好了，去台湾！', example_ko: '결정했어, 대만 가자!',
-    example2: '还没想好，等等我。', example2_ko: '아직 못 정했어, 기다려.'
-  },
-  {
-    zh: '想', combo: '想到', py: 'xiǎng dào',
-    ko_short: '떠올리다 · 생각이 미치다',
-    mech: '到 = 도달 보어. 생각이 그 대상에 "닿았다"',
-    example: '我没想到会这样。', example_ko: '이렇게 될 줄 몰랐어.',
-    example2: '突然想到一个办法！', example2_ko: '갑자기 방법이 떠올랐어!'
-  },
-  {
-    zh: '想', combo: '想起来', py: 'xiǎng qǐ lái',
-    ko_short: '기억나다 · 생각나다',
-    mech: '起来 = 이동 보어. 저장된 기억을 "끌어올림"',
-    example: '啊，想起来了！你是老师！', example_ko: '아, 기억났어! 선생님이시죠!',
-    example2: '那个词想不起来了。', example2_ko: '그 단어가 생각 안 나.'
-  }
+  { combo:'想', py:'xiǎng', ko_short:'생각하다', mech:'동작이 진행 중인 과정 — 결론 없음', ex1:'我在想……', ex1_ko:'나 생각 중이야……', ex2:'你想什么呢？', ex2_ko:'뭘 생각하는 거야?' },
+  { combo:'想好', py:'xiǎng hǎo', ko_short:'결정하다·정하다', mech:'好=결과보어. 생각이 완결·확정 상태에 도달', ex1:'我想好了，去台湾！', ex1_ko:'결정했어, 대만 가자!', ex2:'还没想好，等等我。', ex2_ko:'아직 못 정했어, 기다려.' },
+  { combo:'想到', py:'xiǎng dào', ko_short:'떠올리다·생각이 미치다', mech:'到=도달 보어. 생각이 그 대상에 "닿았다"', ex1:'我没想到会这样。', ex1_ko:'이렇게 될 줄 몰랐어.', ex2:'突然想到一个办法！', ex2_ko:'갑자기 방법이 떠올랐어!' },
+  { combo:'想起来', py:'xiǎng qǐ lái', ko_short:'기억나다·생각나다', mech:'起来=인출 보어. 저장된 기억을 "끌어올림"', ex1:'啊，想起来了！', ex1_ko:'아, 기억났어!', ex2:'那个词想不起来了。', ex2_ko:'그 단어가 생각 안 나.' }
 ];
 
 const quizzes = [
-  {
-    q: '"아직 못 정했어" — 중국어로?',
-    hint: '생각이 완결 안 된 상태',
-    opts: ['还没想好', '还没想到', '还没想起来', '还没想'],
-    ans: 0,
-    exp: '<span class="key">还没想好</span> = 还没 + 想好(결정하다). 생각(想)이 완결(好) 안 된 상태. ※ 还没想到 = 아직 못 떠올렸어, 还没想起来 = 아직 기억 안 나.'
-  },
-  {
-    q: '"준비 다 됐어!" — 중국어로?',
-    hint: '준비 동작이 완결된 상태',
-    opts: ['准备了！', '准备好了！', '准备完了！', '准备过了！'],
-    ans: 1,
-    exp: '<span class="key">准备好了</span> = 준비(准备) + 완결(好) + 완료(了). "了" 없는 준备了는 단순 "준备했어"이고, 完은 "끝내다"의 다른 보어라 준备完了도 가능하지만 준备好了가 더 자연스러워.'
-  },
-  {
-    q: '"우리 약속했어, 금요일에 봐." — 밑줄 친 부분은?',
-    hint: '말(说)이 완결 = 합의·확정',
-    opts: ['我们说完了', '我们说好了', '我们说定了', '我们说过了'],
-    ans: 1,
-    exp: '<span class="key">说好了</span> = 말(说) + 완결·합의(好) + 完了. 쌍방이 확인·합의된 상태. 说定了도 비슷한 뜻이지만 说好了이 더 구어적이야.'
-  },
-  {
-    q: '"보고서 다 썼어?" — 빈칸: 报告___了吗？',
-    hint: '쓰기(写)가 완결된 상태',
-    opts: ['写完', '写好', '写过', '写了'],
-    ans: 1,
-    exp: '<span class="key">写好</span> = 쓰기(写)가 만족스러운 완결(好) 상태. ※ 写完은 "다 끝냈다"(분량 완료 강조), 写好는 "잘 완성했다"(질·완결 강조) — 뉘앙스 차이 있지만 여기선 둘 다 OK. 好가 핵심 패턴이니 写好로.'
-  },
-  {
-    q: '"아직 대만 일정 못 잡았어." — 중국어로?',
-    hint: '안배(安排)가 완결 안 된 상태',
-    opts: ['台湾行程还没安排。', '台湾行程还没安排好。', '台湾行程还没安排完。', '台湾行程还没安排到。'],
-    ans: 1,
-    exp: '<span class="key">还没安排好</span> = 아직(还没) + 계획이 완결(安排好) 안 됨. 好가 없으면 "안배 안 했다"는 뜻은 되지만 "다 정해지지 않았다"는 완결 뉘앙스가 빠져.'
-  }
+  { q:'"아직 못 정했어" — 중국어로?', hint:'생각 완결 안 된 상태', opts:['还没想好','还没想到','还没想起来','还没想'], ans:0, exp:'<span class="key">还没想好</span> = 生각(想)+완결(好) 안 됨. 还没想到=아직 못 떠올렸어, 还没想起来=아직 기억 안 나.' },
+  { q:'"준备 다 됐어!" — 중국어로?', hint:'准备+결과보어', opts:['准备了！','准备好了！','准备完了！','准备过了！'], ans:1, exp:'<span class="key">准备好了</span> = 준비(准备)+완결(好)+완료(了). 준备完了도 가능하지만 准备好了이 더 자연스러워.' },
+  { q:'"보고서 아직 다 못 썼어" — 빈칸: 报告还没___。', hint:'쓰기 완결 안 됨', opts:['写完','写好','写过','写了'], ans:1, exp:'<span class="key">写好</span> = 쓰기(写)+질적 완성(好) 안 됨. 写完은 분량 완료, 写好는 완성도 강조.' },
+  { q:'"숙제 다 해서 제출 가능한 상태"를 표현하면?', hint:'질적 완성 강조', opts:['作业做完了','作业做好了','作业写完了','作业准备好了'], ans:1, exp:'<span class="key">作业做好了</span> = 완성도+준备됨. 作业做完了는 "분량만 끝냄"이라 제출 가능 여부 불명.' },
+  { q:'"밥이 다 됐어 (먹을 수 있어)" — 중국어로?', hint:'밥이 완성된 상태. 밥을 다 먹었다(X)', opts:['饭吃完了','饭做好了','饭吃好了','饭做完了'], ans:1, exp:'<span class="key">饭做好了</span> = 밥(饭)이 만들어져(做) 완성(好)된 상태. 饭吃完了는 "밥을 다 먹었어(소진)".' },
+  { q:'"일정이 아직 안 짜졌어" — 자연스러운 중국어는?', hint:'주제-술어 구조, 의념피동', opts:['我还没有行程','行程还没安排好','行程还没有','行程被安排了'], ans:1, exp:'<span class="key">行程还没安排好</span> = 行程(대상 주어)+安排好(완결 능동 동사)+还没(부정). 被 없이 의념피동. 我还没有行程는 소유 부정으로 뉘앙스 달라.' },
+  { q:'"문 열렸어" — 의념피동으로?', hint:'被 없이 쓰는 게 자연스러움', opts:['门被打开了','门开了','我打开了门','门让我开了'], ans:1, exp:'<span class="key">门开了</span> = 门(대상 주어)+开(능동 동사)+了. 被는 피해·행위자 강조 시에만. 일상 "열렸어"는 门开了이 훨씬 자연스러워.' },
+  { q:'"약속했어, 토요일에 봐" — 빈칸: 我们___了，周六见。', hint:'말(说)이 완결 = 합의·확정', opts:['说完','说好','说定','说过'], ans:1, exp:'<span class="key">说好</span> = 말(说)+완결·합의(好). 쌍방 확인된 상태. 说好이 구어적으로 가장 자연스러워.' }
 ];
 
-// ─── TONE UTILS ──────────────────────────────────────────
-
-function pinyin2html(py) {
-  // Color vowels by accent mark
-  const toneMap = {
-    'ā':'<span class="t1">ā</span>','á':'<span class="t2">á</span>','ǎ':'<span class="t3">ǎ</span>','à':'<span class="t4">à</span>',
-    'ē':'<span class="t1">ē</span>','é':'<span class="t2">é</span>','ě':'<span class="t3">ě</span>','è':'<span class="t4">è</span>',
-    'ī':'<span class="t1">ī</span>','í':'<span class="t2">í</span>','ǐ':'<span class="t3">ǐ</span>','ì':'<span class="t4">ì</span>',
-    'ō':'<span class="t1">ō</span>','ó':'<span class="t2">ó</span>','ǒ':'<span class="t3">ǒ</span>','ò':'<span class="t4">ò</span>',
-    'ū':'<span class="t1">ū</span>','ú':'<span class="t2">ú</span>','ǔ':'<span class="t3">ǔ</span>','ù':'<span class="t4">ù</span>',
-    'ǖ':'<span class="t1">ǖ</span>','ǘ':'<span class="t2">ǘ</span>','ǚ':'<span class="t3">ǚ</span>','ǜ':'<span class="t4">ǜ</span>',
-  };
-  return py.split('').map(c => toneMap[c] || c).join('');
+// ── TONE ─────────────────────────────────────────────────
+function pyHtml(py) {
+  const m = {'ā':'<span class="t1">ā</span>','á':'<span class="t2">á</span>','ǎ':'<span class="t3">ǎ</span>','à':'<span class="t4">à</span>','ē':'<span class="t1">ē</span>','é':'<span class="t2">é</span>','ě':'<span class="t3">ě</span>','è':'<span class="t4">è</span>','ī':'<span class="t1">ī</span>','í':'<span class="t2">í</span>','ǐ':'<span class="t3">ǐ</span>','ì':'<span class="t4">ì</span>','ō':'<span class="t1">ō</span>','ó':'<span class="t2">ó</span>','ǒ':'<span class="t3">ǒ</span>','ò':'<span class="t4">ò</span>','ū':'<span class="t1">ū</span>','ú':'<span class="t2">ú</span>','ǔ':'<span class="t3">ǔ</span>','ù':'<span class="t4">ù</span>','ǖ':'<span class="t1">ǖ</span>','ǘ':'<span class="t2">ǘ</span>','ǚ':'<span class="t3">ǚ</span>','ǜ':'<span class="t4">ǜ</span>'};
+  return py.split('').map(c=>m[c]||c).join('');
 }
 
-// ─── TAB LOGIC ───────────────────────────────────────────
-
-function switchTab(name) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  event.target.classList.add('active');
+// ── TAB ──────────────────────────────────────────────────
+function switchTab(e, name) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  e.target.classList.add('active');
 }
 
-// ─── BUILDER ─────────────────────────────────────────────
-
-let selectedVerb = null;
-
+// ── BUILDER ──────────────────────────────────────────────
 function renderBuilder() {
-  const grid = document.getElementById('verbGrid');
-  grid.innerHTML = '';
-  verbs.forEach((v, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'verb-btn';
-    btn.innerHTML = `<span style="font-size:1.1rem">${v.zh}</span> <span style="font-size:0.75rem;color:var(--muted);display:block">${v.ko}</span>`;
-    btn.onclick = () => selectVerb(i, btn);
-    grid.appendChild(btn);
+  const g = document.getElementById('verbGrid');
+  g.innerHTML = '';
+  verbs.forEach((v,i)=>{
+    const b = document.createElement('button');
+    b.className = 'verb-btn';
+    b.innerHTML = `<span>${v.zh}</span><span style="font-size:0.72rem;color:var(--muted);display:block">${v.ko}</span>`;
+    b.onclick = () => selectVerb(i,b);
+    g.appendChild(b);
   });
 }
-
-function selectVerb(i, btn) {
-  document.querySelectorAll('.verb-btn').forEach(b => b.classList.remove('selected'));
+function selectVerb(i,btn) {
+  document.querySelectorAll('.verb-btn').forEach(b=>b.classList.remove('selected'));
   btn.classList.add('selected');
-  selectedVerb = verbs[i];
   const v = verbs[i];
-  const box = document.getElementById('resultBox');
-  box.innerHTML = `
+  document.getElementById('resultBox').innerHTML = `
     <div class="verb-combo">
-      <span class="combo-verb">${v.zh}</span>
-      <span class="combo-plus">+</span>
-      <span class="combo-hao">好</span>
-      <span class="combo-eq">=</span>
+      <span class="combo-verb">${v.zh}</span><span class="combo-plus">+</span>
+      <span class="combo-hao">好</span><span class="combo-eq">=</span>
       <span class="combo-result">${v.zh}好</span>
     </div>
-    <div class="pinyin-row">
-      <div class="pinyin-block">
-        <div class="meaning-label">없을 때</div>
-        <div class="pinyin">${pinyin2html(v.py)}</div>
-      </div>
-      <div class="pinyin-block">
-        <div class="meaning-label">好 결합</div>
-        <div class="pinyin">${pinyin2html(v.combo_py)}</div>
-      </div>
+    <div class="row2">
+      <div class="col"><div class="col-label">동사만</div><div class="col-py">${pyHtml(v.py)}</div><div class="col-ko-before">${v.before_ko}</div></div>
+      <div class="col"><div class="col-label">+好 결합</div><div class="col-py">${pyHtml(v.combo_py)}</div><div class="col-ko-after">${v.after_ko}</div></div>
     </div>
-    <div class="meaning-row" style="margin-top:10px">
-      <div class="meaning-block">
-        <div class="meaning-label">동사만</div>
-        <div class="meaning-before">${v.before_ko}</div>
-      </div>
-      <div class="meaning-block">
-        <div class="meaning-label">+好 결과</div>
-        <div class="meaning-after">${v.after_ko}</div>
-      </div>
-    </div>
-    <div style="margin-top:10px;font-size:0.82rem;color:var(--muted)">${v.mech}</div>
-    <div class="example-row">
-      <div class="example-label">예문</div>
-      <div class="example-pos">✅ ${v.ex_pos} <span style="color:var(--muted);font-size:0.82rem">— ${v.ex_pos_ko}</span></div>
-      <div class="example-neg">⏳ ${v.ex_neg} <span style="color:var(--muted);font-size:0.82rem">— ${v.ex_neg_ko}</span></div>
+    <div class="mech">${v.mech}</div>
+    <div class="ex-block">
+      <div class="ex-label">예문</div>
+      <div class="ex-pos">✅ ${v.ex_pos} <span style="color:var(--muted);font-size:0.8rem">— ${v.ex_pos_ko}</span></div>
+      <div class="ex-neg">⏳ ${v.ex_neg} <span style="color:var(--muted);font-size:0.8rem">— ${v.ex_neg_ko}</span></div>
     </div>
   `;
 }
 
-// ─── COMPLEMENTS ─────────────────────────────────────────
-
+// ── COMPLEMENTS ──────────────────────────────────────────
 function renderComplements() {
-  const grid = document.getElementById('compGrid');
-  grid.innerHTML = '';
-  complements.forEach((c, i) => {
-    const card = document.createElement('div');
-    card.className = 'comp-card';
-    card.innerHTML = `
-      <div class="comp-head">
-        <span class="comp-zh">${c.combo}</span>
-        <span class="comp-py">${pinyin2html(c.py)}</span>
-      </div>
+  const g = document.getElementById('compGrid');
+  g.innerHTML = '';
+  complements.forEach(c=>{
+    const d = document.createElement('div');
+    d.className = 'comp-card';
+    d.innerHTML = `
+      <div class="comp-head"><span class="comp-zh">${c.combo}</span><span class="comp-py">${pyHtml(c.py)}</span></div>
       <div class="comp-ko-short">${c.ko_short}</div>
       <div class="comp-detail">
         <div class="comp-mech">${c.mech}</div>
-        <div class="comp-example">${c.example}</div>
-        <div class="comp-example-ko">${c.example_ko}</div>
-        <div class="comp-example">${c.example2}</div>
-        <div class="comp-example-ko">${c.example2_ko}</div>
+        <div class="comp-ex">${c.ex1}</div><div class="comp-ex-ko">${c.ex1_ko}</div>
+        <div class="comp-ex">${c.ex2}</div><div class="comp-ex-ko">${c.ex2_ko}</div>
       </div>
     `;
-    card.onclick = () => card.classList.toggle('expanded');
-    grid.appendChild(card);
+    d.onclick=()=>d.classList.toggle('expanded');
+    g.appendChild(d);
   });
-  const hint = document.createElement('p');
-  hint.className = 'tap-hint';
-  hint.textContent = '카드를 탭하면 상세 정보가 펼쳐져요';
-  grid.after(hint);
+  const h=document.createElement('p'); h.className='tap-hint'; h.textContent='카드를 탭하면 상세 정보가 펼쳐져요'; g.after(h);
 }
 
-// ─── QUIZ ────────────────────────────────────────────────
-
-let quizState = { cur: 0, score: 0, answered: new Array(quizzes.length).fill(false) };
+// ── QUIZ ─────────────────────────────────────────────────
+let qs = { score:0, answered:new Array(quizzes.length).fill(false) };
 
 function renderQuiz() {
-  const container = document.getElementById('quizContainer');
-  const prog = document.getElementById('quizProgress');
-  const done = quizState.answered.filter(Boolean).length;
-  prog.textContent = `${done} / ${quizzes.length} 완료`;
-  container.innerHTML = '';
-
-  quizzes.forEach((q, qi) => {
+  const c = document.getElementById('quizContainer');
+  const done = qs.answered.filter(Boolean).length;
+  document.getElementById('quizProgress').textContent = `${done} / ${quizzes.length} 완료`;
+  c.innerHTML = '';
+  quizzes.forEach((q,qi)=>{
+    const answered = qs.answered[qi];
     const card = document.createElement('div');
     card.className = 'quiz-card';
-    const answered = quizState.answered[qi];
     card.innerHTML = `
-      <div class="quiz-q">Q${qi+1}. <span class="ko">${q.q}</span>
-        ${q.hint ? `<div style="font-size:0.8rem;color:var(--muted);margin-top:4px">힌트: ${q.hint}</div>` : ''}
+      <div class="quiz-q">Q${qi+1}. <span class="ko">${q.q}</span>${q.hint?`<div style="font-size:0.78rem;color:var(--muted);margin-top:3px">힌트: ${q.hint}</div>`:''}
       </div>
       <div class="options">
-        ${q.opts.map((opt, oi) => `
-          <button class="opt-btn${answered ? (oi===q.ans?' correct':' wrong') : ''}"
-            id="opt-${qi}-${oi}"
-            ${answered ? 'disabled' : ''}
-            onclick="answerQuiz(${qi},${oi})">
-            ${opt}
-          </button>
-        `).join('')}
+        ${q.opts.map((o,oi)=>`<button class="opt-btn${answered?(oi===q.ans?' correct':' wrong'):''}" id="opt-${qi}-${oi}" ${answered?'disabled':''} onclick="answerQuiz(${qi},${oi})">${o}</button>`).join('')}
       </div>
-      <div class="explanation${answered ? ' show' : ''}" id="exp-${qi}">
-        ${q.exp}
-      </div>
+      <div class="explanation${answered?' show':''}" id="exp-${qi}">${q.exp}</div>
     `;
-    container.appendChild(card);
+    c.appendChild(card);
   });
-
-  const score = document.getElementById('quizScore');
-  if (quizState.answered.every(Boolean)) {
-    score.classList.add('show');
-    document.getElementById('scoreNum').textContent = `${quizState.score} / ${quizzes.length}`;
-    const pct = quizState.score / quizzes.length;
-    document.getElementById('scoreMsg').textContent =
-      pct === 1 ? '완벽해! 결과보어 好 마스터!' :
-      pct >= 0.7 ? '잘했어! 한 번 더 풀면 완성.' :
-      '틀린 문제 해설 다시 읽어봐.';
-  } else {
-    score.classList.remove('show');
-  }
+  const sc = document.getElementById('quizScore');
+  if(qs.answered.every(Boolean)){
+    sc.classList.add('show');
+    document.getElementById('scoreNum').textContent=`${qs.score}/${quizzes.length}`;
+    const p=qs.score/quizzes.length;
+    document.getElementById('scoreMsg').textContent=p===1?'완벽해! 결과보어·의념피동 마스터!':p>=0.75?'잘했어! 틀린 해설 다시 확인.':'틀린 문제 해설을 다시 읽어봐.';
+  } else sc.classList.remove('show');
 }
 
-function answerQuiz(qi, oi) {
-  if (quizState.answered[qi]) return;
-  quizState.answered[qi] = true;
-  if (oi === quizzes[qi].ans) quizState.score++;
-  // Mark buttons
-  quizzes[qi].opts.forEach((_, i) => {
-    const btn = document.getElementById(`opt-${qi}-${i}`);
-    btn.disabled = true;
-    if (i === quizzes[qi].ans) btn.classList.add('correct');
-    else if (i === oi) btn.classList.add('wrong');
-  });
+function answerQuiz(qi,oi) {
+  if(qs.answered[qi]) return;
+  qs.answered[qi]=true;
+  if(oi===quizzes[qi].ans) qs.score++;
+  quizzes[qi].opts.forEach((_,i)=>{ const b=document.getElementById(`opt-${qi}-${i}`); b.disabled=true; if(i===quizzes[qi].ans)b.classList.add('correct'); else if(i===oi)b.classList.add('wrong'); });
   document.getElementById(`exp-${qi}`).classList.add('show');
-  const done = quizState.answered.filter(Boolean).length;
-  document.getElementById('quizProgress').textContent = `${done} / ${quizzes.length} 완료`;
-  if (quizState.answered.every(Boolean)) {
-    setTimeout(() => {
-      const score = document.getElementById('quizScore');
-      score.classList.add('show');
-      document.getElementById('scoreNum').textContent = `${quizState.score} / ${quizzes.length}`;
-      const pct = quizState.score / quizzes.length;
-      document.getElementById('scoreMsg').textContent =
-        pct === 1 ? '완벽해! 결과보어 好 마스터!' :
-        pct >= 0.7 ? '잘했어! 한 번 더 풀면 완성.' :
-        '틀린 문제 해설 다시 읽어봐.';
-    }, 300);
-  }
+  const done=qs.answered.filter(Boolean).length;
+  document.getElementById('quizProgress').textContent=`${done}/${quizzes.length} 완료`;
+  if(qs.answered.every(Boolean)) setTimeout(()=>{ const sc=document.getElementById('quizScore'); sc.classList.add('show'); document.getElementById('scoreNum').textContent=`${qs.score}/${quizzes.length}`; const p=qs.score/quizzes.length; document.getElementById('scoreMsg').textContent=p===1?'완벽해! 결과보어·의념피동 마스터!':p>=0.75?'잘했어! 틀린 해설 다시 확인.':'틀린 문제 해설을 다시 읽어봐.'; },300);
 }
 
-function resetQuiz() {
-  quizState = { cur: 0, score: 0, answered: new Array(quizzes.length).fill(false) };
-  renderQuiz();
-}
+function resetQuiz() { qs={score:0,answered:new Array(quizzes.length).fill(false)}; renderQuiz(); }
 
-// ─── INIT ────────────────────────────────────────────────
-
-renderBuilder();
-renderComplements();
-renderQuiz();
+// ── INIT ─────────────────────────────────────────────────
+renderBuilder(); renderComplements(); renderQuiz();
 </script>
 </body>
 </html>
