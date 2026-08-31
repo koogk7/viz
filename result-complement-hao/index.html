@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>결과보어 好 — 동작 완결 인터랙티브</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #23273a;
+    --border: #2e3348;
+    --text: #e2e6f0;
+    --muted: #7b82a0;
+    --accent: #6c8cff;
+    --accent-glow: rgba(108,140,255,0.18);
+    --green: #4ade80;
+    --yellow: #facc15;
+    --red: #f87171;
+    --blue: #60a5fa;
+    --orange: #fb923c;
+    --success: #22c55e;
+    --error: #ef4444;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    padding: 16px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 1.3rem; margin-bottom: 4px; color: #fff; }
+  .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 24px; }
+  h2 { font-size: 1rem; color: var(--accent); margin-bottom: 12px; letter-spacing: 0.01em; }
+
+  /* ─── Tab Navigation ─── */
+  .tabs { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--muted); cursor: pointer;
+    font-size: 0.88rem; transition: all 0.15s;
+  }
+  .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ─── Section Card ─── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; margin-bottom: 16px;
+  }
+
+  /* ─── Verb Builder ─── */
+  .verb-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .verb-btn {
+    padding: 10px 16px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface2);
+    color: var(--text); cursor: pointer; font-size: 1.1rem;
+    transition: all 0.15s; font-weight: 500;
+  }
+  .verb-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .verb-btn.selected { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+
+  .result-box {
+    background: var(--surface2); border-radius: var(--radius);
+    padding: 20px; min-height: 120px;
+  }
+  .result-empty { color: var(--muted); text-align: center; padding: 24px 0; font-size: 0.9rem; }
+  .verb-combo { display: flex; align-items: center; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+  .combo-verb { font-size: 2rem; font-weight: 700; color: var(--text); }
+  .combo-plus { font-size: 1.4rem; color: var(--muted); margin: 0 4px; }
+  .combo-hao { font-size: 2rem; font-weight: 700; color: var(--accent); }
+  .combo-eq { font-size: 1.2rem; color: var(--muted); margin: 0 8px; }
+  .combo-result { font-size: 2rem; font-weight: 700; color: var(--accent); }
+
+  .meaning-row { display: flex; gap: 16px; margin-top: 4px; flex-wrap: wrap; }
+  .meaning-block { flex: 1; min-width: 140px; }
+  .meaning-label { font-size: 0.75rem; color: var(--muted); margin-bottom: 4px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .meaning-before { color: var(--muted); font-size: 1rem; }
+  .meaning-arrow { color: var(--muted); margin: 0 6px; }
+  .meaning-after { color: var(--green); font-size: 1rem; font-weight: 600; }
+  .pinyin-row { display: flex; gap: 16px; margin-top: 10px; flex-wrap: wrap; }
+  .pinyin-block { flex: 1; min-width: 140px; }
+  .pinyin { font-size: 0.9rem; color: var(--muted); font-style: italic; }
+  .example-row { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .example-label { font-size: 0.75rem; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .example-pos { color: var(--green); font-size: 0.95rem; margin-bottom: 4px; }
+  .example-neg { color: var(--orange); font-size: 0.95rem; margin-bottom: 4px; }
+  .example-ko { color: var(--muted); font-size: 0.85rem; }
+
+  /* ─── Tone Colors ─── */
+  .t1 { color: var(--blue); }
+  .t2 { color: var(--green); }
+  .t3 { color: var(--yellow); }
+  .t4 { color: var(--red); }
+  .tn { color: var(--muted); }
+
+  /* ─── 想 Complement Cards ─── */
+  .comp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media (max-width: 440px) { .comp-grid { grid-template-columns: 1fr; } }
+  .comp-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px; cursor: pointer;
+    transition: all 0.15s; user-select: none;
+  }
+  .comp-card:hover { border-color: var(--accent); }
+  .comp-card.expanded { border-color: var(--accent); }
+  .comp-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+  .comp-zh { font-size: 1.6rem; font-weight: 700; }
+  .comp-py { font-size: 0.85rem; color: var(--muted); font-style: italic; }
+  .comp-ko-short { font-size: 0.9rem; color: var(--green); }
+  .comp-detail { display: none; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+  .comp-card.expanded .comp-detail { display: block; }
+  .comp-mech { font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; }
+  .comp-example { font-size: 0.9rem; color: var(--text); margin-bottom: 3px; }
+  .comp-example-ko { font-size: 0.82rem; color: var(--muted); margin-bottom: 8px; }
+  .tap-hint { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 8px; }
+
+  /* ─── Quiz ─── */
+  .quiz-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; margin-bottom: 12px;
+  }
+  .quiz-q { font-size: 1rem; margin-bottom: 14px; font-weight: 500; }
+  .quiz-q .ko { color: var(--accent); }
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .opt-btn {
+    padding: 10px 14px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--text); cursor: pointer; text-align: left;
+    font-size: 0.95rem; transition: all 0.15s;
+  }
+  .opt-btn:hover:not([disabled]) { border-color: var(--accent); }
+  .opt-btn.correct { background: rgba(34,197,94,0.15); border-color: var(--success); color: var(--success); }
+  .opt-btn.wrong { background: rgba(239,68,68,0.12); border-color: var(--error); color: var(--error); }
+  .opt-btn[disabled] { cursor: default; }
+  .explanation {
+    display: none; margin-top: 12px; padding: 12px;
+    background: var(--surface); border-radius: var(--radius-sm);
+    font-size: 0.88rem; line-height: 1.6;
+  }
+  .explanation.show { display: block; }
+  .explanation .key { color: var(--accent); font-weight: 600; }
+  .quiz-progress { color: var(--muted); font-size: 0.82rem; margin-bottom: 16px; }
+  .quiz-score {
+    text-align: center; padding: 20px; font-size: 1.1rem;
+    display: none; background: var(--surface2); border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+  .quiz-score.show { display: block; }
+  .score-num { font-size: 2rem; font-weight: 700; color: var(--accent); }
+  .reset-btn {
+    margin-top: 12px; padding: 10px 24px; border-radius: 20px;
+    border: 1px solid var(--accent); background: transparent;
+    color: var(--accent); cursor: pointer; font-size: 0.9rem;
+  }
+  .reset-btn:hover { background: var(--accent-glow); }
+</style>
+</head>
+<body>
+
+<h1>결과보어 好</h1>
+<p class="subtitle">동사 + 好 = 동작이 완결·확정 상태에 도달</p>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('builder')">① 好 빌더</button>
+  <button class="tab-btn" onclick="switchTab('xiang')">② 想 보어 비교</button>
+  <button class="tab-btn" onclick="switchTab('quiz')">③ 퀴즈</button>
+</div>
+
+<!-- ══════════════ TAB 1: BUILDER ══════════════ -->
+<div id="tab-builder" class="tab-panel active">
+  <h2>동사를 골라봐</h2>
+  <div class="verb-grid" id="verbGrid"></div>
+  <div class="result-box" id="resultBox">
+    <div class="result-empty">위에서 동사를 탭하면<br>+好 결합 결과가 여기에 나와요</div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB 2: 想 COMPLEMENTS ══════════════ -->
+<div id="tab-xiang" class="tab-panel">
+  <h2>想 뒤에 무엇이 붙느냐에 따라 뜻이 갈린다</h2>
+  <p style="color:var(--muted);font-size:0.88rem;margin-bottom:14px;">카드를 탭하면 원리와 예문이 펼쳐져요</p>
+  <div class="comp-grid" id="compGrid"></div>
+</div>
+
+<!-- ══════════════ TAB 3: QUIZ ══════════════ -->
+<div id="tab-quiz" class="tab-panel">
+  <div id="quizProgress" class="quiz-progress"></div>
+  <div id="quizContainer"></div>
+  <div id="quizScore" class="quiz-score">
+    <div>최종 점수</div>
+    <div class="score-num" id="scoreNum"></div>
+    <div style="color:var(--muted);font-size:0.88rem;margin-top:6px;" id="scoreMsg"></div>
+    <button class="reset-btn" onclick="resetQuiz()">다시 풀기</button>
+  </div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────
+
+const verbs = [
+  {
+    zh: '想', py: 'xiǎng', ko: '생각하다',
+    combo_py: 'xiǎnghǎo',
+    before_ko: '(그냥) 생각하다',
+    after_ko: '생각을 정하다 · 결정하다',
+    mech: '생각(想)이 완결(好) → 결론·매듭이 남',
+    ex_pos: '你想好了吗？', ex_pos_ko: '결정했어?',
+    ex_neg: '我还没想好。', ex_neg_ko: '아직 못 정했어.',
+    tones: [3,3]
+  },
+  {
+    zh: '做', py: 'zuò', ko: '하다',
+    combo_py: 'zuòhǎo',
+    before_ko: '하다 (진행)',
+    after_ko: '다 해내다 · 완성하다',
+    mech: '行为(做)가 만족스러운 상태(好)에 도달',
+    ex_pos: '任务做好了！', ex_pos_ko: '임무 완수!',
+    ex_neg: '还没做好，等一下。', ex_neg_ko: '아직 다 못 됐어, 잠깐.',
+    tones: [4,3]
+  },
+  {
+    zh: '写', py: 'xiě', ko: '쓰다',
+    combo_py: 'xiěhǎo',
+    before_ko: '쓰다 (과정)',
+    after_ko: '다 썼다 · 완성해서 쓰다',
+    mech: '쓰기(写)가 완결 상태(好)에 도달',
+    ex_pos: '作业写好了吗？', ex_pos_ko: '숙제 다 썼어?',
+    ex_neg: '报告还没写好。', ex_neg_ko: '보고서 아직 다 못 썼어.',
+    tones: [3,3]
+  },
+  {
+    zh: '准备', py: 'zhǔnbèi', ko: '준비하다',
+    combo_py: 'zhǔnbèihǎo',
+    before_ko: '준비하다 (과정)',
+    after_ko: '준비 다 됐다 · 완료',
+    mech: '준비(准备)가 완결(好) = 이제 시작할 수 있는 상태',
+    ex_pos: '我准备好了！', ex_pos_ko: '준비 다 됐어!',
+    ex_neg: '还没准备好，稍等。', ex_neg_ko: '아직 준비 안 됐어, 잠깐.',
+    tones: [3,4]
+  },
+  {
+    zh: '说', py: 'shuō', ko: '말하다',
+    combo_py: 'shuōhǎo',
+    before_ko: '말하다 (과정)',
+    after_ko: '약속을 정하다 · 협의하다',
+    mech: '말(说)이 완결(好) = 쌍방 확인·합의가 됨',
+    ex_pos: '我们说好了，周五见。', ex_pos_ko: '우리 약속했어, 금요일에 봐.',
+    ex_neg: '还没说好去哪。', ex_neg_ko: '어디 갈지 아직 못 정했어.',
+    tones: [1,3]
+  },
+  {
+    zh: '吃', py: 'chī', ko: '먹다',
+    combo_py: 'chīhǎo',
+    before_ko: '먹다 (과정)',
+    after_ko: '배불리/잘 먹다 · 식사 완료',
+    mech: '먹기(吃)가 만족(好) = 충분히 먹은 상태',
+    ex_pos: '吃好了，谢谢！', ex_pos_ko: '잘 먹었어요, 감사해요!',
+    ex_neg: '还没吃好，再来一碗。', ex_neg_ko: '아직 못 다 먹었어, 한 그릇 더.',
+    tones: [1,3]
+  },
+  {
+    zh: '安排', py: 'ānpái', ko: '계획하다/배치하다',
+    combo_py: 'ānpáihǎo',
+    before_ko: '계획하다 (과정)',
+    after_ko: '다 준비해두다 · 다 정해두다',
+    mech: '일정 배치(安排)가 완결(好) = 전부 확정된 상태',
+    ex_pos: '行程安排好了。', ex_pos_ko: '일정 다 잡았어.',
+    ex_neg: '台湾的行程还没安排好。', ex_neg_ko: '대만 일정 아직 다 못 잡았어.',
+    tones: [1,2]
+  },
+  {
+    zh: '学', py: 'xué', ko: '배우다',
+    combo_py: 'xuéhǎo',
+    before_ko: '배우다 (과정)',
+    after_ko: '완전히 익히다 · 마스터하다',
+    mech: '학습(学)이 완결(好) = 내 것이 된 상태',
+    ex_pos: '这个语法学好了，感觉不一样。', ex_pos_ko: '이 문법 완전히 익혔어, 느낌이 달라.',
+    ex_neg: '结果补语还没学好。', ex_neg_ko: '결과보어 아직 완전히 안 됐어.',
+    tones: [2,3]
+  }
+];
+
+const complements = [
+  {
+    zh: '想', combo: '想', py: 'xiǎng',
+    ko_short: '생각하다',
+    mech: '동작이 진행 중인 과정 — 결론 없음',
+    example: '我在想……', example_ko: '나 생각 중이야……',
+    example2: '你想什么呢？', example2_ko: '뭘 생각하는 거야?'
+  },
+  {
+    zh: '想', combo: '想好', py: 'xiǎng hǎo',
+    ko_short: '결정하다 · 정하다',
+    mech: '好 = 결과보어. 생각이 완결·확정 상태에 도달',
+    example: '我想好了，去台湾！', example_ko: '결정했어, 대만 가자!',
+    example2: '还没想好，等等我。', example2_ko: '아직 못 정했어, 기다려.'
+  },
+  {
+    zh: '想', combo: '想到', py: 'xiǎng dào',
+    ko_short: '떠올리다 · 생각이 미치다',
+    mech: '到 = 도달 보어. 생각이 그 대상에 "닿았다"',
+    example: '我没想到会这样。', example_ko: '이렇게 될 줄 몰랐어.',
+    example2: '突然想到一个办法！', example2_ko: '갑자기 방법이 떠올랐어!'
+  },
+  {
+    zh: '想', combo: '想起来', py: 'xiǎng qǐ lái',
+    ko_short: '기억나다 · 생각나다',
+    mech: '起来 = 이동 보어. 저장된 기억을 "끌어올림"',
+    example: '啊，想起来了！你是老师！', example_ko: '아, 기억났어! 선생님이시죠!',
+    example2: '那个词想不起来了。', example2_ko: '그 단어가 생각 안 나.'
+  }
+];
+
+const quizzes = [
+  {
+    q: '"아직 못 정했어" — 중국어로?',
+    hint: '생각이 완결 안 된 상태',
+    opts: ['还没想好', '还没想到', '还没想起来', '还没想'],
+    ans: 0,
+    exp: '<span class="key">还没想好</span> = 还没 + 想好(결정하다). 생각(想)이 완결(好) 안 된 상태. ※ 还没想到 = 아직 못 떠올렸어, 还没想起来 = 아직 기억 안 나.'
+  },
+  {
+    q: '"준비 다 됐어!" — 중국어로?',
+    hint: '준비 동작이 완결된 상태',
+    opts: ['准备了！', '准备好了！', '准备完了！', '准备过了！'],
+    ans: 1,
+    exp: '<span class="key">准备好了</span> = 준비(准备) + 완결(好) + 완료(了). "了" 없는 준备了는 단순 "준备했어"이고, 完은 "끝내다"의 다른 보어라 준备完了도 가능하지만 준备好了가 더 자연스러워.'
+  },
+  {
+    q: '"우리 약속했어, 금요일에 봐." — 밑줄 친 부분은?',
+    hint: '말(说)이 완결 = 합의·확정',
+    opts: ['我们说完了', '我们说好了', '我们说定了', '我们说过了'],
+    ans: 1,
+    exp: '<span class="key">说好了</span> = 말(说) + 완결·합의(好) + 完了. 쌍방이 확인·합의된 상태. 说定了도 비슷한 뜻이지만 说好了이 더 구어적이야.'
+  },
+  {
+    q: '"보고서 다 썼어?" — 빈칸: 报告___了吗？',
+    hint: '쓰기(写)가 완결된 상태',
+    opts: ['写完', '写好', '写过', '写了'],
+    ans: 1,
+    exp: '<span class="key">写好</span> = 쓰기(写)가 만족스러운 완결(好) 상태. ※ 写完은 "다 끝냈다"(분량 완료 강조), 写好는 "잘 완성했다"(질·완결 강조) — 뉘앙스 차이 있지만 여기선 둘 다 OK. 好가 핵심 패턴이니 写好로.'
+  },
+  {
+    q: '"아직 대만 일정 못 잡았어." — 중국어로?',
+    hint: '안배(安排)가 완결 안 된 상태',
+    opts: ['台湾行程还没安排。', '台湾行程还没安排好。', '台湾行程还没安排完。', '台湾行程还没安排到。'],
+    ans: 1,
+    exp: '<span class="key">还没安排好</span> = 아직(还没) + 계획이 완결(安排好) 안 됨. 好가 없으면 "안배 안 했다"는 뜻은 되지만 "다 정해지지 않았다"는 완결 뉘앙스가 빠져.'
+  }
+];
+
+// ─── TONE UTILS ──────────────────────────────────────────
+
+function pinyin2html(py) {
+  // Color vowels by accent mark
+  const toneMap = {
+    'ā':'<span class="t1">ā</span>','á':'<span class="t2">á</span>','ǎ':'<span class="t3">ǎ</span>','à':'<span class="t4">à</span>',
+    'ē':'<span class="t1">ē</span>','é':'<span class="t2">é</span>','ě':'<span class="t3">ě</span>','è':'<span class="t4">è</span>',
+    'ī':'<span class="t1">ī</span>','í':'<span class="t2">í</span>','ǐ':'<span class="t3">ǐ</span>','ì':'<span class="t4">ì</span>',
+    'ō':'<span class="t1">ō</span>','ó':'<span class="t2">ó</span>','ǒ':'<span class="t3">ǒ</span>','ò':'<span class="t4">ò</span>',
+    'ū':'<span class="t1">ū</span>','ú':'<span class="t2">ú</span>','ǔ':'<span class="t3">ǔ</span>','ù':'<span class="t4">ù</span>',
+    'ǖ':'<span class="t1">ǖ</span>','ǘ':'<span class="t2">ǘ</span>','ǚ':'<span class="t3">ǚ</span>','ǜ':'<span class="t4">ǜ</span>',
+  };
+  return py.split('').map(c => toneMap[c] || c).join('');
+}
+
+// ─── TAB LOGIC ───────────────────────────────────────────
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ─── BUILDER ─────────────────────────────────────────────
+
+let selectedVerb = null;
+
+function renderBuilder() {
+  const grid = document.getElementById('verbGrid');
+  grid.innerHTML = '';
+  verbs.forEach((v, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'verb-btn';
+    btn.innerHTML = `<span style="font-size:1.1rem">${v.zh}</span> <span style="font-size:0.75rem;color:var(--muted);display:block">${v.ko}</span>`;
+    btn.onclick = () => selectVerb(i, btn);
+    grid.appendChild(btn);
+  });
+}
+
+function selectVerb(i, btn) {
+  document.querySelectorAll('.verb-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedVerb = verbs[i];
+  const v = verbs[i];
+  const box = document.getElementById('resultBox');
+  box.innerHTML = `
+    <div class="verb-combo">
+      <span class="combo-verb">${v.zh}</span>
+      <span class="combo-plus">+</span>
+      <span class="combo-hao">好</span>
+      <span class="combo-eq">=</span>
+      <span class="combo-result">${v.zh}好</span>
+    </div>
+    <div class="pinyin-row">
+      <div class="pinyin-block">
+        <div class="meaning-label">없을 때</div>
+        <div class="pinyin">${pinyin2html(v.py)}</div>
+      </div>
+      <div class="pinyin-block">
+        <div class="meaning-label">好 결합</div>
+        <div class="pinyin">${pinyin2html(v.combo_py)}</div>
+      </div>
+    </div>
+    <div class="meaning-row" style="margin-top:10px">
+      <div class="meaning-block">
+        <div class="meaning-label">동사만</div>
+        <div class="meaning-before">${v.before_ko}</div>
+      </div>
+      <div class="meaning-block">
+        <div class="meaning-label">+好 결과</div>
+        <div class="meaning-after">${v.after_ko}</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:0.82rem;color:var(--muted)">${v.mech}</div>
+    <div class="example-row">
+      <div class="example-label">예문</div>
+      <div class="example-pos">✅ ${v.ex_pos} <span style="color:var(--muted);font-size:0.82rem">— ${v.ex_pos_ko}</span></div>
+      <div class="example-neg">⏳ ${v.ex_neg} <span style="color:var(--muted);font-size:0.82rem">— ${v.ex_neg_ko}</span></div>
+    </div>
+  `;
+}
+
+// ─── COMPLEMENTS ─────────────────────────────────────────
+
+function renderComplements() {
+  const grid = document.getElementById('compGrid');
+  grid.innerHTML = '';
+  complements.forEach((c, i) => {
+    const card = document.createElement('div');
+    card.className = 'comp-card';
+    card.innerHTML = `
+      <div class="comp-head">
+        <span class="comp-zh">${c.combo}</span>
+        <span class="comp-py">${pinyin2html(c.py)}</span>
+      </div>
+      <div class="comp-ko-short">${c.ko_short}</div>
+      <div class="comp-detail">
+        <div class="comp-mech">${c.mech}</div>
+        <div class="comp-example">${c.example}</div>
+        <div class="comp-example-ko">${c.example_ko}</div>
+        <div class="comp-example">${c.example2}</div>
+        <div class="comp-example-ko">${c.example2_ko}</div>
+      </div>
+    `;
+    card.onclick = () => card.classList.toggle('expanded');
+    grid.appendChild(card);
+  });
+  const hint = document.createElement('p');
+  hint.className = 'tap-hint';
+  hint.textContent = '카드를 탭하면 상세 정보가 펼쳐져요';
+  grid.after(hint);
+}
+
+// ─── QUIZ ────────────────────────────────────────────────
+
+let quizState = { cur: 0, score: 0, answered: new Array(quizzes.length).fill(false) };
+
+function renderQuiz() {
+  const container = document.getElementById('quizContainer');
+  const prog = document.getElementById('quizProgress');
+  const done = quizState.answered.filter(Boolean).length;
+  prog.textContent = `${done} / ${quizzes.length} 완료`;
+  container.innerHTML = '';
+
+  quizzes.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'quiz-card';
+    const answered = quizState.answered[qi];
+    card.innerHTML = `
+      <div class="quiz-q">Q${qi+1}. <span class="ko">${q.q}</span>
+        ${q.hint ? `<div style="font-size:0.8rem;color:var(--muted);margin-top:4px">힌트: ${q.hint}</div>` : ''}
+      </div>
+      <div class="options">
+        ${q.opts.map((opt, oi) => `
+          <button class="opt-btn${answered ? (oi===q.ans?' correct':' wrong') : ''}"
+            id="opt-${qi}-${oi}"
+            ${answered ? 'disabled' : ''}
+            onclick="answerQuiz(${qi},${oi})">
+            ${opt}
+          </button>
+        `).join('')}
+      </div>
+      <div class="explanation${answered ? ' show' : ''}" id="exp-${qi}">
+        ${q.exp}
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  const score = document.getElementById('quizScore');
+  if (quizState.answered.every(Boolean)) {
+    score.classList.add('show');
+    document.getElementById('scoreNum').textContent = `${quizState.score} / ${quizzes.length}`;
+    const pct = quizState.score / quizzes.length;
+    document.getElementById('scoreMsg').textContent =
+      pct === 1 ? '완벽해! 결과보어 好 마스터!' :
+      pct >= 0.7 ? '잘했어! 한 번 더 풀면 완성.' :
+      '틀린 문제 해설 다시 읽어봐.';
+  } else {
+    score.classList.remove('show');
+  }
+}
+
+function answerQuiz(qi, oi) {
+  if (quizState.answered[qi]) return;
+  quizState.answered[qi] = true;
+  if (oi === quizzes[qi].ans) quizState.score++;
+  // Mark buttons
+  quizzes[qi].opts.forEach((_, i) => {
+    const btn = document.getElementById(`opt-${qi}-${i}`);
+    btn.disabled = true;
+    if (i === quizzes[qi].ans) btn.classList.add('correct');
+    else if (i === oi) btn.classList.add('wrong');
+  });
+  document.getElementById(`exp-${qi}`).classList.add('show');
+  const done = quizState.answered.filter(Boolean).length;
+  document.getElementById('quizProgress').textContent = `${done} / ${quizzes.length} 완료`;
+  if (quizState.answered.every(Boolean)) {
+    setTimeout(() => {
+      const score = document.getElementById('quizScore');
+      score.classList.add('show');
+      document.getElementById('scoreNum').textContent = `${quizState.score} / ${quizzes.length}`;
+      const pct = quizState.score / quizzes.length;
+      document.getElementById('scoreMsg').textContent =
+        pct === 1 ? '완벽해! 결과보어 好 마스터!' :
+        pct >= 0.7 ? '잘했어! 한 번 더 풀면 완성.' :
+        '틀린 문제 해설 다시 읽어봐.';
+    }, 300);
+  }
+}
+
+function resetQuiz() {
+  quizState = { cur: 0, score: 0, answered: new Array(quizzes.length).fill(false) };
+  renderQuiz();
+}
+
+// ─── INIT ────────────────────────────────────────────────
+
+renderBuilder();
+renderComplements();
+renderQuiz();
+</script>
+</body>
+</html>
