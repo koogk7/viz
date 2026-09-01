@@ -3,50 +3,57 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>돈의 크기 사다리</title>
+<title>크기 감각 — 돈 · 석유</title>
 <style>
   :root{
     --bg:#0e1013; --panel:#171a1f; --panel2:#1e222a; --line:#2a2f39;
-    --tx:#e8eaed; --dim:#9aa3b2; --gold:#f2c14e; --grn:#4ade80; --red:#f87171; --blu:#60a5fa;
+    --tx:#e8eaed; --dim:#9aa3b2; --gold:#f2c14e; --grn:#4ade80; --red:#f87171; --blu:#60a5fa; --oil:#38bdf8;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--tx);
     font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",Roboto,sans-serif;
     font-size:15px;line-height:1.5;-webkit-text-size-adjust:100%}
-  .wrap{max-width:640px;margin:0 auto;padding:18px 16px 60px}
-  h1{font-size:22px;margin:.2em 0 .1em;letter-spacing:-.01em}
-  .sub{color:var(--dim);font-size:13px;margin-bottom:16px}
+  .wrap{max-width:640px;margin:0 auto;padding:16px 16px 60px}
+  h1{font-size:21px;margin:.2em 0 .1em;letter-spacing:-.01em}
+  .sub{color:var(--dim);font-size:13px;margin-bottom:14px}
+  .tabs{display:flex;gap:8px;margin-bottom:14px}
+  .tab{flex:1;text-align:center;background:var(--panel);border:1px solid var(--line);color:var(--dim);
+    border-radius:12px;padding:11px;font-size:15px;font-weight:700;cursor:pointer}
+  .tab.on{background:var(--panel2);color:var(--tx);border-color:var(--gold)}
+  .tab.on.oil{border-color:var(--oil)}
   .tnum{font-variant-numeric:tabular-nums}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 15px;margin:12px 0}
   label{display:block;color:var(--dim);font-size:12px;margin-bottom:6px}
   .inputrow{display:flex;gap:8px}
   input[type=number]{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);color:var(--tx);
-    border-radius:10px;padding:12px 12px;font-size:19px;font-weight:600;-webkit-appearance:none;font-variant-numeric:tabular-nums}
+    border-radius:10px;padding:12px;font-size:19px;font-weight:600;-webkit-appearance:none;font-variant-numeric:tabular-nums}
   select{background:var(--panel2);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:0 10px;font-size:16px;font-weight:600}
   input:focus,select:focus{outline:none;border-color:var(--gold)}
   .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
   .chip{background:var(--panel2);border:1px solid var(--line);color:var(--tx);border-radius:999px;
-    padding:7px 12px;font-size:13px;cursor:pointer;transition:.12s}
+    padding:7px 12px;font-size:13px;cursor:pointer}
   .chip:active{transform:scale(.96)} .chip.on{background:var(--gold);color:#111;border-color:var(--gold);font-weight:700}
-  .headline{font-size:15px;color:var(--dim);margin:2px 0 2px}
-  .big{font-size:30px;font-weight:800;letter-spacing:-.02em;color:var(--gold);font-variant-numeric:tabular-nums;line-height:1.15}
-  .usd{color:var(--grn);font-size:15px;font-weight:600}
-  /* ladder */
-  .ladder{position:relative;height:430px;margin:6px 4px 2px;border-left:2px solid var(--line)}
+  .chip.on.oilc{background:var(--oil);color:#062130}
+  .headline{font-size:15px;color:var(--dim);margin:2px 0}
+  .big{font-size:29px;font-weight:800;letter-spacing:-.02em;color:var(--gold);font-variant-numeric:tabular-nums;line-height:1.15}
+  .big.oilbig{color:var(--oil)}
+  .sub2{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+  .sub2.usd{color:var(--grn)} .sub2.lit{color:var(--dim)}
+  .ladder{position:relative;height:410px;margin:6px 4px 2px;border-left:2px solid var(--line)}
   .tick{position:absolute;left:0;right:0;display:flex;align-items:center;gap:8px;transform:translateY(50%)}
   .tick .dot{width:7px;height:7px;border-radius:50%;background:var(--line);margin-left:-4.5px;flex:none}
   .tick .lbl{font-size:11.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .tick .amt{font-size:10.5px;color:#6b7280;margin-left:auto;flex:none;font-variant-numeric:tabular-nums}
-  .tick.tier-me .dot{background:#8b93a4}
-  .tick.tier-corp .dot{background:var(--blu)}
-  .tick.tier-market .dot{background:#a78bfa}
-  .tick.tier-nation .dot{background:var(--grn)}
+  .tick.tier-me .dot{background:#8b93a4} .tick.tier-corp .dot{background:var(--blu)}
+  .tick.tier-market .dot{background:#a78bfa} .tick.tier-nation .dot{background:var(--grn)}
+  .tick.tier-oil .dot{background:var(--oil)}
   .you{position:absolute;left:0;right:0;transform:translateY(50%);z-index:5;display:flex;align-items:center;gap:7px}
   .you .bar{position:absolute;left:-2px;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent)}
-  .you .pin{width:13px;height:13px;border-radius:50%;background:var(--gold);margin-left:-7px;
-    border:2px solid var(--bg);outline:2px solid var(--gold);flex:none;z-index:6}
-  .you .tag{background:var(--gold);color:#111;font-weight:800;font-size:12px;padding:2px 8px;border-radius:6px;
-    white-space:nowrap;font-variant-numeric:tabular-nums;z-index:6}
+  .you.oilyou .bar{background:linear-gradient(90deg,var(--oil),transparent)}
+  .you .pin{width:13px;height:13px;border-radius:50%;background:var(--gold);margin-left:-7px;border:2px solid var(--bg);outline:2px solid var(--gold);flex:none;z-index:6}
+  .you.oilyou .pin{background:var(--oil);outline-color:var(--oil)}
+  .you .tag{background:var(--gold);color:#111;font-weight:800;font-size:12px;padding:2px 8px;border-radius:6px;white-space:nowrap;font-variant-numeric:tabular-nums;z-index:6}
+  .you.oilyou .tag{background:var(--oil);color:#062130}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
   .cmp{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:11px 12px}
   .cmp .k{font-size:11.5px;color:var(--dim);margin-bottom:3px}
@@ -55,192 +62,250 @@
   .sec-t{font-size:12px;color:var(--dim);letter-spacing:.02em;margin:16px 2px 2px;text-transform:uppercase}
   .note{color:var(--dim);font-size:11.5px;margin-top:14px;line-height:1.6}
   .pct{color:var(--blu)} .mult{color:var(--gold)}
+  [hidden]{display:none!important}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>💰 돈의 크기 사다리</h1>
-  <div class="sub">뉴스·시장의 금액이 <b>어느 척도의 얼마</b>인지 — 로그 사다리 위 위치 + 앵커 대비 배율로 감각 잡기</div>
+  <h1>📊 크기 감각</h1>
+  <div class="sub">뉴스·시장의 숫자가 <b>어느 척도의 얼마</b>인지 — 로그 사다리 위 위치 + 앵커 대비 배율로</div>
 
-  <div class="card">
-    <label>금액 입력</label>
-    <div class="inputrow">
-      <input type="number" id="amt" value="1" min="0" step="any" inputmode="decimal">
-      <select id="unit">
-        <option value="1">원</option>
-        <option value="10000">만원</option>
-        <option value="100000000">억원</option>
-        <option value="1000000000000" selected>조원</option>
-      </select>
+  <div class="tabs">
+    <div class="tab on" id="tabMoneyBtn">💰 돈의 크기</div>
+    <div class="tab oil" id="tabOilBtn">🛢️ 석유 배럴</div>
+  </div>
+
+  <!-- ========== 돈 탭 ========== -->
+  <div id="tabMoney">
+    <div class="card">
+      <label>금액 입력</label>
+      <div class="inputrow">
+        <input type="number" id="amt" value="1" min="0" step="any" inputmode="decimal">
+        <select id="unit">
+          <option value="1">원</option><option value="10000">만원</option>
+          <option value="100000000">억원</option><option value="1000000000000" selected>조원</option>
+        </select>
+      </div>
+      <div class="chips" id="chips"></div>
     </div>
-    <div class="chips" id="chips"></div>
+    <div class="card">
+      <div class="headline">입력액</div>
+      <div class="big" id="won">₩1조</div>
+      <div class="sub2 usd" id="usd"></div>
+      <div class="ladder" id="ladder"></div>
+    </div>
+    <div class="sec-t">⏱ 시간으로</div>
+    <div class="grid">
+      <div class="cmp"><div class="k">하루 100만원씩 쓰면</div><div class="v" id="t1">—</div></div>
+      <div class="cmp"><div class="k">하루 1억원씩 쓰면</div><div class="v" id="t2">—</div></div>
+    </div>
+    <div class="sec-t">👥 1인당 · 실물</div>
+    <div class="grid">
+      <div class="cmp"><div class="k">전 국민(5,100만) 나누면</div><div class="v" id="pc">—</div></div>
+      <div class="cmp"><div class="k">최저임금 연봉(2,500만)</div><div class="v" id="wage">—</div></div>
+      <div class="cmp"><div class="k">서울 아파트(10억)</div><div class="v" id="apt">—</div></div>
+      <div class="cmp"><div class="k">로또 1등(20억)</div><div class="v" id="lotto">—</div></div>
+    </div>
+    <div class="sec-t">⚖️ 큰 척도 대비</div>
+    <div class="grid" id="ratios"></div>
+    <div class="note" id="foot"></div>
   </div>
 
-  <div class="card">
-    <div class="headline">입력액</div>
-    <div class="big" id="won">₩1조</div>
-    <div class="usd" id="usd">≈ $7.1억 (US$714M)</div>
-    <div class="ladder" id="ladder"></div>
+  <!-- ========== 석유 탭 ========== -->
+  <div id="tabOil" hidden>
+    <div class="card">
+      <label>배럴 수 입력</label>
+      <div class="inputrow">
+        <input type="number" id="oamt" value="1" min="0" step="any" inputmode="decimal">
+        <select id="ounit">
+          <option value="1">배럴</option><option value="10000">만 배럴</option>
+          <option value="1000000" selected>백만 배럴</option><option value="100000000">억 배럴</option>
+        </select>
+      </div>
+      <div style="margin-top:10px"><label>유가 (US$/배럴)</label>
+        <input type="number" id="oil-price" value="75" min="0" step="1" inputmode="decimal" style="font-size:16px;padding:9px 12px">
+      </div>
+      <div class="chips" id="ochips"></div>
+    </div>
+    <div class="card">
+      <div class="headline">입력량</div>
+      <div class="big oilbig" id="obbl">100만 배럴</div>
+      <div class="sub2 lit" id="olit"></div>
+      <div class="sub2 usd" id="ousd"></div>
+      <div class="ladder" id="oladder"></div>
+    </div>
+    <div class="sec-t">🔄 환산 · 실물</div>
+    <div class="grid">
+      <div class="cmp"><div class="k">리터(1배럴=159L)</div><div class="v" id="oL">—</div></div>
+      <div class="cmp"><div class="k">자동차 주유(탱크 50L)</div><div class="v" id="ocar">—</div></div>
+      <div class="cmp"><div class="k">초대형 유조선 VLCC(200만 배럴)</div><div class="v" id="ovlcc">—</div></div>
+      <div class="cmp"><div class="k">달러 가치(유가×배럴)</div><div class="v" id="oval">—</div></div>
+    </div>
+    <div class="sec-t">🌍 흐름 대비 (생산·소비)</div>
+    <div class="grid">
+      <div class="cmp"><div class="k">전 세계 하루 소비(1억 배럴/일)</div><div class="v" id="oworld">—</div></div>
+      <div class="cmp"><div class="k">한국 하루 원유수입(270만/일)</div><div class="v" id="okr">—</div></div>
+      <div class="cmp"><div class="k">사우디 하루 생산(900만/일)</div><div class="v" id="osaudi">—</div></div>
+      <div class="cmp"><div class="k">미국 전략비축유 SPR(3.5억)</div><div class="v" id="ospr">—</div></div>
+    </div>
+    <div class="note" id="ofoot"></div>
   </div>
-
-  <div class="sec-t">⏱ 시간으로</div>
-  <div class="grid">
-    <div class="cmp"><div class="k">하루 100만원씩 쓰면</div><div class="v" id="t1">—</div></div>
-    <div class="cmp"><div class="k">하루 1억원씩 쓰면</div><div class="v" id="t2">—</div></div>
-  </div>
-
-  <div class="sec-t">👥 1인당 · 실물</div>
-  <div class="grid">
-    <div class="cmp"><div class="k">전 국민(5,100만) 나누면</div><div class="v" id="pc">—</div></div>
-    <div class="cmp"><div class="k">최저임금 연봉(2,500만)</div><div class="v" id="wage">—</div></div>
-    <div class="cmp"><div class="k">서울 아파트(10억)</div><div class="v" id="apt">—</div></div>
-    <div class="cmp"><div class="k">로또 1등(20억)</div><div class="v" id="lotto">—</div></div>
-  </div>
-
-  <div class="sec-t">⚖️ 큰 척도 대비</div>
-  <div class="grid" id="ratios"></div>
-
-  <div class="note" id="foot"></div>
 </div>
 
 <script>
 (function(){
-  var FX=1400; // 원/달러
-  var POP=51000000;
-  // 앵커 (원). tier: me/corp/market/nation
-  // 사다리는 로그 위치가 잘 벌어진 7개만 (겹침 방지). 나머지 wow 앵커는 비율카드에.
-  var ANCH=[
-    {l:"최저임금 연봉", w:2.5e7, t:"me"},
-    {l:"서울 아파트(중위)", w:1e9, t:"me"},
-    {l:"유니콘 ($1B)", w:1.4e12, t:"corp"},
-    {l:"토스 밸류", w:9e12, t:"corp"},
-    {l:"삼성전자 시총", w:4.5e14, t:"corp"},
-    {l:"한국 GDP", w:2.5e15, t:"nation"},
-    {l:"미국 GDP ($29T)", w:4.06e16, t:"nation"}
-  ];
-  // 비율 카드용 (대표 척도)
-  var RAT=[
-    {l:"한국 GDP", w:2.5e15},
-    {l:"한국 1년 예산", w:6.6e14},
-    {l:"삼성 매출(300조)", w:3e14},
-    {l:"삼성 시총(450조)", w:4.5e14},
-    {l:"미국 국방비($900B)", w:1.26e15},
-    {l:"미국 GDP($29T)", w:4.06e16}
-  ];
-  var PRESETS=[
-    {l:"연매출 10억", w:1e9},{l:"100억", w:1e10},{l:"1000억", w:1e11},{l:"1조원", w:1e12},
-    {l:"토스 밸류(9조)", w:9e12},
-    {l:"네이버 매출(11조)", w:1.1e13},{l:"쿠팡 매출(40조)", w:4e13},
-    {l:"한국 국방(60조)", w:6e13},{l:"한국 복지(250조)", w:2.5e14},
-    {l:"삼성 매출(300조)", w:3e14},{l:"삼성 시총(450조)", w:4.5e14},
-    {l:"애플 매출($391B)", w:5.47e14},{l:"한국 예산(660조)", w:6.6e14},
-    {l:"미국 국방비($900B)", w:1.26e15},{l:"엔비디아($4T)", w:5.6e15},
-    {l:"미국 GDP($29T)", w:4.06e16}
-  ];
-  var LMIN=Math.log10(1e4), LMAX=Math.log10(4.06e16); // 1만원 ~ 미국GDP
-
+  var FX=1400, POP=51000000;
   var el=function(id){return document.getElementById(id)};
-  function fmtWon(w){
-    if(w<1e4) return "₩"+Math.round(w).toLocaleString();
-    var jo=Math.floor(w/1e12), eok=Math.floor((w%1e12)/1e8), man=Math.floor((w%1e8)/1e4);
-    var s="";
-    if(jo>0) s+=jo.toLocaleString()+"조 ";
-    if(eok>0) s+=eok.toLocaleString()+"억 ";
-    if(jo===0 && man>0) s+=man.toLocaleString()+"만 ";
-    if(!s) s=Math.round(w).toLocaleString()+" ";
-    return "₩"+s.trim();
-  }
-  function fmtUsd(w){
-    var d=w/FX;
-    if(d>=1e12) return "≈ $"+(d/1e12).toFixed(2)+"조 (US$"+(d/1e12).toFixed(2)+"T)";
-    if(d>=1e8) return "≈ $"+(d/1e8).toFixed(1)+"억 (US$"+(d/1e6).toFixed(0)+"M)";
-    if(d>=1e4) return "≈ $"+(d/1e4).toFixed(1)+"만";
-    return "≈ $"+Math.round(d).toLocaleString();
-  }
-  function mult(a,b){ // a는 b의 몇 배 / 몇 %
-    var r=a/b;
-    if(r>=1) return '<span class="mult">'+ (r>=100? Math.round(r).toLocaleString() : r.toFixed(r>=10?0:1)) +'배</span>';
-    return '<span class="pct">'+ (r*100>=10? (r*100).toFixed(0) : (r*100).toFixed(1)) +'%</span>';
-  }
-  function human(n,unit){ // 개수
-    if(n>=1e8) return (n/1e8).toFixed(1)+"억"+unit;
+
+  /* ===== 공용 ===== */
+  function human(n,unit){
+    if(n>=1e8) return (n/1e8).toFixed(n>=1e9?0:1)+"억"+unit;
     if(n>=1e4) return (n/1e4).toFixed(n>=1e5?0:1)+"만"+unit;
     if(n>=1) return Math.round(n).toLocaleString()+unit;
     return n.toFixed(2)+unit;
   }
-  function years(w, perDay){
-    var days=w/perDay;
-    if(days<1) return "하루 안";
-    if(days<365) return Math.round(days).toLocaleString()+"일";
-    var y=days/365;
-    return (y>=100? Math.round(y).toLocaleString() : y.toFixed(1))+"년";
+  function multStr(a,b){
+    var r=a/b;
+    if(r>=1) return '<span class="mult">'+(r>=100?Math.round(r).toLocaleString():r.toFixed(r>=10?0:1))+'배</span>';
+    return '<span class="pct">'+(r*100>=10?(r*100).toFixed(0):(r*100).toFixed(1))+'%</span>';
   }
 
-  function buildLadder(){
-    var L=el("ladder"); L.innerHTML="";
-    // 앵커를 로그 위치로 (아래=작음, 위=큼). top% = (1 - (log-LMIN)/(LMAX-LMIN))
-    ANCH.slice().sort(function(a,b){return a.w-b.w}).forEach(function(a){
-      var p=(Math.log10(a.w)-LMIN)/(LMAX-LMIN);
-      var d=document.createElement("div");
-      d.className="tick tier-"+a.t; d.style.bottom=(p*100)+"%";
-      d.innerHTML='<span class="dot"></span><span class="lbl">'+a.l+'</span><span class="amt">'+fmtWon(a.w).replace("₩","")+'</span>';
+  /* ===== 돈 탭 ===== */
+  var ANCH=[
+    {l:"최저임금 연봉", w:2.5e7, t:"me"},{l:"서울 아파트(중위)", w:1e9, t:"me"},
+    {l:"유니콘 ($1B)", w:1.4e12, t:"corp"},{l:"토스 밸류", w:9e12, t:"corp"},
+    {l:"삼성전자 시총", w:4.5e14, t:"corp"},{l:"한국 GDP", w:2.5e15, t:"nation"},
+    {l:"미국 GDP ($29T)", w:4.06e16, t:"nation"}
+  ];
+  var RAT=[
+    {l:"한국 GDP", w:2.5e15},{l:"한국 1년 예산", w:6.6e14},
+    {l:"삼성 매출(300조)", w:3e14},{l:"삼성 시총(450조)", w:4.5e14},
+    {l:"미국 국방비($900B)", w:1.26e15},{l:"미국 GDP($29T)", w:4.06e16}
+  ];
+  var PRESETS=[
+    {l:"연매출 10억", w:1e9},{l:"100억", w:1e10},{l:"1000억", w:1e11},{l:"1조원", w:1e12},
+    {l:"토스 밸류(9조)", w:9e12},{l:"네이버 매출(11조)", w:1.1e13},{l:"쿠팡 매출(40조)", w:4e13},
+    {l:"한국 국방(60조)", w:6e13},{l:"한국 복지(250조)", w:2.5e14},{l:"삼성 매출(300조)", w:3e14},
+    {l:"삼성 시총(450조)", w:4.5e14},{l:"애플 매출($391B)", w:5.47e14},{l:"한국 예산(660조)", w:6.6e14},
+    {l:"미국 국방비($900B)", w:1.26e15},{l:"엔비디아($4T)", w:5.6e15},{l:"미국 GDP($29T)", w:4.06e16}
+  ];
+  var LMIN=Math.log10(1e4), LMAX=Math.log10(4.06e16);
+  function fmtWon(w){
+    if(w<1e4) return "₩"+Math.round(w).toLocaleString();
+    var jo=Math.floor(w/1e12), eok=Math.floor((w%1e12)/1e8), man=Math.floor((w%1e8)/1e4), s="";
+    if(jo>0) s+=jo.toLocaleString()+"조 "; if(eok>0) s+=eok.toLocaleString()+"억 ";
+    if(jo===0 && man>0) s+=man.toLocaleString()+"만 "; if(!s) s=Math.round(w).toLocaleString()+" ";
+    return "₩"+s.trim();
+  }
+  function fmtUsd(w){var d=w/FX;
+    if(d>=1e12) return "≈ US$"+(d/1e12).toFixed(2)+"T"; if(d>=1e8) return "≈ $"+(d/1e8).toFixed(1)+"억 (US$"+(d/1e6).toFixed(0)+"M)";
+    if(d>=1e4) return "≈ $"+(d/1e4).toFixed(1)+"만"; return "≈ $"+Math.round(d).toLocaleString();}
+  function years(w,per){var d=w/per; if(d<1)return"하루 안"; if(d<365)return Math.round(d).toLocaleString()+"일";
+    var y=d/365; return (y>=100?Math.round(y).toLocaleString():y.toFixed(1))+"년";}
+  function buildLadder(id,arr,lmin,lmax,tier){
+    var L=el(id); L.innerHTML="";
+    arr.slice().sort(function(a,b){return a.w-b.w}).forEach(function(a){
+      var p=(Math.log10(a.w)-lmin)/(lmax-lmin), d=document.createElement("div");
+      d.className="tick tier-"+(a.t||tier); d.style.bottom=(p*100)+"%";
+      d.innerHTML='<span class="dot"></span><span class="lbl">'+a.l+'</span><span class="amt">'+a.amt+'</span>';
       L.appendChild(d);
     });
-    var you=document.createElement("div"); you.id="you"; you.className="you";
-    you.innerHTML='<span class="bar"></span><span class="pin"></span><span class="tag" id="youtag"></span>';
-    L.appendChild(you);
   }
-
-  function render(){
-    var v=parseFloat(el("amt").value)||0;
-    var u=parseFloat(el("unit").value);
-    var w=v*u;
-    el("won").textContent=fmtWon(w);
-    el("usd").textContent=fmtUsd(w);
-    // ladder marker
+  function renderMoney(){
+    var w=(parseFloat(el("amt").value)||0)*parseFloat(el("unit").value);
+    el("won").textContent=fmtWon(w); el("usd").textContent=fmtUsd(w);
     var p=Math.max(0,Math.min(1,(Math.log10(Math.max(w,1))-LMIN)/(LMAX-LMIN)));
-    var you=el("you"); if(you){ you.style.bottom=(p*100)+"%"; el("youtag").textContent=fmtWon(w); }
-    // 시간
-    el("t1").innerHTML=years(w,1e6);
-    el("t2").innerHTML=years(w,1e8);
-    // 1인당·실물
-    el("pc").innerHTML="1인당 "+fmtWon(w/POP).replace("₩","")+"<small>원</small>".replace("원원","원");
-    el("pc").innerHTML="1인당 "+ (w/POP>=1e4? (w/POP/1e4).toFixed(1)+"만원" : Math.round(w/POP).toLocaleString()+"원");
-    el("wage").innerHTML=human(w/2.5e7,"명")+" <small>1년치</small>";
-    el("apt").innerHTML=human(w/1e9,"채");
-    el("lotto").innerHTML=human(w/2e9,"번");
-    // 비율
+    var you=el("mYou"); you.style.bottom=(p*100)+"%"; el("mYouTag").textContent=fmtWon(w);
+    el("t1").innerHTML=years(w,1e6); el("t2").innerHTML=years(w,1e8);
+    el("pc").innerHTML=(w/POP>=1e4?(w/POP/1e4).toFixed(1)+"만원":Math.round(w/POP).toLocaleString()+"원");
+    el("wage").innerHTML=human(w/2.5e7,"명")+' <small>1년치</small>';
+    el("apt").innerHTML=human(w/1e9,"채"); el("lotto").innerHTML=human(w/2e9,"번");
     var R=el("ratios"); R.innerHTML="";
-    RAT.forEach(function(a){
-      var d=document.createElement("div"); d.className="cmp";
-      d.innerHTML='<div class="k">'+a.l+' 대비</div><div class="v">'+mult(w,a.w)+'</div>';
-      R.appendChild(d);
-    });
-    // chip active
-    document.querySelectorAll(".chip").forEach(function(c){ c.classList.toggle("on", Math.abs(parseFloat(c.dataset.w)-w)<1); });
-    el("foot").innerHTML="※ 대략값(환율 $1=1,400원·인구 5,100만 기준). 앵커는 감각용 근사치라 시점에 따라 변함. "
-      +"핵심은 정확한 숫자가 아니라 <b>자릿수와 앵커 대비 배율</b>.";
+    RAT.forEach(function(a){var d=document.createElement("div");d.className="cmp";
+      d.innerHTML='<div class="k">'+a.l+' 대비</div><div class="v">'+multStr(w,a.w)+'</div>';R.appendChild(d);});
+    document.querySelectorAll("#chips .chip").forEach(function(c){c.classList.toggle("on",Math.abs(parseFloat(c.dataset.w)-w)<1);});
+    el("foot").innerHTML="※ 대략값($1=1,400원·인구 5,100만). 핵심은 정확한 숫자가 아니라 <b>자릿수와 앵커 대비 배율</b>.";
   }
-
-  // build chips
+  // 돈 사다리 + marker
+  (function(){var L=el("ladder");
+    ANCH.forEach(function(a){a.amt=fmtWon(a.w).replace("₩","");});
+    buildLadder("ladder",ANCH,LMIN,LMAX);
+    var you=document.createElement("div");you.className="you";you.id="mYou";
+    you.innerHTML='<span class="bar"></span><span class="pin"></span><span class="tag" id="mYouTag"></span>';L.appendChild(you);})();
   var C=el("chips");
-  PRESETS.forEach(function(p){
-    var b=document.createElement("button"); b.className="chip"; b.textContent=p.l; b.dataset.w=p.w;
-    b.onclick=function(){ setWon(p.w); };
-    C.appendChild(b);
-  });
-  function setWon(w){
-    // 조 단위면 조로, 억 단위면 억으로 표시
-    var u,val;
-    if(w>=1e12){u=1e12;} else if(w>=1e8){u=1e8;} else if(w>=1e4){u=1e4;} else {u=1;}
-    val=w/u;
-    el("unit").value=String(u); el("amt").value=(val%1===0?val:val.toFixed(2));
-    render();
-  }
+  PRESETS.forEach(function(p){var b=document.createElement("button");b.className="chip";b.textContent=p.l;b.dataset.w=p.w;
+    b.onclick=function(){setWon(p.w);};C.appendChild(b);});
+  function setWon(w){var u=w>=1e12?1e12:w>=1e8?1e8:w>=1e4?1e4:1;el("unit").value=String(u);
+    el("amt").value=(w/u%1===0?w/u:(w/u).toFixed(2));renderMoney();}
+  el("amt").addEventListener("input",renderMoney); el("unit").addEventListener("change",renderMoney);
+  renderMoney();
 
-  el("amt").addEventListener("input",render);
-  el("unit").addEventListener("change",render);
-  buildLadder(); render();
+  /* ===== 석유 탭 ===== */
+  var OANCH=[
+    {l:"유조선 VLCC 1척", w:2e6, t:"oil"},{l:"한국 하루 수입", w:2.7e6, t:"oil"},
+    {l:"사우디 하루 생산", w:9e6, t:"oil"},{l:"미국 하루 생산", w:1.3e7, t:"oil"},
+    {l:"전세계 하루 소비", w:1e8, t:"oil"},{l:"미국 SPR(전략비축)", w:3.5e8, t:"oil"},
+    {l:"전세계 연간 소비", w:3.65e10, t:"oil"}
+  ];
+  var OPRE=[
+    {l:"1만 배럴", w:1e4},{l:"OPEC+ 감산(100만/일)", w:1e6},{l:"유조선 1척(200만)", w:2e6},
+    {l:"한국 하루수입(270만)", w:2.7e6},{l:"사우디 하루생산(900만)", w:9e6},
+    {l:"전세계 하루소비(1억)", w:1e8},{l:"미국 SPR(3.5억)", w:3.5e8}
+  ];
+  var OLMIN=0, OLMAX=Math.log10(3.65e10);
+  function fmtBbl(b){
+    if(b>=1e8) return (b/1e8).toFixed(b>=1e9?1:2)+"억 배럴";
+    if(b>=1e4) return (b/1e4).toFixed(b>=1e6?0:1)+"만 배럴";
+    return Math.round(b).toLocaleString()+" 배럴";
+  }
+  function fmtUsdRaw(d){
+    if(d>=1e12) return "US$"+(d/1e12).toFixed(2)+"T"; if(d>=1e8) return "$"+(d/1e8).toFixed(1)+"억 (US$"+(d/1e9).toFixed(1)+"B)";
+    if(d>=1e4) return "$"+(d/1e4).toFixed(1)+"만"; return "$"+Math.round(d).toLocaleString();
+  }
+  function renderOil(){
+    var b=(parseFloat(el("oamt").value)||0)*parseFloat(el("ounit").value);
+    var price=parseFloat(el("oil-price").value)||0;
+    var lit=b*159, usd=b*price, won=usd*FX;
+    el("obbl").textContent=fmtBbl(b);
+    el("olit").textContent="= "+ (lit>=1e8?(lit/1e8).toFixed(1)+"억 L":lit>=1e4?(lit/1e4).toFixed(0)+"만 L":Math.round(lit).toLocaleString()+" L");
+    el("ousd").textContent="≈ "+fmtUsdRaw(usd)+" (₩"+ (won>=1e12?(won/1e12).toFixed(2)+"조":won>=1e8?(won/1e8).toFixed(0)+"억":Math.round(won).toLocaleString()) +")";
+    var p=Math.max(0,Math.min(1,(Math.log10(Math.max(b,1))-OLMIN)/(OLMAX-OLMIN)));
+    var you=el("oYou"); you.style.bottom=(p*100)+"%"; el("oYouTag").textContent=fmtBbl(b);
+    el("oL").innerHTML=(lit>=1e8?(lit/1e8).toFixed(1)+"억":lit>=1e4?(lit/1e4).toFixed(0)+"만":Math.round(lit).toLocaleString())+" <small>L</small>";
+    el("ocar").innerHTML=human(lit/50,"대");
+    el("ovlcc").innerHTML=(b/2e6>=1?human(b/2e6,"척"):multStr(b,2e6));
+    el("oval").innerHTML=fmtUsdRaw(usd);
+    // 흐름: N일치 or 배율
+    el("oworld").innerHTML=(b/1e8>=1? human(b/1e8,"일치") : multStr(b,1e8));
+    el("okr").innerHTML=(b/2.7e6>=1? human(b/2.7e6,"일치") : multStr(b,2.7e6));
+    el("osaudi").innerHTML=(b/9e6>=1? human(b/9e6,"일치") : multStr(b,9e6));
+    el("ospr").innerHTML=multStr(b,3.5e8);
+    document.querySelectorAll("#ochips .chip").forEach(function(c){c.classList.toggle("on",Math.abs(parseFloat(c.dataset.w)-b)<1);});
+    el("ofoot").innerHTML="※ 1배럴=159L(약 42갤런). 유가·생산량은 대략값(유가 기본 $75). 전세계 하루소비 ~1억 배럴/일이 핵심 앵커.";
+  }
+  (function(){var L=el("oladder");
+    OANCH.forEach(function(a){a.amt=fmtBbl(a.w).replace(" 배럴","");});
+    buildLadder("oladder",OANCH,OLMIN,OLMAX,"oil");
+    var you=document.createElement("div");you.className="you oilyou";you.id="oYou";
+    you.innerHTML='<span class="bar"></span><span class="pin"></span><span class="tag" id="oYouTag"></span>';L.appendChild(you);})();
+  var OC=el("ochips");
+  OPRE.forEach(function(p){var b=document.createElement("button");b.className="chip oilc";b.textContent=p.l;b.dataset.w=p.w;
+    b.onclick=function(){setBbl(p.w);};OC.appendChild(b);});
+  function setBbl(b){var u=b>=1e8?1e8:b>=1e6?1e6:b>=1e4?1e4:1;el("ounit").value=String(u);
+    el("oamt").value=(b/u%1===0?b/u:(b/u).toFixed(2));renderOil();}
+  el("oamt").addEventListener("input",renderOil); el("ounit").addEventListener("change",renderOil);
+  el("oil-price").addEventListener("input",renderOil);
+  renderOil();
+
+  /* ===== 탭 전환 ===== */
+  function show(which){
+    var money=which==="money";
+    el("tabMoney").hidden=!money; el("tabOil").hidden=money;
+    el("tabMoneyBtn").classList.toggle("on",money);
+    el("tabOilBtn").classList.toggle("on",!money);
+  }
+  el("tabMoneyBtn").onclick=function(){show("money")};
+  el("tabOilBtn").onclick=function(){show("oil")};
 })();
 </script>
 </body>
