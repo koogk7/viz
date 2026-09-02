@@ -106,6 +106,17 @@
       <div class="cmp"><div class="k">서울 아파트(10억)</div><div class="v" id="apt">—</div></div>
       <div class="cmp"><div class="k">로또 1등(20억)</div><div class="v" id="lotto">—</div></div>
     </div>
+    <div class="sec-t">🏦 은행 예금 이자</div>
+    <div class="card" style="margin-top:2px">
+      <label>연이자율 (%)</label>
+      <input type="number" id="rate" value="4" min="0" step="0.1" inputmode="decimal" style="width:100%;font-size:16px;padding:9px 12px">
+      <div class="grid" style="margin-top:11px">
+        <div class="cmp"><div class="k">세전 연이자</div><div class="v" id="iy0">—</div></div>
+        <div class="cmp"><div class="k">세후 연이자 <small>(−15.4%)</small></div><div class="v" id="iy1">—</div></div>
+        <div class="cmp"><div class="k">세전 월이자</div><div class="v" id="im0">—</div></div>
+        <div class="cmp"><div class="k">세후 월이자</div><div class="v" id="im1">—</div></div>
+      </div>
+    </div>
     <div class="sec-t">⚖️ 큰 척도 대비</div>
     <div class="grid" id="ratios"></div>
     <div class="note" id="foot"></div>
@@ -224,7 +235,11 @@
     RAT.forEach(function(a){var d=document.createElement("div");d.className="cmp";
       d.innerHTML='<div class="k">'+a.l+' 대비</div><div class="v">'+multStr(w,a.w)+'</div>';R.appendChild(d);});
     document.querySelectorAll("#chips .chip").forEach(function(c){c.classList.toggle("on",Math.abs(parseFloat(c.dataset.w)-w)<1);});
-    el("foot").innerHTML="※ 대략값($1=1,400원·인구 5,100만). 핵심은 정확한 숫자가 아니라 <b>자릿수와 앵커 대비 배율</b>.";
+    // 은행 예금 이자 (세후 = 세전 × (1-0.154), 이자소득세 15.4%)
+    var rate=(parseFloat(el("rate").value)||0)/100, iy0=w*rate, iy1=iy0*0.846;
+    el("iy0").innerHTML=fmtWon(iy0).replace("₩",""); el("iy1").innerHTML=fmtWon(iy1).replace("₩","");
+    el("im0").innerHTML=fmtWon(iy0/12).replace("₩",""); el("im1").innerHTML=fmtWon(iy1/12).replace("₩","");
+    el("foot").innerHTML="※ 대략값($1=1,400원·인구 5,100만·이자소득세 15.4%). 핵심은 <b>자릿수와 앵커 대비 배율</b>.";
   }
   // 돈 사다리 + marker
   (function(){var L=el("ladder");
@@ -238,6 +253,7 @@
   function setWon(w){var u=w>=1e12?1e12:w>=1e8?1e8:w>=1e4?1e4:1;el("unit").value=String(u);
     el("amt").value=(w/u%1===0?w/u:(w/u).toFixed(2));renderMoney();}
   el("amt").addEventListener("input",renderMoney); el("unit").addEventListener("change",renderMoney);
+  el("rate").addEventListener("input",renderMoney);
   renderMoney();
 
   /* ===== 석유 탭 ===== */
