@@ -1,0 +1,89 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>영어 문법 90%</title><style>
+:root{--bg:#0d1117;--card:#161b22;--line:#26303d;--tx:#e9eff6;--mut:#8b9cb0;--ac:#58d0a0;--yl:#ffd166;--bl:#6ba7ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Segoe UI',sans-serif;line-height:1.6;font-size:15px}
+.w{max-width:720px;margin:0 auto;padding:18px}
+h1{font-size:23px;margin:0 0 3px;letter-spacing:-.01em}
+.sub{color:var(--mut);font-size:12.5px;margin-bottom:18px}
+.c{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:13px}
+.c h2{font-size:16.5px;margin:0 0 3px}
+.c .k{color:var(--mut);font-size:12px;margin-bottom:11px}
+.big{font-size:19px;font-weight:700;line-height:1.7}
+.num{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--ac);color:#06251a;font-size:12px;font-weight:800;align-items:center;justify-content:center;margin-right:8px}
+.row{display:flex;align-items:baseline;gap:8px;padding:5px 0;border-bottom:1px dashed rgba(255,255,255,.06)}
+.row:last-child{border:0}
+.en{font-weight:700;color:var(--tx)}
+.ko{color:var(--mut);font-size:13.5px;margin-left:auto;text-align:right}
+.hide .ko{filter:blur(5px);cursor:pointer}
+.toggle{background:transparent;border:1px solid var(--line);color:var(--mut);font-size:11.5px;padding:4px 10px;border-radius:999px;cursor:pointer;float:right}
+.builder{background:#0f1620;border:1px solid var(--line);border-radius:10px;padding:14px;text-align:center;margin-top:8px}
+.bsent{font-size:19px;font-weight:700;min-height:56px;display:flex;align-items:center;justify-content:center;color:var(--yl)}
+.bko{color:var(--mut);font-size:13px;min-height:20px}
+.bstep{color:var(--ac);font-size:11.5px;margin-top:6px}
+.bbtns{display:flex;gap:6px;justify-content:center;margin-top:11px}
+.bbtn{background:var(--ac);color:#06251a;border:0;font-weight:700;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px}
+.bbtn.sec{background:transparent;color:var(--mut);border:1px solid var(--line)}
+.grow div{padding:4px 0;font-weight:700}
+.grow div:nth-child(1){opacity:.55}.grow div:nth-child(2){opacity:.7}.grow div:nth-child(3){opacity:.85}
+.grow div:nth-child(4){color:var(--yl)}
+.pill{display:inline-block;background:rgba(107,167,255,.15);color:var(--bl);font-weight:700;padding:2px 9px;border-radius:7px;font-size:13.5px}
+.tip{background:rgba(255,209,102,.1);border-left:3px solid var(--yl);padding:9px 12px;border-radius:0 8px 8px 0;font-size:13.5px;margin-top:10px}
+.foot{color:var(--mut);font-size:11.5px;border-top:1px solid var(--line);padding-top:11px;margin-top:6px}
+@media(max-width:520px){.w{padding:13px}h1{font-size:20px}.big{font-size:17px}}
+</style></head><body><div class="w">
+<h1>🗣 영어 문법, 사실 <span style="color:var(--ac)">90%는 이거임</span></h1>
+<div class="sub">fmkorea 「영어 문법 90%는 사실 이거임」(초삥식, 2026-09-02) · 원본 카드 @emily.newyorker · 본문 이미지 10장을 텍스트로 변환</div>
+
+<div class="c"><h2>① 어순, 이 4개가 전부</h2><div class="k">순서만 지키면 말이 나옴</div>
+<div class="big" id="r4"></div></div>
+
+<div class="c"><h2>② 질문은 거의 이 5개로 시작</h2><div class="k">외울 건 생각보다 적어요</div>
+<button class="toggle" data-t="q5">뜻 가리기</button><div id="q5"></div></div>
+
+<div class="c"><h2>③ 말이 길어지는 어순 확장</h2><div class="k">버튼을 눌러 한 덩어리씩 붙여보세요</div>
+<div class="builder"><div class="bsent" id="bs"></div><div class="bko" id="bk"></div><div class="bstep" id="bt"></div>
+<div class="bbtns"><button class="bbtn" id="next">+ 붙이기</button><button class="bbtn sec" id="reset">처음부터</button></div></div>
+<div class="tip">📌 뒤에 <b>to + 동사</b>만 붙이면 <b>이유</b>가 완성됨!</div></div>
+
+<div class="c"><h2>④ 시제 규칙, 이게 전부</h2><div id="tense"></div></div>
+
+<div class="c"><h2>⑤ 영어는 길게 말하는 게임이 아님</h2><div class="k">한 단어씩만 붙이면 됩니다</div>
+<div class="grow" id="grow"></div></div>
+
+<div class="c"><h2>⑥ 영어 규칙, 이게 전부임</h2><div class="k">하루면 이해할 수 있음</div><div id="allr"></div></div>
+
+<div class="c"><h2>⑦ 걍 통째로 외울 문장 5개</h2>
+<button class="toggle" data-t="memo">뜻 가리기</button><div id="memo"></div></div>
+
+<div class="c"><h2>⑧ get 구동사 5개</h2><div class="k">이건 걍 외우셈</div>
+<button class="toggle" data-t="get">뜻 가리기</button><div id="get"></div></div>
+
+<div class="c"><h2>⑨ 이거 모르면 영어대화 불가능</h2><div class="k">리액션 4종</div>
+<button class="toggle" data-t="react">뜻 가리기</button><div id="react"></div></div>
+
+<div class="c"><h2>⑩ 해외여행 무적 패턴 5개</h2><div class="k">어디서든 쓰는</div>
+<button class="toggle" data-t="travel">뜻 가리기</button><div id="travel"></div></div>
+
+<div class="foot">원문은 이미지 카드뉴스였고, 이 페이지는 그 내용을 텍스트로 옮겨 학습용으로 재구성한 것입니다. 뜻 가리기 버튼으로 셀프테스트 가능.</div>
+</div><script>
+const D={"rules4": ["누가", "한다", "무엇을", "언제/어디서"], "q5": [["Do you…", "하니?"], ["Can you…", "할 수 있어?"], ["Are you…", "야?/하는 중이야?"], ["Did you…", "했어?"], ["Will you…", "할 거야?"]], "build": [["I go.", "나는 간다", "주어 + 동사"], ["I go to the cafe.", "나는 카페에 간다", "장소 추가"], ["I go to the cafe to work.", "나는 일하러 카페에 간다", "목적 추가"], ["I go to the cafe to work every morning.", "나는 매일 아침 일하러 카페에 간다", "시간/상황 추가"]], "tense": [["지금 하는 중", "-ing"], ["끝났으면", "-ed"], ["아직이면", "will"], ["헷갈리면", "그냥 will로 말해도 다 알아들음"]], "grow": ["I want.", "I want coffee.", "I want hot coffee.", "I want hot coffee, please."], "allrules": ["주어 + 동사", "현재 / 과거 / 미래", "단수면 s, 복수면 s 빼기", "동사 바뀌는 것만 기억하기"], "memo": [["How's it going?", "어떻게 지내?"], ["I have no idea", "모르겠다"], ["That makes sense", "이해된다 / 말이 된다"], ["I'm running late", "늦는다"], ["Let me know", "알려달라고 할 때"]], "get": [["get up", "일어나다"], ["get along", "사이 좋게 지내다"], ["get over", "극복하다"], ["get in", "타다"], ["get out", "내리다"]], "react": [["I see.", "알겠어."], ["Makes sense.", "말이 되네."], ["Fair enough.", "그럴 수 있지."], ["No way!", "말도 안 돼!"]], "travel": [["Do you have ~?", "있나요?"], ["Can I get ~?", "주세요."], ["Where is ~?", "어디예요?"], ["How much is ~?", "얼마예요?"], ["I want ~.", "~하고 싶어요."]]};
+document.getElementById('r4').innerHTML=D.rules4.map((r,i)=>`<div><span class="num">${i+1}</span>${r}</div>`).join('');
+function pairs(id,arr){document.getElementById(id).innerHTML=arr.map(p=>`<div class="row"><span class="en">${p[0]}</span><span class="ko">${p[1]}</span></div>`).join('');}
+pairs('q5',D.q5);pairs('memo',D.memo);pairs('get',D.get);pairs('react',D.react);pairs('travel',D.travel);
+document.getElementById('tense').innerHTML=D.tense.map((t,i)=>`<div class="row"><span class="num">${i+1}</span><span>${t[0]}</span><span class="ko"><span class="pill">${t[1]}</span></span></div>`).join('');
+document.getElementById('grow').innerHTML=D.grow.map(g=>`<div>${g}</div>`).join('');
+document.getElementById('allr').innerHTML=D.allrules.map((r,i)=>`<div class="row"><span class="num">${i+1}</span><span>${r}</span></div>`).join('');
+// 토글(뜻 가리기)
+document.querySelectorAll('.toggle').forEach(b=>b.addEventListener('click',()=>{
+ const el=document.getElementById(b.dataset.t);const on=el.classList.toggle('hide');
+ b.textContent=on?'뜻 보기':'뜻 가리기';
+}));
+// 어순 빌더
+let step=0;
+function draw(){const b=D.build[step];document.getElementById('bs').textContent=b[0];document.getElementById('bk').textContent=b[1];
+ document.getElementById('bt').textContent=`${step+1}. ${b[2]}`;
+ document.getElementById('next').textContent=step<D.build.length-1?'+ 붙이기':'완성!';}
+document.getElementById('next').onclick=()=>{if(step<D.build.length-1){step++;draw();}};
+document.getElementById('reset').onclick=()=>{step=0;draw();};
+draw();
+</script></body></html>
