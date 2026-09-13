@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>像是中了你的毒 — 중국어 학습</title>
+<style>
+:root {
+  --bg: #0d0f1a;
+  --surface: #161927;
+  --surface2: #1e2235;
+  --border: #2a2f4a;
+  --text: #dde2f4;
+  --text2: #7a83a8;
+  --accent: #6c8ef5;
+  --accent2: #a78bfa;
+  --green: #4ade80;
+  --red: #f87171;
+  --yellow: #fbbf24;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 15px; min-height: 100vh; }
+
+/* ── Tabs ── */
+.tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; position: sticky; top: 0; z-index: 10; }
+.tab-btn { flex: 1; min-width: 72px; padding: 13px 8px; text-align: center; font-size: 12px; font-weight: 600; color: var(--text2); border: none; background: none; cursor: pointer; white-space: nowrap; letter-spacing: 0.3px; }
+.tab-btn.active { color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); }
+
+/* ── Panel ── */
+.panel { display: none; padding: 16px; max-width: 680px; margin: 0 auto; }
+.panel.active { display: block; }
+
+/* ── Header ── */
+.song-header { text-align: center; padding: 20px 0 24px; }
+.song-header .title { font-size: 22px; font-weight: 700; color: var(--accent2); }
+.song-header .py { font-size: 13px; color: var(--text2); margin-top: 4px; }
+.song-header .meaning { font-size: 14px; color: var(--text); margin-top: 6px; }
+
+/* ── Grammar ── */
+.g-item { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+.g-item h3 { font-size: 15px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+.g-pattern { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; color: var(--accent2); background: var(--surface2); border-radius: 6px; padding: 6px 10px; margin-bottom: 8px; display: inline-block; }
+.g-desc { font-size: 13px; color: var(--text2); margin-bottom: 8px; line-height: 1.6; }
+.g-ex { font-size: 14px; margin: 3px 0; }
+.g-ex .zh { color: var(--text); }
+.g-ex .kr { color: var(--text2); font-size: 12px; display: block; margin-top: 1px; }
+.g-ex .src { font-size: 11px; color: var(--border); }
+.ext-ex { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+.ext-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+
+/* ── Vocab ── */
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.flip-card { height: 96px; cursor: pointer; perspective: 800px; }
+.flip-inner { width: 100%; height: 100%; position: relative; transition: transform 0.38s; transform-style: preserve-3d; }
+.flip-card.flipped .flip-inner { transform: rotateY(180deg); }
+.flip-front, .flip-back { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 10px; border: 1px solid var(--border); }
+.flip-front { background: var(--surface); }
+.flip-back { background: var(--surface2); transform: rotateY(180deg); }
+.flip-front .zh { font-size: 20px; font-weight: 600; }
+.flip-front .py { font-size: 11px; color: var(--text2); margin-top: 3px; }
+.flip-front .hint { font-size: 10px; color: var(--border); margin-top: 6px; }
+.flip-back .meaning { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+/* ── Trad/Simp ── */
+.rule-group { margin-bottom: 20px; }
+.rule-title { font-size: 13px; font-weight: 700; color: var(--accent2); margin-bottom: 2px; }
+.rule-desc { font-size: 12px; color: var(--text2); margin-bottom: 10px; }
+.trad-pair { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 15px; }
+.trad-pair:last-child { border-bottom: none; }
+.trad { color: var(--text2); min-width: 60px; }
+.arrow-sym { color: var(--border); }
+.simp { color: var(--text); font-weight: 600; flex: 1; }
+.note-chip { font-size: 11px; color: var(--text2); background: var(--surface2); border-radius: 4px; padding: 2px 6px; }
+.toggle-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.tog { padding: 6px 16px; border-radius: 20px; border: 1px solid var(--border); background: none; color: var(--text2); font-size: 13px; cursor: pointer; }
+.tog.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* ── Quiz ── */
+.quiz-score { text-align: center; padding: 10px; font-size: 14px; color: var(--text2); margin-bottom: 16px; }
+.quiz-score span { color: var(--accent); font-weight: 700; font-size: 20px; }
+.q-item { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+.q-num { font-size: 11px; color: var(--text2); margin-bottom: 6px; }
+.q-text { font-size: 15px; margin-bottom: 12px; line-height: 1.6; }
+.q-options { display: flex; flex-direction: column; gap: 7px; }
+.q-opt { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; cursor: pointer; font-size: 14px; text-align: left; color: var(--text); }
+.q-opt.correct { border-color: var(--green); color: var(--green); }
+.q-opt.wrong { border-color: var(--red); color: var(--red); }
+.q-opt:disabled { cursor: default; }
+.q-fb { font-size: 13px; margin-top: 10px; padding: 8px 10px; border-radius: 8px; }
+.q-fb.ok { background: rgba(74,222,128,.1); color: var(--green); }
+.q-fb.no { background: rgba(248,113,113,.1); color: var(--red); }
+.reset-btn { display: block; margin: 12px auto 0; padding: 10px 28px; border-radius: 20px; background: var(--accent); color: #fff; border: none; font-size: 14px; cursor: pointer; font-weight: 600; }
+
+.section-lbl { font-size: 12px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--text2); margin: 20px 0 10px; }
+</style>
+</head>
+<body>
+
+<nav class="tabs">
+  <button class="tab-btn active" onclick="switchTab('grammar',this)">문법</button>
+  <button class="tab-btn" onclick="switchTab('vocab',this)">어휘</button>
+  <button class="tab-btn" onclick="switchTab('trad',this)">번체↔간체</button>
+  <button class="tab-btn" onclick="switchTab('quiz',this)">퀴즈</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════ GRAMMAR ═════ -->
+<div id="grammar" class="panel active">
+  <div class="song-header">
+    <div class="title">像是中了你的毒</div>
+    <div class="py">Xiàng shì zhòng le nǐ de dú</div>
+    <div class="meaning">"네 독에 중독된 것 같아" — GINGER</div>
+  </div>
+
+  <!-- 1 -->
+  <div class="g-item">
+    <h3>① 像是 + 中了…的毒 — 비유 + 이산 구조</h3>
+    <span class="g-pattern">像是 + 中了 + [대상] + 的毒</span>
+    <div class="g-desc">
+      <b>像是</b>(xiàng shì) = ~인 것 같다 (비유·감각 강조, 好像보다 문어적)<br>
+      <b>中 = zhòng 4성</b> "맞다·당하다" — zhōng(가운데)와 구분<br>
+      中毒·中奖·中枪 모두 같은 4성 zhòng 계열<br>
+      <b>了</b> = 상태 변화 완료("이미 그렇게 됐다")
+    </div>
+    <div class="g-ex"><span class="zh">像是中了这首歌的毒。</span><span class="kr">이 노래에 중독된 것 같아.</span></div>
+    <div class="ext-ex">
+      <div class="ext-label">비교</div>
+      <div class="g-ex"><span class="zh">好像 ≈ 像是</span><span class="kr">好像=구어 추측 / 像是=비유 감각 강조</span></div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="g-item">
+    <h3>② V不住 — 가능보어 부정 ★핵심</h3>
+    <span class="g-pattern">动词 + 不住 (= "~할 수 없다")</span>
+    <div class="g-desc">
+      住 = 결과를 붙잡아 두다. 不住 = 그 상태 유지 불가.<br>
+      긍정: 动词 + 得住 (=~할 수 있다)
+    </div>
+    <div class="g-ex"><span class="zh">藏不住 cáng bu zhù</span><span class="kr">감출 수 없다 ↔ 藏得住 감출 수 있다</span></div>
+    <div class="g-ex"><span class="zh">忍不住 rěn bu zhù</span><span class="kr">참을 수 없다</span></div>
+    <div class="g-ex"><span class="zh">记不住 jì bu zhù</span><span class="kr">외울 수 없다</span></div>
+    <div class="g-ex"><span class="zh">留不住 liú bu zhù</span><span class="kr">붙잡을 수 없다·引き留められない</span></div>
+    <div class="ext-ex">
+      <div class="ext-label">다른 예</div>
+      <div class="g-ex"><span class="zh">那种感觉忍不住，根本停不下来。</span><span class="kr">그 감각은 참을 수 없어, 멈출 수조차 없어.</span></div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="g-item">
+    <h3>③ 把자문 — 목적어 전치</h3>
+    <span class="g-pattern">把 + 대상 + 동사(+결과/방향보어)</span>
+    <div class="g-desc">목적어를 앞으로 당겨 "~을 어떻게 처리하다" 강조. 처분·결과 초점.</div>
+    <div class="g-ex"><span class="zh">把自己贡献给…</span><span class="kr">자신을 ~에 바치다</span></div>
+    <div class="ext-ex">
+      <div class="ext-label">다른 예</div>
+      <div class="g-ex"><span class="zh">把心里的话说出来。</span><span class="kr">마음속 말을 꺼내다.</span></div>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="g-item">
+    <h3>④ 明明 — "분명히 ~인데도"</h3>
+    <span class="g-pattern">明明 + 사실 + 却/还是 + 역접</span>
+    <div class="g-desc">뻔히 알면서도, 분명한데도 — 역접 강조. 뒤에 却·还是·也와 짝.</div>
+    <div class="g-ex"><span class="zh">明明知道，还是…</span><span class="kr">뻔히 알면서도, 그래도…</span></div>
+    <div class="ext-ex">
+      <div class="ext-label">다른 예</div>
+      <div class="g-ex"><span class="zh">明明很累，还是睡不着。</span><span class="kr">분명 피곤한데 잠이 안 와.</span></div>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="g-item">
+    <h3>⑤ 让 사역 — "나를 ~하게 하다"</h3>
+    <span class="g-pattern">让 + 사람 + 동사</span>
+    <div class="g-desc">让 = 허락·사역. "누군가가 나를 ~하게 만들다".</div>
+    <div class="g-ex"><span class="zh">让我身处…</span><span class="kr">나를 ~에 처하게 하다</span></div>
+    <div class="ext-ex">
+      <div class="ext-label">다른 예</div>
+      <div class="g-ex"><span class="zh">这首歌让我忍不住哭。</span><span class="kr">이 노래가 나를 울지 않을 수 없게 해.</span></div>
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="g-item">
+    <h3>⑥ 着 — 지속상 "~하고 있다·~한 채로"</h3>
+    <span class="g-pattern">동사 + 着 (了=완료와 대비)</span>
+    <div class="g-desc">了 = 완료(그 순간 끝) vs 着 = 지속(상태가 이어짐).</div>
+    <div class="g-ex"><span class="zh">隐藏着 yǐncáng zhe</span><span class="kr">숨기고 있다·숨긴 채로</span></div>
+    <div class="g-ex"><span class="zh">等着 děng zhe</span><span class="kr">기다리고 있다</span></div>
+    <div class="ext-ex">
+      <div class="ext-label">다른 예</div>
+      <div class="g-ex"><span class="zh">他看着我，没说话。</span><span class="kr">그가 나를 바라보며 말하지 않았다.</span></div>
+    </div>
+  </div>
+
+  <!-- 7 -->
+  <div class="g-item">
+    <h3>⑦ 没…过 — 경험 부정</h3>
+    <span class="g-pattern">没 + 动词 + 过 (= ~해본 적 없다)</span>
+    <div class="g-desc">过 = 경험 상태보어. 没+V+过 = 그 경험이 없음.</div>
+    <div class="g-ex"><span class="zh">没看过 méi kàn guò</span><span class="kr">본 적이 없다</span></div>
+    <div class="ext-ex">
+      <div class="ext-label">다른 예</div>
+      <div class="g-ex"><span class="zh">我没去过台湾。（现在去过了！）</span><span class="kr">대만에 가본 적이 없었다. (이제 다녀왔다!)</span></div>
+    </div>
+  </div>
+
+  <!-- 8 -->
+  <div class="g-item">
+    <h3>⑧ 동량보어 — 횟수 표현</h3>
+    <span class="g-pattern">动词 + 횟수 + 遍/次/下</span>
+    <div class="g-desc">
+      <b>遍</b>(biàn) = 처음부터 끝까지 1회 완주 (노래 1곡, 책 1독)<br>
+      <b>次</b>(cì) = 단순 횟수<br>
+      <b>下</b>(xià) = 가볍게 한 번
+    </div>
+    <div class="g-ex"><span class="zh">七遍 qī biàn</span><span class="kr">일곱 번(완주)</span></div>
+    <div class="ext-ex">
+      <div class="ext-label">다른 예</div>
+      <div class="g-ex"><span class="zh">这首歌我听了三遍。</span><span class="kr">이 노래를 세 번(완전히) 들었다.</span></div>
+    </div>
+  </div>
+
+  <!-- 9 -->
+  <div class="g-item">
+    <h3>⑨ 说…也不算… — 양보 구문</h3>
+    <span class="g-pattern">说 + 형용사 + 也不算 + 형용사</span>
+    <div class="g-desc">"~다고 해도 그렇게 ~한 건 아니야" — 역접 양보.</div>
+    <div class="g-ex"><span class="zh">说多也不算多</span><span class="kr">많다고 해도 그렇게 많은 건 아니야</span></div>
+    <div class="ext-ex">
+      <div class="ext-label">다른 예</div>
+      <div class="g-ex"><span class="zh">说贵也不算太贵。</span><span class="kr">비싸다고 해도 그리 비싼 건 아니야.</span></div>
+    </div>
+  </div>
+
+  <!-- 10 -->
+  <div class="g-item">
+    <h3>⑩ 양사 중첩 一道一道 — "하나하나·연속"</h3>
+    <span class="g-pattern">一 + 양사 + 一 + 양사</span>
+    <div class="g-desc">양사 중첩 = 하나하나·연속·많음 뉘앙스. 시각적·반복적 이미지 강조.</div>
+    <div class="g-ex"><span class="zh">一道一道 yī dào yī dào</span><span class="kr">한 줄기 한 줄기</span></div>
+    <div class="g-ex"><span class="zh">一步一步 yī bù yī bù</span><span class="kr">한 걸음 한 걸음</span></div>
+    <div class="ext-ex">
+      <div class="ext-label">다른 예</div>
+      <div class="g-ex"><span class="zh">一步一步地走向你。</span><span class="kr">한 걸음씩 너에게로 걸어간다.</span></div>
+    </div>
+  </div>
+
+  <!-- 11 -->
+  <div class="g-item">
+    <h3>⑪ 变+형용사 / 了 변화 — 상태 변화</h3>
+    <span class="g-pattern">变 + 형용사 | 동사 + 了</span>
+    <div class="g-desc">
+      <b>变+adj</b> = ~하게 변하다 (능동 변화)<br>
+      <b>V+了</b> = ~해졌다 (완료·변화 결과)
+    </div>
+    <div class="g-ex"><span class="zh">变炙热 biàn zhìrè</span><span class="kr">불타듯 뜨거워지다</span></div>
+    <div class="g-ex"><span class="zh">停滞了 tíngzhì le</span><span class="kr">정체됐다</span></div>
+    <div class="g-ex"><span class="zh">乱了 luàn le</span><span class="kr">뒤엉켜버렸다</span></div>
+    <div class="ext-ex">
+      <div class="ext-label">다른 예</div>
+      <div class="g-ex"><span class="zh">天气变冷了。</span><span class="kr">날씨가 추워졌다.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ VOCAB ═════ -->
+<div id="vocab" class="panel">
+  <p style="font-size:13px;color:var(--text2);text-align:center;margin-bottom:16px;">카드를 탭하면 뒤집혀요</p>
+  <div class="cards-grid" id="cardsGrid"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════ TRAD ═════ -->
+<div id="trad" class="panel">
+  <div class="toggle-row">
+    <button class="tog active" onclick="setTradMode('both',this)">번체→간체</button>
+    <button class="tog" onclick="setTradMode('trad',this)">번체만</button>
+    <button class="tog" onclick="setTradMode('simp',this)">간체만</button>
+  </div>
+
+  <div class="rule-group">
+    <div class="rule-title">그룹 A — 초서·획 통합 간략화</div>
+    <div class="rule-desc">복잡한 획이 초서체 형태로 단순화. 가장 많은 글자가 속함.</div>
+    <div id="groupA"></div>
+  </div>
+
+  <div class="rule-group">
+    <div class="rule-title">그룹 B — 부수 간략화</div>
+    <div class="rule-desc">門→门, 言→讠, 糸→纟 등 부수 자체가 단순화.</div>
+    <div id="groupB"></div>
+  </div>
+
+  <div class="rule-group">
+    <div class="rule-title">그룹 C — 두 글자 세트</div>
+    <div class="rule-desc">단어 단위로 두 글자 모두 변환.</div>
+    <div id="groupC"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ QUIZ ═════ -->
+<div id="quiz" class="panel">
+  <div class="quiz-score">맞힌 문항: <span id="scoreNum">0</span> / <span id="totalNum">12</span></div>
+  <div id="quizContainer"></div>
+  <button class="reset-btn" onclick="resetQuiz()">다시 풀기</button>
+</div>
+
+<script>
+// ── Tab switch ──
+function switchTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── Vocab data ──
+const vocab = [
+  {zh:'时钟',py:'shízhōng',kr:'시계'},
+  {zh:'旁边',py:'pángbiān',kr:'옆·곁'},
+  {zh:'奇怪',py:'qíguài',kr:'이상하다'},
+  {zh:'感觉',py:'gǎnjué',kr:'느낌·느끼다'},
+  {zh:'危险',py:'wēixiǎn',kr:'위험하다'},
+  {zh:'飞蛾',py:'fēié',kr:'나방 (불나방)'},
+  {zh:'贡献',py:'gòngxiàn',kr:'바치다·공헌'},
+  {zh:'假装',py:'jiǎzhuāng',kr:'~인 척하다'},
+  {zh:'不在乎',py:'bù zàihu',kr:'신경 안 쓰다'},
+  {zh:'装酷',py:'zhuāng kù',kr:'쿨한 척하다'},
+  {zh:'隐藏',py:'yǐncáng',kr:'숨기다'},
+  {zh:'喜怒',py:'xǐnù',kr:'기쁨과 분노'},
+  {zh:'路口',py:'lùkǒu',kr:'교차로·갈림길'},
+  {zh:'红灯',py:'hóngdēng',kr:'빨간 신호등'},
+  {zh:'目光',py:'mùguāng',kr:'시선·눈빛'},
+  {zh:'炙热',py:'zhìrè',kr:'불타듯 뜨겁다'},
+  {zh:'停滞',py:'tíngzhì',kr:'정체되다'},
+  {zh:'沙滩',py:'shātān',kr:'모래사장'},
+  {zh:'温柔',py:'wēnróu',kr:'온화하다·다정하다'},
+  {zh:'阳光',py:'yángguāng',kr:'햇빛·햇살'},
+  {zh:'身处',py:'shēnchǔ',kr:'~에 처하다'},
+  {zh:'粉红',py:'fěnhóng',kr:'분홍색'},
+  {zh:'宇宙',py:'yǔzhòu',kr:'우주'},
+  {zh:'足够',py:'zúgòu',kr:'충분하다'},
+];
+
+const grid = document.getElementById('cardsGrid');
+vocab.forEach((v, i) => {
+  grid.innerHTML += `
+  <div class="flip-card" onclick="this.classList.toggle('flipped')">
+    <div class="flip-inner">
+      <div class="flip-front">
+        <div class="zh">${v.zh}</div>
+        <div class="py">${v.py}</div>
+        <div class="hint">탭해서 뒤집기</div>
+      </div>
+      <div class="flip-back">
+        <div class="meaning">${v.kr}</div>
+      </div>
+    </div>
+  </div>`;
+});
+
+// ── Trad/Simp data ──
+const groupA = [
+  {t:'時鐘',s:'时钟',n:'時→时, 鐘→钟'},
+  {t:'夢',s:'梦',n:'초서 간략화'},
+  {t:'邊',s:'边',n:'초서 간략화'},
+  {t:'過',s:'过',n:'초서 간략화'},
+  {t:'麼',s:'么',n:'획 통합'},
+  {t:'變',s:'变',n:'초서 간략화'},
+  {t:'熱',s:'热',n:'초서 간략화'},
+  {t:'樂',s:'乐',n:'초서 간략화'},
+  {t:'這',s:'这',n:'초서 간략화'},
+];
+const groupB = [
+  {t:'臉',s:'脸',n:'부수 간략화'},
+  {t:'覺',s:'觉',n:'부수 간략화'},
+  {t:'險',s:'险',n:'부수 간략화'},
+  {t:'獻',s:'献',n:'부수 간략화'},
+  {t:'亂',s:'乱',n:'부수 간략화'},
+  {t:'裝',s:'装',n:'부수 간략화'},
+  {t:'實',s:'实',n:'부수 간략화'},
+  {t:'處',s:'处',n:'부수 간략화'},
+  {t:'滯',s:'滞',n:'부수 간략화'},
+  {t:'誰',s:'谁',n:'言→讠 (讠=언변 간략형)'},
+];
+const groupC = [
+  {t:'隱藏',s:'隐藏',n:'두 글자 모두 변환'},
+  {t:'發現',s:'发现',n:'두 글자 모두 변환'},
+  {t:'陽光',s:'阳光',n:'두 글자 모두 변환'},
+  {t:'溫柔',s:'温柔',n:'두 글자 모두 변환'},
+  {t:'貢獻',s:'贡献',n:'두 글자 모두 변환'},
+];
+
+let tradMode = 'both';
+function setTradMode(m, btn) {
+  tradMode = m;
+  document.querySelectorAll('.tog').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTrad();
+}
+
+function renderGroup(id, data) {
+  const el = document.getElementById(id);
+  el.innerHTML = data.map(d => {
+    let tEl = tradMode === 'simp' ? '' : `<span class="trad">${d.t}</span>`;
+    let arrow = tradMode === 'both' ? `<span class="arrow-sym">→</span>` : '';
+    let sEl = tradMode === 'trad' ? '' : `<span class="simp">${d.s}</span>`;
+    return `<div class="trad-pair">${tEl}${arrow}${sEl}<span class="note-chip">${d.n}</span></div>`;
+  }).join('');
+}
+
+function renderTrad() {
+  renderGroup('groupA', groupA);
+  renderGroup('groupB', groupB);
+  renderGroup('groupC', groupC);
+}
+renderTrad();
+
+// ── Quiz ──
+const questions = [
+  {q:'飞蛾 (fēié) 의 뜻은?', opts:['나방','나비','잠자리','반딧불이'], ans:0, fb:'飞蛾 = 나방. 불나방처럼 위험에 뛰어드는 비유로 자주 쓰여.'},
+  {q:'停滞 (tíngzhì) 의 뜻은?', opts:['돌진하다','정체되다','회전하다','사라지다'], ans:1, fb:'停滞 = 정체되다·멈추다. 停=멈추다 + 滞=막히다.'},
+  {q:'"藏不住" 에서 不住는 무슨 역할?', opts:['시제 표지','가능보어 부정','방향보어','지속상'], ans:1, fb:'V不住 = 가능보어 부정. "그 결과 상태를 유지할 수 없다" → 감출 수 없다.'},
+  {q:'"中了你的毒" 에서 中의 성조는?', opts:['1성 zhōng','2성 zhóng','3성 zhǒng','4성 zhòng'], ans:3, fb:'中 zhòng 4성 = 맞다·당하다. 中毒·中奖·中枪 모두 4성.'},
+  {q:'明明의 의미는?', opts:['아마·어쩌면','분명히 ~인데도(역접)','결국·마침내','오히려·도리어'], ans:1, fb:'明明 = 뻔히·분명히 ~인데도. 역접 강조. 还是·却와 짝.'},
+  {q:'번체 誰 → 간체는?', opts:['谁','谨','试','话'], ans:0, fb:'誰→谁. 言(말씀 언)→讠 부수 간략화. 讠=언변.'},
+  {q:'"一道一道" 양사 중첩의 뜻은?', opts:['한 가지 한 가지','도로 위에서','이따금씩','한 줄기 한 줄기·연속'], ans:3, fb:'양사 중첩 一X一X = 하나하나·연속. 一道=한 줄기.'},
+  {q:'藏不住의 긍정형은?', opts:['藏了住','藏过住','藏得住','藏着住'], ans:2, fb:'V不住 ↔ V得住. 得=가능 긍정, 不=가능 부정.'},
+  {q:'假装 (jiǎzhuāng) 의 뜻은?', opts:['진심으로','~인 척하다','갑자기','비교하다'], ans:1, fb:'假装 = ~인 척하다. 假=가짜·거짓 + 装=꾸미다.'},
+  {q:'번체 溫柔 → 간체는?', opts:['温柔','湿柔','暖柔','混柔'], ans:0, fb:'溫→温. 부수 획 간략화. 柔는 번체=간체 동일.'},
+  {q:'"说多也不算多" 구조는?', opts:['사역문','가능보어','양보 구문','경험 부정'], ans:2, fb:'说…也不算… = 양보 구문. "~다고 해도 그렇게 ~한 건 아니야"'],
+  {q:'"V+着" 의 문법 기능은?', opts:['완료','지속상(~한 채로)','경험','변화'], ans:1, fb:'着 = 지속상. 동작·상태가 계속됨. 了(완료)와 대비.'},
+];
+
+let score = 0;
+let answered = Array(questions.length).fill(false);
+
+function buildQuiz() {
+  const c = document.getElementById('quizContainer');
+  c.innerHTML = questions.map((q, qi) => `
+    <div class="q-item" id="q${qi}">
+      <div class="q-num">${qi+1} / ${questions.length}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="q-options">
+        ${q.opts.map((o, oi) => `<button class="q-opt" onclick="answer(${qi},${oi})">${o}</button>`).join('')}
+      </div>
+      <div class="q-fb" id="fb${qi}" style="display:none"></div>
+    </div>`).join('');
+  document.getElementById('scoreNum').textContent = '0';
+  document.getElementById('totalNum').textContent = questions.length;
+}
+
+function answer(qi, oi) {
+  if (answered[qi]) return;
+  answered[qi] = true;
+  const q = questions[qi];
+  const opts = document.querySelectorAll(`#q${qi} .q-opt`);
+  opts.forEach(b => b.disabled = true);
+  opts[q.ans].classList.add('correct');
+  const fb = document.getElementById(`fb${qi}`);
+  fb.style.display = 'block';
+  if (oi === q.ans) {
+    score++;
+    document.getElementById('scoreNum').textContent = score;
+    fb.classList.add('ok');
+    fb.textContent = '✓ ' + q.fb;
+  } else {
+    opts[oi].classList.add('wrong');
+    fb.classList.add('no');
+    fb.textContent = '✗ ' + q.fb;
+  }
+}
+
+function resetQuiz() {
+  score = 0;
+  answered = Array(questions.length).fill(false);
+  buildQuiz();
+}
+
+buildQuiz();
+</script>
+</body>
+</html>
