@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>중국어 복습 — 8/23~9/13</title>
+<style>
+:root {
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --surface2: #f0ede8;
+  --border: #e2ddd8;
+  --text: #1a1a1a;
+  --text2: #555;
+  --accent: #c0392b;
+  --accent2: #e74c3c;
+  --green: #27ae60;
+  --blue: #2980b9;
+  --orange: #e67e22;
+  --purple: #8e44ad;
+  --gold: #b8860b;
+  --shadow: 0 2px 8px rgba(0,0,0,.08);
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1a1917;
+    --surface: #252320;
+    --surface2: #2d2b28;
+    --border: #3d3a36;
+    --text: #e8e4de;
+    --text2: #9d9791;
+    --shadow: 0 2px 8px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1a1917;
+  --surface: #252320;
+  --surface2: #2d2b28;
+  --border: #3d3a36;
+  --text: #e8e4de;
+  --text2: #9d9791;
+  --shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; font-size: 15px; line-height: 1.6; min-height: 100vh; }
+
+/* Header */
+.hdr { background: var(--accent); color: #fff; padding: 18px 20px 14px; }
+.hdr h1 { font-size: 19px; font-weight: 700; }
+.hdr p { font-size: 12px; opacity: .82; margin-top: 3px; }
+
+/* Tabs */
+.tabs { display: flex; overflow-x: auto; background: var(--surface); border-bottom: 1px solid var(--border); scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab-btn { flex-shrink: 0; padding: 11px 18px; font-size: 13px; font-weight: 600; border: none; background: none; color: var(--text2); cursor: pointer; border-bottom: 3px solid transparent; transition: color .15s; }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* Content */
+.tab-pane { display: none; padding: 16px; max-width: 700px; margin: 0 auto; }
+.tab-pane.active { display: block; }
+
+/* Cards */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; margin-bottom: 14px; box-shadow: var(--shadow); }
+.card-title { font-size: 13px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+.tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; margin: 2px; }
+.tag-gram { background: #fde8e8; color: #a33; }
+.tag-vocab { background: #e8f4fd; color: #1a6a8f; }
+.tag-pattern { background: #fef9e7; color: #7a5c00; }
+:root[data-theme="dark"] .tag-gram { background: #3d1515; color: #f08080; }
+:root[data-theme="dark"] .tag-vocab { background: #0d2d3d; color: #7ec8e3; }
+:root[data-theme="dark"] .tag-pattern { background: #2d2200; color: #e8c060; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .tag-gram { background: #3d1515; color: #f08080; }
+  :root:not([data-theme="light"]) .tag-vocab { background: #0d2d3d; color: #7ec8e3; }
+  :root:not([data-theme="light"]) .tag-pattern { background: #2d2200; color: #e8c060; }
+}
+
+/* Grammar blocks */
+.formula { background: var(--surface2); border-left: 3px solid var(--accent); border-radius: 0 6px 6px 0; padding: 10px 14px; font-family: 'SF Mono', monospace; font-size: 13px; margin: 8px 0; }
+.zh { font-size: 18px; font-weight: 600; color: var(--text); }
+.py { font-size: 12px; color: var(--blue); margin: 1px 0; }
+.ko { font-size: 13px; color: var(--text2); }
+.correct { color: var(--green); }
+.wrong { color: var(--accent2); }
+.example-row { display: flex; gap: 8px; margin: 4px 0; align-items: baseline; }
+.example-row .label { font-size: 11px; font-weight: 700; min-width: 28px; }
+
+/* Vocab table */
+.vtable { width: 100%; border-collapse: collapse; font-size: 13px; }
+.vtable th { background: var(--surface2); padding: 8px 10px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text2); }
+.vtable td { padding: 8px 10px; border-top: 1px solid var(--border); }
+.vtable tr:hover td { background: var(--surface2); }
+
+/* Compare table */
+.ctable { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0; }
+.ctable th { background: var(--surface2); padding: 8px; font-size: 12px; }
+.ctable td { padding: 8px; border: 1px solid var(--border); }
+.ctable .highlight { background: #fff8e1; }
+:root[data-theme="dark"] .ctable .highlight { background: #2d2200; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ctable .highlight { background: #2d2200; } }
+
+/* Pattern cards */
+.p-card { background: var(--surface2); border-radius: 8px; padding: 12px 14px; margin: 8px 0; }
+.p-formula { font-size: 15px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+.p-examples { font-size: 13px; }
+.p-examples li { margin: 4px 0; }
+
+/* Kanji */
+.kanji-big { font-size: 56px; text-align: center; padding: 10px; }
+.kanji-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.kanji-box { flex: 1; min-width: 140px; background: var(--surface2); border-radius: 8px; padding: 12px; text-align: center; }
+
+/* Quiz */
+.quiz-card { background: var(--surface); border: 2px solid var(--border); border-radius: var(--r); padding: 20px; margin-bottom: 16px; cursor: pointer; transition: border-color .2s; }
+.quiz-card:hover { border-color: var(--accent); }
+.quiz-q { font-size: 15px; font-weight: 600; margin-bottom: 14px; }
+.quiz-opts { display: flex; flex-direction: column; gap: 8px; }
+.quiz-opt { padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 14px; transition: background .15s, border-color .15s; }
+.quiz-opt:hover { background: var(--surface2); }
+.quiz-opt.correct { background: #e8f8ee; border-color: var(--green); color: var(--green); font-weight: 700; }
+.quiz-opt.wrong { background: #fde8e8; border-color: var(--accent2); color: var(--accent2); }
+:root[data-theme="dark"] .quiz-opt.correct { background: #0d3d1f; }
+:root[data-theme="dark"] .quiz-opt.wrong { background: #3d1515; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .quiz-opt.correct { background: #0d3d1f; }
+  :root:not([data-theme="light"]) .quiz-opt.wrong { background: #3d1515; }
+}
+.quiz-exp { display: none; margin-top: 12px; padding: 10px 14px; background: var(--surface2); border-radius: 8px; font-size: 13px; line-height: 1.7; }
+.quiz-exp.show { display: block; }
+.quiz-score { text-align: center; font-size: 18px; font-weight: 700; padding: 16px; }
+#quiz-reset { display: block; margin: 12px auto; padding: 10px 28px; background: var(--accent); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
+
+/* Flip cards */
+.flip-section { }
+.flip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.flip { perspective: 600px; height: 100px; cursor: pointer; }
+.flip-inner { position: relative; width: 100%; height: 100%; transition: transform .4s; transform-style: preserve-3d; }
+.flip.flipped .flip-inner { transform: rotateY(180deg); }
+.flip-front, .flip-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 8px; text-align: center; }
+.flip-front { background: var(--surface); border: 1px solid var(--border); font-size: 13px; color: var(--text2); }
+.flip-back { background: var(--accent); color: #fff; transform: rotateY(180deg); font-size: 12px; line-height: 1.5; }
+.flip-front .zh { font-size: 22px; }
+.flip-back .ko { font-size: 13px; color: rgba(255,255,255,.9); }
+.flip-back .py { color: rgba(255,255,255,.75); }
+
+/* Sections */
+.sec-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--text2); margin: 20px 0 8px; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+
+/* Progress bar */
+.prog-bar { height: 6px; background: var(--border); border-radius: 3px; margin: 8px 0 16px; }
+.prog-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width .3s; }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>중국어 복습 · 8/23~9/13</h1>
+  <p>3주간 #chinese에서 물어본 내용 총정리</p>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('gram')">문법</button>
+  <button class="tab-btn" onclick="switchTab('vocab')">어휘</button>
+  <button class="tab-btn" onclick="switchTab('pattern')">구문틀</button>
+  <button class="tab-btn" onclick="switchTab('kanji')">한자</button>
+  <button class="tab-btn" onclick="switchTab('quiz')">퀴즈</button>
+</div>
+
+<!-- ===== 문법 탭 ===== -->
+<div class="tab-pane active" id="pane-gram">
+
+  <div class="card">
+    <div class="card-title">시량보어 어순 <span class="tag tag-gram">8/23</span></div>
+    <div class="formula">기본: V + 了 + 시량</div>
+    <div class="formula">목적어 있을 때: V + 了 + <b>목적어</b> + 시량</div>
+    <div class="formula">比 비교문: A比B + <b>부사</b> + V + 了 + 시량</div>
+    <div style="margin-top:10px">
+      <div class="example-row">
+        <span class="label correct">✅</span>
+        <div><div class="zh">她比我晚到了三十分钟。</div><div class="py">Tā bǐ wǒ wǎn dào le sānshí fēnzhōng.</div><div class="ko">그녀는 나보다 30분 늦게 도착했다.</div></div>
+      </div>
+      <div class="example-row" style="margin-top:8px">
+        <span class="label correct">✅</span>
+        <div><div class="zh">我等了他两个小时，他才来。</div><div class="py">Wǒ děng le tā liǎng gè xiǎoshí, tā cái lái.</div><div class="ko">나는 그를 2시간 기다렸는데, 그제야 왔다. (才=그래야 비로소)</div></div>
+      </div>
+      <div class="example-row" style="margin-top:8px">
+        <span class="label" style="color:var(--orange)">ℹ️</span>
+        <div><div class="ko">이합사(睡觉)는 분리: 睡了两个小时觉 (x) → <b>睡了两个小时</b> (o)</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">관형어 어순 (定语排列顺序) <span class="tag tag-gram">8/23</span></div>
+    <div class="formula">소유 > 수량 > 성질형용사 > 동사구+的 > 명사</div>
+    <div style="margin-top:10px">
+      <div class="zh">更适合自己的一种方式</div>
+      <div class="py">gèng shìhé zìjǐ de yī zhǒng fāngshì</div>
+      <div class="ko" style="margin-top:4px">자신에게 더 맞는 하나의 방식<br><small>→ [동사구+的] + [一+양사] + [명사]: 한국어 어순과 동일!</small></div>
+    </div>
+    <div style="margin-top:10px; font-size:13px; color:var(--text2)">
+      예) 让我感动的一个故事 · 值得尝试的一种方法 · 他推荐的一本书
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">老 vs 是…的 충돌 <span class="tag tag-gram">8/23</span></div>
+    <div class="formula">老 (lǎo) = 늘·항상 → 반복·습관</div>
+    <div class="formula">(是)…来的 = 과거 완료 사실 강조</div>
+    <table class="ctable" style="margin-top:8px">
+      <tr><th>의도</th><th>올바른 표현</th></tr>
+      <tr><td>출신 강조</td><td class="highlight">(是)从北京来的 <small>(老 삭제)</small></td></tr>
+      <tr><td>습관·반복</td><td class="highlight">老从北京来 <small>(的 삭제)</small></td></tr>
+      <tr><td>老+형용사</td><td class="highlight">我的一位<b>老</b>朋友 <small>(오래된 친구)</small></td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">결과보어 好 <span class="tag tag-gram">8/31</span></div>
+    <div class="formula">동사 + 好 = 동작이 <b>완결·준비됨</b> 상태에 도달</div>
+    <table class="vtable" style="margin-top:8px">
+      <tr><th>표현</th><th>뜻</th><th>부정</th></tr>
+      <tr><td><b class="zh" style="font-size:15px">做好</b></td><td>제대로 해냈다</td><td>还没做好</td></tr>
+      <tr><td><b class="zh" style="font-size:15px">准备好</b></td><td>준비 완료</td><td>还没准备好</td></tr>
+      <tr><td><b class="zh" style="font-size:15px">想好</b></td><td>결정했다</td><td>还没想好</td></tr>
+      <tr><td><b class="zh" style="font-size:15px">说好</b></td><td>약속을 정했다</td><td>还没说好</td></tr>
+      <tr><td><b class="zh" style="font-size:15px">安排好</b></td><td>다 짜놨다</td><td>还没安排好</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">做好 vs 做完 <span class="tag tag-gram">8/31</span></div>
+    <table class="ctable">
+      <tr><th></th><th>做完</th><th>做好</th></tr>
+      <tr><td>방점</td><td>양적 종료 (done)</td><td>질적 완성 (done right)</td></tr>
+      <tr><td>숙제</td><td>作业做完了 <small>(분량 끝)</small></td><td class="highlight">作业做好了 <small>(제출 가능)</small></td></tr>
+      <tr><td>밥</td><td>饭吃完了 <small>(다 먹음)</small></td><td class="highlight">饭做好了 <small>(먹을 준비)</small></td></tr>
+    </table>
+    <div style="margin-top:8px; font-size:12px; color:var(--text2)">판단: "그냥 끝" → 完 / "제대로·준비됨" → 好</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">行程 vs 计划 <span class="tag tag-gram">8/31</span></div>
+    <table class="ctable">
+      <tr><th></th><th>计划 jìhuà</th><th>行程 xíngchéng</th></tr>
+      <tr><td>성격</td><td>추상적·의도·플랜</td><td>구체적·시간순 여정</td></tr>
+      <tr><td>예문</td><td>我还没想好计划。</td><td class="highlight">行程还没安排好。</td></tr>
+    </table>
+    <div style="margin-top:8px; font-size:13px">→ 计划(하려는 것)을 세우면 → 行程(언제 어디 갈지 표)</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">의념피동 (意念被动) <span class="tag tag-gram">8/31</span></div>
+    <div class="ko" style="margin-bottom:8px">被 없이 피동 대상을 주어로 → 능동 동사 그대로</div>
+    <div class="formula">행程还没安排好 = 일정이 아직 안 짜졌어 (被 없음)</div>
+    <div style="margin-top:8px">
+      <div class="example-row"><span class="label">·</span><div><span class="zh">门开了。</span> <span class="ko">→ 문 열렸어.</span></div></div>
+      <div class="example-row"><span class="label">·</span><div><span class="zh">饭做好了。</span> <span class="ko">→ 밥 다 됐어.</span></div></div>
+      <div class="example-row"><span class="label">·</span><div><span class="zh">衣服洗好了。</span> <span class="ko">→ 옷 빨았어.</span></div></div>
+    </div>
+    <div style="margin-top:8px; font-size:12px; color:var(--text2)">被는 피해·부정적 사건이거나 행위자 강조할 때만 (他被骗了)</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">주제-술어 구조 <span class="tag tag-gram">8/31</span></div>
+    <div class="formula">주제(화제) + 술어 — 주어가 행위자일 필요 없음</div>
+    <div style="margin-top:8px">
+      <div class="example-row"><span class="label">·</span><div><span class="zh">行程还没定。</span> <span class="ko">일정이 아직 안 정해졌어. (行程=화제)</span></div></div>
+      <div class="example-row"><span class="label">·</span><div><span class="zh">我还没安排好行程。</span> <span class="ko">내가 아직 못 짰어. (我=행위자)</span></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">想 + 보어 변신 <span class="tag tag-gram">8/31</span></div>
+    <table class="vtable">
+      <tr><th>표현</th><th>병음</th><th>뜻</th></tr>
+      <tr><td class="zh" style="font-size:16px">想</td><td class="py">xiǎng</td><td>생각하다 (과정)</td></tr>
+      <tr><td class="zh" style="font-size:16px">想好</td><td class="py">xiǎng hǎo</td><td>결정하다 (완결)</td></tr>
+      <tr><td class="zh" style="font-size:16px">想到</td><td class="py">xiǎng dào</td><td>떠올리다·생각이 미치다</td></tr>
+      <tr><td class="zh" style="font-size:16px">想起来</td><td class="py">xiǎng qǐlái</td><td>기억나다</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">在去+V 구어 뉘앙스 <span class="tag tag-gram">8/23</span></div>
+    <div class="formula">在(진행) + 去(지향·실현) + V = 실제로 ~해나가는 중</div>
+    <div style="margin-top:8px">
+      <span class="zh">我们也在去选择那个更适合自己的一种方式吧。</span>
+      <div class="ko" style="margin-top:4px">우리도 실제로 자신에게 더 맞는 방식을 선택해나가고 있잖아요.</div>
+      <div style="font-size:12px; color:var(--text2); margin-top:4px">在选择(그냥 선택 중) vs 在去选择(실제로 해나가는 중)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">不曾有过 문어체 부정 <span class="tag tag-gram">8/31</span></div>
+    <table class="ctable">
+      <tr><th>표현</th><th>뉘앙스</th></tr>
+      <tr><td>从来没有过</td><td>구어 — 여태 없었어</td></tr>
+      <tr><td class="highlight">不曾有过</td><td>문어·격식 — 단 한 번도 없었다</td></tr>
+      <tr><td>前所未有</td><td>성어 — 전례 없는</td></tr>
+    </table>
+    <div style="margin-top:8px"><span class="zh">这是我不曾有过的经历。</span><div class="ko">이건 내가 여태 겪어보지 못한 경험이야.</div></div>
+  </div>
+</div>
+
+<!-- ===== 어휘 탭 ===== -->
+<div class="tab-pane" id="pane-vocab">
+
+  <p class="sec-label">走红 계열 — 인기</p>
+  <div class="flip-grid">
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">走红</div><div class="py">zǒuhóng</div></div></div>
+        <div class="flip-back"><div class="ko">(서서히) 인기를 얻다·뜨다</div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">爆红</div><div class="py">bàohóng</div></div></div>
+        <div class="flip-back"><div class="ko">갑자기 확 뜨다 (viral)</div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">当红</div><div class="py">dānghóng</div></div></div>
+        <div class="flip-back"><div class="ko">지금 한창 잘나가는</div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">网红</div><div class="py">wǎnghóng</div></div></div>
+        <div class="flip-back"><div class="ko">인플루언서 (网络+红人)</div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">悄然走红</div><div class="py">qiǎorán</div></div></div>
+        <div class="flip-back"><div class="ko">조용히 뜨고 있다<br><small>悄然=소리 없이</small></div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">风口</div><div class="py">fēngkǒu</div></div></div>
+        <div class="flip-back"><div class="ko">바람 길목 → 뜨는 시장·기회의 자리</div></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="sec-label">조직·비즈니스 어휘</p>
+  <div class="flip-grid">
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">渠道</div><div class="py">qúdào</div></div></div>
+        <div class="flip-back"><div class="ko">경로·채널<br><small>원래: 수로(水渠)</small></div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">决策</div><div class="py">juécè</div></div></div>
+        <div class="flip-back"><div class="ko">의사결정<br><small>做决策·决策者</small></div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">参与人数</div><div class="py">cānyù rénshù</div></div></div>
+        <div class="flip-back"><div class="ko">참여 인원수</div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">同比增长</div><div class="py">tóngbǐ zēngzhǎng</div></div></div>
+        <div class="flip-back"><div class="ko">전년 동기 대비 성장<br><small>三成=30% (成=10%)</small></div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">扭亏为盈</div><div class="py">niǔ kuī wéi yíng</div></div></div>
+        <div class="flip-back"><div class="ko">흑자 전환<br><small>扭+부정+为+긍정</small></div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">占比</div><div class="py">zhànbǐ</div></div></div>
+        <div class="flip-back"><div class="ko">점유율·비중<br><small>占比过半=50% 초과</small></div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">累计</div><div class="py">lèijì</div></div></div>
+        <div class="flip-back"><div class="ko">누적<br><small>累计推出了一千多款</small></div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">主打</div><div class="py">zhǔdǎ</div></div></div>
+        <div class="flip-back"><div class="ko">~을 앞세우다·주력으로</div></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="sec-label">노션 UI 어휘 (9/12)</p>
+  <div class="flip-grid">
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">验证码</div><div class="py">yànzhèngmǎ</div></div></div>
+        <div class="flip-back"><div class="ko">인증번호·OTP</div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">收件箱</div><div class="py">shōujiànxiāng</div></div></div>
+        <div class="flip-back"><div class="ko">받은편지함</div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">密钥</div><div class="py">mìyào</div></div></div>
+        <div class="flip-back"><div class="ko">비밀키·패스키</div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">生物识别</div><div class="py">shēngwù shíbié</div></div></div>
+        <div class="flip-back"><div class="ko">생체인식</div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">撤销</div><div class="py">chèxiāo</div></div></div>
+        <div class="flip-back"><div class="ko">철회·취소·해지</div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">访问权限</div><div class="py">fǎngwèn quánxiàn</div></div></div>
+        <div class="flip-back"><div class="ko">접근권한</div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">偏好</div><div class="py">piānhào</div></div></div>
+        <div class="flip-back"><div class="ko">환경설정·선호</div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">登录</div><div class="py">dēnglù</div></div></div>
+        <div class="flip-back"><div class="ko">로그인</div></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="sec-label">시간 표현</p>
+  <div class="flip-grid">
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">一转眼</div><div class="py">yīzhuǎnyǎn</div></div></div>
+        <div class="flip-back"><div class="ko">눈 깜짝할 새에</div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">过阵子</div><div class="py">guò zhènzi</div></div></div>
+        <div class="flip-back"><div class="ko">머지않아·조금 있다가<br><small>≈ 과几天 (구어, 짧은 미래)</small></div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">难得</div><div class="py">nándé</div></div></div>
+        <div class="flip-back"><div class="ko">드물게·모처럼·좀처럼 없는</div></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="sec-label">판판 선생님 리뷰 어휘 (8/23)</p>
+  <div class="flip-grid">
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">查漏补缺</div><div class="py">chá lòu bǔ quē</div></div></div>
+        <div class="flip-back"><div class="ko">빈틈을 찾아 보완하다<br><small>성어</small></div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">改过来</div><div class="py">gǎi guò lái</div></div></div>
+        <div class="flip-back"><div class="ko">고쳐내다<br><small>过来=잘못→올바름 전환</small></div></div>
+      </div>
+    </div>
+    <div class="flip" onclick="this.classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-front"><div><div class="zh">积极主动</div><div class="py">jījí zhǔdòng</div></div></div>
+        <div class="flip-back"><div class="ko">적극적이고 자발적으로</div></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="sec-label">전환·다의어 転了 (9/10)</p>
+  <div class="card">
+    <table class="ctable">
+      <tr><th>발음</th><th>의미</th><th>예</th></tr>
+      <tr><td>zhuǎn 3성</td><td>이체·전달·전환</td><td>转账·转发·好转</td></tr>
+      <tr><td>zhuàn 4성</td><td>빙빙 돌다</td><td>转圈·转了一圈</td></tr>
+      <tr><td class="highlight">zhuǎn 3성</td><td colspan="2"><b>转了好几个一对一</b> = 원오원 여러 개를 거쳤다</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===== 구문틀 탭 ===== -->
+<div class="tab-pane" id="pane-pattern">
+
+  <div class="p-card">
+    <div class="p-formula">忍不住 + V</div>
+    <div class="py">rěn bú zhù</div>
+    <div class="ko">참을 수 없어 ~하다 / 저절로 ~하게 된다</div>
+    <ul class="p-examples" style="margin-top:8px">
+      <li>忍不住想：这是机会还是陷阱？ <span class="ko">→ 저절로 이런 생각이 들었어</span></li>
+      <li>忍不住想推荐给你。 <span class="ko">→ 추천하고 싶어졌어</span></li>
+    </ul>
+  </div>
+
+  <div class="p-card">
+    <div class="p-formula">越来越 + 형용사</div>
+    <div class="py">yuèláiyuè</div>
+    <div class="ko">점점 더 ~하다</div>
+    <ul class="p-examples" style="margin-top:8px">
+      <li>越来越值得关注。 <span class="ko">→ 점점 주목할 만해진다</span></li>
+      <li>越来越烦恼。 <span class="ko">→ 점점 더 고민이 많아진다</span></li>
+    </ul>
+  </div>
+
+  <div class="p-card">
+    <div class="p-formula">越V越adj</div>
+    <div class="py">yuè V yuè adj</div>
+    <div class="ko">~할수록 더 ~하다</div>
+    <ul class="p-examples" style="margin-top:8px">
+      <li>越看越觉得像纪录片。 <span class="ko">→ 볼수록 다큐 같다는 느낌</span></li>
+    </ul>
+  </div>
+
+  <div class="p-card">
+    <div class="p-formula">令人印象深刻</div>
+    <div class="py">lìng rén yìnxiàng shēnkè</div>
+    <div class="ko">인상적이다 / 인상 깊다 (직역: 사람을 깊은 인상에 머물게 하다)</div>
+    <ul class="p-examples" style="margin-top:8px">
+      <li>令人印象深刻的是，用了纪录片的格式。</li>
+    </ul>
+  </div>
+
+  <div class="p-card">
+    <div class="p-formula">不…的话, 没法 + V</div>
+    <div class="py">bù…de huà, méifǎ + V</div>
+    <div class="ko">~하지 않으면, ~할 방법이 없다 (조건+불능)</div>
+    <ul class="p-examples" style="margin-top:8px">
+      <li>不关电视的话，我没法看书。 <span class="ko">→ TV 안 끄면 책 못 봐</span></li>
+      <li>不说清楚的话，没法解决。 <span class="ko">→ 명확히 말 안 하면 해결 못 해</span></li>
+    </ul>
+  </div>
+
+  <div class="p-card">
+    <div class="p-formula">好久没…了</div>
+    <div class="py">hǎojiǔ méi…le</div>
+    <div class="ko">오랫동안 ~하지 않았다</div>
+    <ul class="p-examples" style="margin-top:8px">
+      <li>好久没这么认真学中文了。 <span class="ko">→ 오랜만에 이렇게 열심히 중국어 공부하네</span></li>
+    </ul>
+  </div>
+
+  <div class="p-card">
+    <div class="p-formula">有意识地 + V</div>
+    <div class="py">yǒu yìshí de</div>
+    <div class="ko">의식적으로 ~하다</div>
+    <ul class="p-examples" style="margin-top:8px">
+      <li>有意识地去培养领导力。 <span class="ko">→ 의식적으로 리더십을 키우다</span></li>
+    </ul>
+  </div>
+
+  <div class="p-card">
+    <div class="p-formula">跟以前相比</div>
+    <div class="py">gēn yǐqián xiāngbǐ</div>
+    <div class="ko">이전과 비교하면</div>
+    <ul class="p-examples" style="margin-top:8px">
+      <li>跟以前相比，你觉得自己更主动了吗？</li>
+    </ul>
+  </div>
+
+  <div class="p-card">
+    <div class="p-formula">已将 ___ 发送到 ___</div>
+    <div class="py">yǐ jiāng A fāsòng dào B</div>
+    <div class="ko">A를 B로 발송했다 (노션 UI 패턴)</div>
+    <ul class="p-examples" style="margin-top:8px">
+      <li>我们已将验证码发送到你的收件箱。</li>
+    </ul>
+  </div>
+
+  <div class="p-card">
+    <div class="p-formula">[동사구+的] + [一+양사] + [명사]</div>
+    <div class="ko" style="margin-top:4px">관형절 + 양사 + 명사 (한국어 어순과 동일)</div>
+    <ul class="p-examples" style="margin-top:8px">
+      <li>更适合自己的<b>一种</b>方式 <span class="py">zhǒng</span></li>
+      <li>让我感动的<b>一个</b>故事 <span class="py">gè</span></li>
+      <li>他推荐的<b>一本</b>书 <span class="py">běn</span></li>
+    </ul>
+  </div>
+
+  <div class="p-card">
+    <div class="p-formula">값어치 표현 — V得</div>
+    <div class="py">zhídé</div>
+    <div class="ko">~할 만하다</div>
+    <ul class="p-examples" style="margin-top:8px">
+      <li>东南亚房产越来越值得关注。</li>
+      <li>值得尝试的一种方法。</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== 한자 탭 ===== -->
+<div class="tab-pane" id="pane-kanji">
+
+  <div class="card">
+    <div class="card-title">拍 pāi — 손으로 치다 <span class="tag tag-vocab">8/26</span></div>
+    <div class="kanji-big">拍</div>
+    <div class="formula">扌(손 수 변, 뜻) + 白(bái, 소리) → 형성자</div>
+    <div style="margin-top:8px; font-size:13px">본의: <b>손으로 탁 치다·두드리다</b></div>
+    <table class="vtable" style="margin-top:8px">
+      <tr><th>파생어</th><th>병음</th><th>뜻</th></tr>
+      <tr><td>拍手</td><td>pāishǒu</td><td>박수치다</td></tr>
+      <tr><td>拍照</td><td>pāizhào</td><td>사진 찍다 (셔터를 "탁" 누르다)</td></tr>
+      <tr><td>拍电影</td><td>pāi diànyǐng</td><td>영화 찍다</td></tr>
+      <tr><td class="highlight">拍卖</td><td>pāimài</td><td>경매 (낙찰 망치를 내리치는 것)</td></tr>
+      <tr><td>拍马屁</td><td>pāi mǎpì</td><td>아첨하다 (말 엉덩이를 탁 쳐서)</td></tr>
+      <tr><td>球拍</td><td>qiúpāi</td><td>라켓·배트 (치는 도구)</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">渠 qú — 수로에서 채널로 <span class="tag tag-vocab">9/11</span></div>
+    <div class="kanji-big">渠</div>
+    <div class="formula">氵(물, 뜻) + 巨+木 계열(소리·이미지) → 형성자</div>
+    <div style="font-size:13px; margin-top:8px">说文解字: "渠, 水所居也" — 물이 흐르는 곳</div>
+    <div style="margin-top:8px; font-size:13px">
+      <b>확장 경로:</b> 수로(도랑) → 물이 지나는 '길' → 추상화 → <b>경로·채널</b>
+    </div>
+    <table class="vtable" style="margin-top:8px">
+      <tr><th>파생어</th><th>병음</th><th>뜻</th></tr>
+      <tr><td>水渠</td><td>shuǐqú</td><td>수로</td></tr>
+      <tr><td>沟渠</td><td>gōuqú</td><td>도랑</td></tr>
+      <tr><td class="highlight">渠道</td><td>qúdào</td><td>수로의 道 → 채널·경로</td></tr>
+      <tr><td>销售渠道</td><td>xiāoshòu qúdào</td><td>판매 채널</td></tr>
+      <tr><td>沟通渠道</td><td>gōutōng qúdào</td><td>소통 경로</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">越南 국호 유래 <span class="tag tag-vocab">8/26</span></div>
+    <div class="kanji-row" style="margin-bottom:12px">
+      <div class="kanji-box"><div class="zh">越</div><div class="ko">Việt (=민족)</div></div>
+      <div class="kanji-box"><div class="zh">南</div><div class="ko">Nam (=남쪽)</div></div>
+    </div>
+    <div style="font-size:13px; line-height:1.8">
+      <b>백越(百越)</b> — 고대 중국 남부~베트남 북부 민족 총칭<br>
+      <b>南越 왕국</b> (기원전 204년) — "남쪽의 越 땅" (광둥+광시+베트남 북부 포함)<br><br>
+      <b>1802년</b> 응우옌 왕조: 청나라에 "南越" 국호 신청<br>
+      → 청 황제 거부: "南越은 옛 조타의 광대한 영토 함의"<br>
+      → 글자 순서를 뒤집어 하사: <b>越南</b> ("越의 남쪽", 범위 축소)<br><br>
+      <b>漢越音</b>: 越→Việt, 南→Nam → <b>Việt Nam</b>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 퀴즈 탭 ===== -->
+<div class="tab-pane" id="pane-quiz">
+  <div class="prog-bar"><div class="prog-fill" id="quiz-prog" style="width:0%"></div></div>
+  <div id="quiz-score" class="quiz-score" style="display:none"></div>
+
+  <div id="quiz-container"></div>
+  <button id="quiz-reset" style="display:none" onclick="resetQuiz()">다시 풀기</button>
+</div>
+
+<script>
+// ===== Tab switching =====
+function switchTab(id) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('pane-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ===== Quiz =====
+const QUIZ = [
+  {
+    q: '결과보어 好 — "아직 일정을 다 못 짰어"를 중국어로?',
+    opts: ['行程还没安排完', '行程还没安排好', '行程没有安排', '行程安排好了'],
+    ans: 1,
+    exp: '好 = 질적 완성·준비됨. 安排好 = 짜는 걸 제대로 완결함. 완(完)은 분량 종료이고 好는 "제대로 됐다"는 뉘앙스.'
+  },
+  {
+    q: '"TV를 끄지 않으면 책을 볼 수가 없어" — 빈칸을 채워라:\n不关电视的话，我没___看书。',
+    opts: ['有法', '法', '有', '办'],
+    ans: 1,
+    exp: '没法 = 没办法 = ~할 방법이 없다. 法은 fǎ(3성) — 발(fā 1성)과 혼동 주의.'
+  },
+  {
+    q: '"우리도 실제로 선택해나가고 있잖아요" — 在___选择의 빈칸은?',
+    opts: ['得', '去', '做', '到'],
+    ans: 1,
+    exp: '在去+V = 진행 중이면서 실제로 이뤄지고 있다는 뉘앙스. 단순 在选择(선택하는 중)과 비교.'
+  },
+  {
+    q: '관형어 어순 — "자신에게 더 맞는 하나의 방식"?',
+    opts: ['一种更适合自己的方式', '更适合自己的一种方式', '一种方式更适合自己的', '方式更适合自己一种'],
+    ans: 1,
+    exp: '[동사구+的] + [一+양사] + [명사] 순서. 한국어와 동일하다!'
+  },
+  {
+    q: '做好 vs 做完 — "밥이 먹을 준비가 됐다"는?',
+    opts: ['饭吃完了', '饭做完了', '饭做好了', '饭吃好了'],
+    ans: 2,
+    exp: '饭做好了 = 밥이 만들어져서 먹을 준비 됨(질적 완성). 饭吃完了는 밥이 다 소진됨(양적 종료).'
+  },
+  {
+    q: '拍卖(경매)에서 拍의 의미는?',
+    opts: ['찍다', '치다·두드리다', '팔다', '탭하다'],
+    ans: 1,
+    exp: '拍 = 손으로 탁 치다. 경매사가 낙찰 순간 망치를 내리치는 것(落槌)이 거래 성립 신호 → 拍+卖 = 경매.'
+  },
+  {
+    q: '"여태껏 있어 본 적이 없다" — 문어체 표현은?',
+    opts: ['从来没有过', '不曾有过', '从来没有', '前所未有'],
+    ans: 1,
+    exp: '不曾有过 = 문어·격식체. 从来没有过는 구어. 前所未有는 성어(전례 없는).'
+  },
+  {
+    q: '越南 국호가 "남월(南越)"에서 "越南"으로 바뀐 이유는?',
+    opts: ['발음이 더 예뻐서', '청나라가 영토 주장 함의 차단 위해 순서를 뒤집음', '베트남이 요청해서', '프랑스 식민지 시대에 바뀜'],
+    ans: 1,
+    exp: '1802년 응우옌 왕조가 南越 신청 → 청 황제: "南越은 광동·광서 포함 옛 영토" → 越南으로 뒤집어 하사.'
+  },
+  {
+    q: '渠道의 渠 원래 뜻은?',
+    opts: ['경로', '수로·도랑', '길', '채널'],
+    ans: 1,
+    exp: '渠 원래 뜻은 사람이 판 수로·도랑. 물이 지나는 "길" → 추상화 → 경로·채널. 渠道 = 수로의 道.'
+  },
+  {
+    q: '"그는 나보다 30분 늦게 도착했다" — 比+시량보어 올바른 어순은?',
+    opts: ['他晚了比我三十分钟到', '他比我晚到了三十分钟', '他比我到晚了三十分钟', '他比我三十分钟晚到了'],
+    ans: 1,
+    exp: '比 비교문에서 시량보어는 동사(到) 바로 뒤: A比B + 부사(晚) + V(到) + 了 + 시량.'
+  },
+  {
+    q: '의념피동 — 被 없이 올바른 문장은?',
+    opts: ['我把衣服洗好了', '衣服被洗好了', '衣服洗好了', '衣服洗了好'],
+    ans: 2,
+    exp: '의념피동: 피동 대상(衣服)이 주어, 능동 동사 그대로, 被 불필요. 被 붙이면 문법상 맞지만 어색하고 무거움.'
+  },
+  {
+    q: '"이전에 있어본 적 없는" — 不曾有过的 구조에서 곡용된 뜻?',
+    opts: ['단순 부정', '경험 없음 + 문어체', '미래 부정', '가능성 부정'],
+    ans: 1,
+    exp: '不曾(문어 부정: 이전에 ~한 적 없다) + 有(있다) + 过(경험 상태보어) = 여태껏 있어 본 적이 없다.'
+  }
+];
+
+let score = 0;
+let answered = 0;
+
+function buildQuiz() {
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = '';
+  score = 0;
+  answered = 0;
+  updateProg();
+
+  QUIZ.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'quiz-card';
+    card.style.cursor = 'default';
+
+    const qDiv = document.createElement('div');
+    qDiv.className = 'quiz-q';
+    qDiv.textContent = `Q${i+1}. ${q.q}`;
+    card.appendChild(qDiv);
+
+    const opts = document.createElement('div');
+    opts.className = 'quiz-opts';
+    q.opts.forEach((opt, j) => {
+      const btn = document.createElement('div');
+      btn.className = 'quiz-opt';
+      btn.textContent = opt;
+      btn.onclick = () => handleAnswer(i, j, btn, opts, exp, q.ans);
+      opts.appendChild(btn);
+    });
+    card.appendChild(opts);
+
+    const exp = document.createElement('div');
+    exp.className = 'quiz-exp';
+    exp.textContent = '해설: ' + q.exp;
+    card.appendChild(exp);
+
+    container.appendChild(card);
+  });
+
+  document.getElementById('quiz-score').style.display = 'none';
+  document.getElementById('quiz-reset').style.display = 'none';
+}
+
+function handleAnswer(qi, chosen, btn, opts, exp, correct) {
+  const btns = opts.querySelectorAll('.quiz-opt');
+  btns.forEach(b => b.onclick = null);
+  if (chosen === correct) {
+    btn.classList.add('correct');
+    score++;
+  } else {
+    btn.classList.add('wrong');
+    btns[correct].classList.add('correct');
+  }
+  exp.classList.add('show');
+  answered++;
+  updateProg();
+  if (answered === QUIZ.length) showFinal();
+}
+
+function updateProg() {
+  const pct = Math.round(answered / QUIZ.length * 100);
+  document.getElementById('quiz-prog').style.width = pct + '%';
+}
+
+function showFinal() {
+  const scoreDiv = document.getElementById('quiz-score');
+  const pct = Math.round(score / QUIZ.length * 100);
+  let msg = pct >= 80 ? '훌륭해! 🎉' : pct >= 60 ? '좋아, 한 번 더!' : '다시 보자 💪';
+  scoreDiv.textContent = `${score} / ${QUIZ.length} (${pct}%) — ${msg}`;
+  scoreDiv.style.display = 'block';
+  document.getElementById('quiz-reset').style.display = 'block';
+}
+
+function resetQuiz() {
+  buildQuiz();
+}
+
+buildQuiz();
+</script>
+</body>
+</html>
