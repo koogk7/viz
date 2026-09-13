@@ -1,0 +1,72 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>데이터 아키텍처 12패턴</title><style>
+:root{--bg:#0f1216;--card:#171c23;--line:#262f3a;--tx:#e8eef5;--mut:#93a4b8;--ac:#5cc8ff;--gd:#ffc65c;--gr:#4ad991;--pk:#ff7ba8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Segoe UI',sans-serif;line-height:1.55;font-size:14.5px}
+.w{max-width:1000px;margin:0 auto;padding:18px}
+h1{font-size:22px;margin:0 0 4px}.sub{color:var(--mut);font-size:12.5px;margin-bottom:16px}
+.tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+.tab{background:var(--card);border:1px solid var(--line);color:var(--mut);padding:7px 13px;border-radius:999px;cursor:pointer;font-size:13px}
+.tab.on{background:var(--ac);color:#06232f;border-color:var(--ac);font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.p{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.p h3{margin:0 0 2px;font-size:16px}.p .en{color:var(--mut);font-size:11.5px;font-weight:400}
+.cat{display:inline-block;font-size:10.5px;padding:2px 8px;border-radius:999px;margin-bottom:8px}
+.cat.저장{background:rgba(92,200,255,.15);color:var(--ac)}.cat.정제{background:rgba(74,217,145,.15);color:var(--gr)}
+.cat.처리{background:rgba(255,198,92,.15);color:var(--gd)}.cat.소유{background:rgba(255,123,168,.15);color:var(--pk)}
+.def{font-size:13.5px;margin:0 0 10px}
+.lab{color:var(--mut);font-size:11px;margin:9px 0 3px;letter-spacing:.03em}
+.p ul{margin:0;padding-left:16px;font-size:12.8px}.p li{margin:2px 0}
+.pro{color:var(--gr);font-size:12.5px}.con{color:var(--pk);font-size:12.5px}
+.tools{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.tool{background:#1f2732;border:1px solid var(--line);color:var(--mut);font-size:11px;padding:2px 7px;border-radius:6px}
+h2{font-size:17px;margin:26px 0 10px;border-left:3px solid var(--ac);padding-left:9px}
+table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);border-radius:10px;overflow:hidden}
+th,td{padding:9px 11px;text-align:left;border-bottom:1px solid var(--line)}th{background:#1c232c;color:var(--mut);font-size:11.5px}
+td b{color:var(--ac)}
+.flow{display:flex;flex-direction:column;gap:0}
+.step{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--ac);padding:10px 13px;border-radius:8px;margin-bottom:4px}
+.step b{color:var(--ac)}.step span{color:var(--mut);font-size:12.5px;display:block}
+.arrow{color:var(--mut);text-align:center;font-size:11px;margin:-2px 0 2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{background:rgba(92,200,255,.13);color:var(--ac);font-size:12px;padding:4px 10px;border-radius:999px;font-weight:600}
+.note{color:var(--mut);font-size:12px;margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+@media(max-width:560px){.w{padding:12px}h1{font-size:18px}}
+</style></head><body><div class="w">
+<h1>🏗 2026 데이터 아키텍처 <b style="color:var(--ac)">12패턴</b></h1>
+<div class="sub">도구가 아니라 <b>패턴</b>이 플랫폼의 확장성·신뢰성·적응력을 결정한다 · 출처: 2stndard.tistory.com/307 (원저 Rohan Mistry, Medium) · 카테고리 탭으로 필터</div>
+<div class="tabs" id="tabs"></div>
+<div class="grid" id="grid"></div>
+<h2>🧭 상황별 선택 가이드</h2>
+<table><thead><tr><th>이런 상황이면</th><th>이 패턴</th></tr></thead><tbody id="guide"></tbody></table>
+<h2>🔗 실제 조합 예시 — 현대 리테일 플랫폼</h2>
+<div class="flow" id="stack"></div>
+<h2>🎯 2026 면접 대비</h2>
+<div class="p"><div class="lab">이해하고 있어야 할 것</div><ul id="intv"></ul>
+<div class="lab">AI/ML 데이터 엔지니어 핵심 4</div><div class="chips" id="core"></div>
+<div class="note">“각 패턴이 <b>어떤 문제를 풀려고 존재하는지</b> 이해하고, 여러 패턴을 적절히 조합해 신뢰성·거버넌스·속도를 갖춘 시스템을 설계할 수 있는 사람” — 2026년 데이터 엔지니어 상</div></div>
+<div class="note">현대 플랫폼은 하나의 패턴이 아니라 <b>여러 패턴의 조합</b>으로 만들어진다. 더 좋은 아키텍처가 더 좋은 데이터 플랫폼을 만든다.</div>
+</div><script>
+const D={"P": [{"n": "메달리온", "e": "Medallion", "c": "정제", "d": "데이터 품질 수준에 따라 단계적으로 정제·풍부화", "s": ["Bronze 원시·불변 원본", "Silver 정제·중복제거·검증·표준화·조인", "Gold 집계·모델링 → BI/ML 피처"], "w": "현대 레이크하우스 플랫폼", "pro": "레이어별 문제 진단 쉬움, 재처리 비용 낮음", "con": "", "t": ["Databricks", "Delta Lake", "Azure Data Lake"]}, {"n": "람다", "e": "Lambda", "c": "처리", "d": "정확한 과거 분석 + 짧은 지연 실시간 처리를 동시에", "s": ["Batch Layer 과거 정확성", "Speed Layer 실시간", "Serving Layer 결과 결합"], "w": "정확성·저지연 둘 다 필요한 대규모 처리", "pro": "대용량·내결함성·이중 처리", "con": "같은 로직을 배치/스트리밍 두 번 구현 = 'Lambda Tax'", "t": ["Hadoop", "Spark", "Kafka"]}, {"n": "카파", "e": "Kappa", "c": "처리", "d": "모든 데이터를 스트림으로 처리해 람다를 단순화", "s": ["Data Stream → Kafka → Stream Processing → Serving"], "w": "스트림 재생(replay) 가능하고 단일 코드베이스 선호", "pro": "람다보다 훨씬 단순, 처리 방식 하나", "con": "엔진·저장소가 대용량 재생을 효율적으로 해내야", "t": ["Kafka", "Flink", "Spark Structured Streaming"]}, {"n": "데이터 레이크", "e": "Data Lake", "c": "저장", "d": "정형·반정형·비정형을 하나의 저장소에 저렴하게", "s": ["Schema-on-Read (조회 시점 해석)"], "w": "유연하고 저렴한 저장이 필요할 때", "pro": "탁월한 유연성", "con": "거버넌스 없으면 '데이터 늪(Data Swamp)'", "t": ["AWS S3", "Azure Data Lake Storage", "GCS"]}, {"n": "데이터 웨어하우스", "e": "Data Warehouse", "c": "저장", "d": "구조화·모델링된 데이터로 빠른 분석 쿼리", "s": ["Schema-on-Write (저장 전 ETL)"], "w": "BI 리포팅·대시보드, 안정성·성능 중시", "pro": "분석 안정성·성능 높음", "con": "스키마가 경직됨", "t": ["Snowflake", "Redshift", "BigQuery", "Teradata"]}, {"n": "레이크하우스", "e": "Lakehouse", "c": "저장", "d": "레이크의 저렴·유연 + 웨어하우스의 신뢰·성능 결합", "s": ["Lake Storage 저렴·개방형", "Warehouse 기능: ACID·스키마 강제·Time Travel·BI급 성능"], "w": "통합 저장+분석을 원하는 현대 분석 플랫폼", "pro": "ACID·스키마 강제·Time Travel·고성능", "con": "", "t": ["Databricks", "Delta Lake", "Iceberg", "Hudi"]}, {"n": "데이터 메시", "e": "Data Mesh", "c": "소유", "d": "각 도메인이 자기 데이터를 '제품'처럼 직접 소유·관리", "s": ["Domain Ownership", "Data as a Product", "Self-Service Infra", "Federated Governance"], "w": "중앙 데이터팀이 병목이 된 대기업", "pro": "분산 소유로 중앙 병목 해소", "con": "기술이 아니라 '사람·조직 규모' 문제 해결용 — 소규모 팀엔 부적합", "t": []}, {"n": "데이터 패브릭", "e": "Data Fabric", "c": "소유", "d": "AI 도움으로 흩어진 데이터의 접근·메타데이터·거버넌스를 통합", "s": ["Active Metadata", "Automated Discovery", "Data Lineage", "Policy Enforcement"], "w": "여러 곳에 분산된 시스템의 통합 거버넌스", "pro": "물리적 이동 없이 파편화된 시스템 통합", "con": "", "t": ["IBM", "Informatica", "클라우드 카탈로그 계층"]}, {"n": "허브 앤 스포크", "e": "Hub-and-Spoke", "c": "소유", "d": "중앙 웨어하우스 + 부서별 최적화 데이터 마트", "s": ["Central Warehouse → 부서별 Data Mart"], "w": "중앙 일관성 + 부서 자율성 둘 다 필요", "pro": "Single Source of Truth + 부서 최적화", "con": "", "t": []}, {"n": "데이터 볼트", "e": "Data Vault", "c": "정제", "d": "변경 이력 추적·감사(Audit)·스키마 변경에 유연", "s": ["Hubs 비즈니스 키(무엇)", "Links 키 관계(어떻게 연결)", "Satellites 시점별 상세 속성(어떻게 변했나)"], "w": "금융·보험·의료 등 '특정 날짜에 이 데이터가 어떤 모습이었나'를 규제기관이 요구하는 산업", "pro": "완전한 변경 이력·감사 대응·스키마 유연", "con": "", "t": []}, {"n": "이벤트 기반", "e": "Event-Driven", "c": "처리", "d": "생산자와 소비자를 분리해 실시간으로 이벤트에 반응", "s": ["Producer → Kafka/Event Hub → Consumers (pub/sub)"], "w": "실시간 반응 시스템·마이크로서비스", "pro": "느슨한 결합, 비동기(동기 대기 없음)", "con": "", "t": ["Kafka", "AWS EventBridge", "Azure Event Hubs"]}, {"n": "현대적 스트리밍", "e": "Modern Streaming", "c": "처리", "d": "생성 순간부터 분석까지 거의 지연 없이 이벤트 전달", "s": ["Sources → Kafka → Flink/Spark → Lakehouse/Warehouse", "카파+이벤트기반+레이크하우스의 수렴"], "w": "이상거래 탐지·실시간 추천·운영 대시보드", "pro": "엔드투엔드 준실시간", "con": "", "t": ["Kafka", "Flink", "Spark Structured Streaming"]}], "GUIDE": [["현대적 분석 & ML 플랫폼", "Lakehouse + Medallion + Streaming"], ["배치 정확도 + 실시간 둘 다", "Lambda (로그 재생 가능하면 Kappa)"], ["스트리밍 전용 시스템", "Kappa + Event-Driven"], ["저렴·유연한 원시 저장", "Data Lake (거버넌스 필수)"], ["BI·리포팅 중심", "Data Warehouse + Hub-and-Spoke"], ["규제·감사 대응이 핵심", "Data Vault"], ["중앙 데이터팀이 병목", "Data Mesh"], ["거버넌스가 파편화", "Data Fabric"]], "STACK": [["Streaming (Kafka + Flink)", "실시간 클릭스트림·거래 데이터 수집"], ["Lakehouse (Iceberg / Delta)", "개방형 포맷·ACID, 모든 데이터 저장"], ["Medallion (Bronze → Gold)", "원시 이벤트를 신뢰 가능한 테이블로 단계 정제"], ["Data Vault (Gold History)", "감사 가능한 이력 장기 보존"], ["Data Mesh (Domain Teams)", "마케팅·재무·운영 등 도메인 데이터 제품"], ["Data Fabric (Governance)", "계보·권한·탐색 통합 관리"]], "INTV": ["메달리온과 각 레이어의 필요성", "레이크하우스가 Lake vs Warehouse 논쟁을 어떻게 끝냈나", "람다 vs 카파 차이와 트레이드오프", "데이터 메시는 기술이 아니라 '조직' 패턴이라는 점", "데이터 볼트(특히 금융·의료)", "이벤트 기반 + Kafka/Flink/Spark 스트리밍"], "CORE": ["Lakehouse", "Medallion", "Streaming (Kafka/Flink)", "Data Mesh"]};let cat='전체';
+const cats=['전체','저장','정제','처리','소유'];
+document.getElementById('tabs').innerHTML=cats.map(c=>`<span class="tab${c===cat?' on':''}" data-c="${c}">${c}${c==='전체'?' ('+D.P.length+')':' ('+D.P.filter(p=>p.c===c).length+')'}</span>`).join('');
+function render(){
+ document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.c===cat));
+ const list=cat==='전체'?D.P:D.P.filter(p=>p.c===cat);
+ document.getElementById('grid').innerHTML=list.map(p=>`<div class="p">
+  <span class="cat ${p.c}">${p.c}</span>
+  <h3>${p.n} <span class="en">${p.e}</span></h3>
+  <p class="def">${p.d}</p>
+  <div class="lab">구조</div><ul>${p.s.map(x=>`<li>${x}</li>`).join('')}</ul>
+  <div class="lab">언제 쓰나</div><div style="font-size:12.8px">${p.w}</div>
+  ${p.pro?`<div class="lab">장점</div><div class="pro">${p.pro}</div>`:''}
+  ${p.con?`<div class="lab">한계</div><div class="con">${p.con}</div>`:''}
+  ${p.t.length?`<div class="tools">${p.t.map(t=>`<span class="tool">${t}</span>`).join('')}</div>`:''}
+ </div>`).join('');
+}
+document.getElementById('tabs').addEventListener('click',e=>{const t=e.target.closest('.tab');if(!t)return;cat=t.dataset.c;render();});
+document.getElementById('guide').innerHTML=D.GUIDE.map(g=>`<tr><td>${g[0]}</td><td><b>${g[1]}</b></td></tr>`).join('');
+document.getElementById('stack').innerHTML=D.STACK.map((s,i)=>`<div class="step"><b>${s[0]}</b><span>${s[1]}</span></div>${i<D.STACK.length-1?'<div class="arrow">▼</div>':''}`).join('');
+document.getElementById('intv').innerHTML=D.INTV.map(x=>`<li>${x}</li>`).join('');
+document.getElementById('core').innerHTML=D.CORE.map(x=>`<span class="chip">${x}</span>`).join('');
+render();
+</script></body></html>
