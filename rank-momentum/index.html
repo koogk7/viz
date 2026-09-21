@@ -205,8 +205,8 @@ tbody tr:hover{background:#1a2536}
         <th data-k="ret_12w" style="min-width:58px">12W%</th>
         <th data-k="ret_52w" style="min-width:58px">52W%</th>
         <th data-k="gap_52w_high" style="min-width:62px">갭52W</th>
-        <th data-k="per" style="min-width:50px">PER</th>
-        <th data-k="roe" style="min-width:50px">ROE</th>
+        <th data-k="per" style="min-width:50px" title="점수 미반영 — 참고용">PER*</th>
+        <th data-k="roe" style="min-width:50px" title="점수 미반영 — 참고용">ROE*</th>
       `;
     }
     bindHeaderClicks();
@@ -455,7 +455,7 @@ tbody tr:hover{background:#1a2536}
     if (market === 'KR') {
       el.innerHTML = '※ 교육용. 유니버스: KOSPI+KOSDAQ 시가총액 3,000억원 이상. mom_score=4·12·25·52주 횡단면 백분위 평균, price_score=52주 고가 대비 위치 점수, combined=두 점수의 가중합(0.6:0.4). 데이터: naver-universe + yfinance.';
     } else {
-      el.innerHTML = '유니버스: 시총 $217M+ AND 20일 평균 거래대금 $1M+ (NASDAQ screener + yfinance). combined=mom×0.6+price×0.4. 밸류에이션(PER/ROE): Yahoo Finance 레이트리밋으로 현재 공백 — 추후 보완.';
+      el.innerHTML = '유니버스: 시총 $217M+ AND 20일 평균 거래대금 $1M+ (NASDAQ screener + yfinance). combined=mom×0.6+price×0.4 (KR과 동일 공식, 직접 비교 불가). PER*/ROE*는 참고 컬럼 — combined 점수에 미반영(KR도 밸류에이션 0%, 공식 통일). 데이터: Yahoo Finance.';
     }
   }
 
