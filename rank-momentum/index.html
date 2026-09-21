@@ -165,10 +165,8 @@ tbody tr:hover{background:#1a2536}
     return `<span style="color:${color}">${prefix}${val.toFixed(0)}</span>`;
   }
 
-  // US: ret values are decimal fractions → multiply by 100 for %
-  function usRet(v) {
-    return (v !== null && v !== undefined) ? v * 100 : null;
-  }
+  // US ret values are now stored as % (same as KR) — no conversion needed
+  // Both markets: ret_* and gap_52w_high in percent (e.g. 37.4 = +37.4%)
 
   // ── header render ──────────────────────────────────
   function renderHeaders() {
@@ -293,10 +291,10 @@ tbody tr:hover{background:#1a2536}
           <td>${fmtScore(s.combined)}</td>
           <td>${fmtScore(s.mom_score)}</td>
           <td>${fmtScore(s.price_score)}</td>
-          <td>${fmtRet(usRet(s.ret_4w))}</td>
-          <td>${fmtRet(usRet(s.ret_12w))}</td>
-          <td>${fmtRet(usRet(s.ret_52w))}</td>
-          <td>${fmtRet(usRet(s.gap_52w_high))}</td>
+          <td>${fmtRet(s.ret_4w)}</td>
+          <td>${fmtRet(s.ret_12w)}</td>
+          <td>${fmtRet(s.ret_52w)}</td>
+          <td>${fmtRet(s.gap_52w_high)}</td>
           <td>${fmtNum(s.per, 1)}</td>
           <td>${fmtNum(s.roe, 1)}</td>
         </tr>`;
