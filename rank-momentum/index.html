@@ -5,66 +5,167 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0e1420;--card:#161f2e;--card2:#1d2838;--line:#2a3648;--tx:#e6edf5;--mut:#8fa3bd;--gold:#e8b04b;--grn:#33c27f;--red:#ef5f6b;--accent:#4aa8ff}
+:root{
+  --bg:#0e1420;--card:#161f2e;--card2:#1d2838;--line:#2a3648;
+  --tx:#e6edf5;--mut:#8fa3bd;--gold:#e8b04b;--grn:#33c27f;
+  --red:#ef5f6b;--accent:#4aa8ff;
+  --theme-bg:#1e1640;--theme-fg:#9a87d0;--theme-bd:#4a3a7a;
+}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx);font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Segoe UI',sans-serif;font-size:14px;line-height:1.45}
-.wrap{max-width:1200px;margin:0 auto;padding:16px}
+body{margin:0;background:var(--bg);color:var(--tx);
+  font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Segoe UI',sans-serif;
+  font-size:14px;line-height:1.45}
+.wrap{max-width:1400px;margin:0 auto;padding:16px}
 h1{font-size:20px;margin:0 0 10px}
+
+/* ── market toggle ── */
 .mkt-toggle{display:flex;gap:8px;margin-bottom:8px}
-.mkt-btn{background:transparent;border:1px solid var(--card2);color:var(--mut);border-radius:8px;padding:5px 18px;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s}
+.mkt-btn{background:transparent;border:1px solid var(--card2);color:var(--mut);border-radius:8px;
+  padding:5px 18px;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s}
 .mkt-btn:hover{border-color:var(--accent);color:var(--tx)}
 .mkt-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
 .cap-banner{font-size:12px;color:var(--mut);margin-bottom:4px}
 .cap-warn{font-size:12px;color:rgba(232,176,75,.75);margin-bottom:10px}
-.sub{color:var(--mut);font-size:12.5px;margin-bottom:14px}
+.sub{color:var(--mut);font-size:12.5px;margin-bottom:10px}
 .sub b{color:var(--gold)}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:16px}
+
+/* ── params bar ── */
+.params-bar{background:var(--card);border:1px solid var(--line);border-radius:8px;margin-bottom:10px}
+.params-trig{display:flex;align-items:center;justify-content:space-between;
+  padding:8px 14px;cursor:pointer;user-select:none;color:var(--mut);font-size:12.5px;font-weight:600}
+.params-trig:hover{color:var(--tx)}
+.params-body{display:none;padding:10px 14px 12px;border-top:1px solid var(--line);
+  flex-wrap:wrap;gap:10px 24px}
+.params-body.open{display:flex}
+.pm{min-width:110px}
+.pm-k{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);font-weight:600;margin-bottom:2px}
+.pm-v{font-size:12.5px;color:var(--tx);font-weight:500}
+
+/* ── summary cards ── */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 13px}
 .card h3{margin:0 0 6px;font-size:11.5px;letter-spacing:.02em;color:var(--mut);text-transform:uppercase}
 .card .val{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
 .card .sub2{font-size:11px;color:var(--mut);margin-top:2px}
-.ctrls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
-.ctrls input,.ctrls select{background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13px;outline:none}
+
+/* ── controls ── */
+.ctrls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.ctrls input,.ctrls select{background:var(--card2);color:var(--tx);border:1px solid var(--line);
+  border-radius:8px;padding:7px 10px;font-size:13px;outline:none}
 .ctrls input:focus,.ctrls select:focus{border-color:var(--accent)}
 .ctrls input{flex:1;min-width:140px}
-.hint{color:var(--mut);font-size:11.5px;margin:2px 0 12px}
+.hint{color:var(--mut);font-size:11.5px;margin:2px 0 10px}
+
+/* ── table ── */
 .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
-table{border-collapse:collapse;width:100%;min-width:1000px}
-th,td{padding:7px 8px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
-th{background:var(--card2);position:sticky;top:0;font-size:11.5px;color:var(--mut);cursor:pointer;user-select:none;transition:color .15s}
+table{border-collapse:collapse;width:100%;min-width:1100px}
+th,td{padding:6px 8px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+th{background:var(--card2);position:sticky;top:0;font-size:11px;color:var(--mut);
+  cursor:pointer;user-select:none;transition:color .15s;z-index:1}
 th:hover{color:var(--tx)}
 th.act{color:var(--gold)}
 td.l,th.l{text-align:left}
 tbody tr:last-child td{border-bottom:none}
-tbody tr:hover{background:#1a2536}
+tbody tr:hover>td{background:#1a2536}
+tbody tr.expanded>td{background:#192030}
 .code{font-family:monospace;font-size:12px;color:var(--mut)}
-.name-cell{max-width:160px;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.rk{font-variant-numeric:tabular-nums;font-weight:700;font-size:13px}
+
+/* name + theme chips */
+.name-wrap{display:flex;flex-direction:column;gap:3px;max-width:160px}
+.name-cell{overflow:hidden;text-overflow:ellipsis;font-weight:600;font-size:13px}
+.theme-chips{display:flex;flex-wrap:wrap;gap:2px;margin-top:1px}
+.theme-chip{display:inline-block;font-size:9px;padding:1px 4px;
+  background:var(--theme-bg);color:var(--theme-fg);
+  border:1px solid var(--theme-bd);border-radius:3px;white-space:nowrap}
+.theme-more{display:inline-block;font-size:9px;padding:1px 4px;
+  background:var(--card2);color:var(--mut);border-radius:3px}
+
 .mkt-badge{display:inline-block;font-size:10px;padding:1px 5px;border-radius:4px;margin-left:4px;vertical-align:middle}
 .mkt-kospi{background:rgba(74,168,255,.18);color:var(--accent)}
 .mkt-kosdaq{background:rgba(232,176,75,.18);color:var(--gold)}
 .sector-tag{font-size:11.5px;color:var(--mut)}
-.rk{font-variant-numeric:tabular-nums;font-weight:700;font-size:13px}
+
+/* score bar */
 .score-wrap{display:flex;align-items:center;gap:5px;justify-content:flex-end}
-.score-bar-bg{width:54px;height:6px;border-radius:3px;background:var(--line);overflow:hidden;flex-shrink:0}
+.score-bar-bg{width:54px;height:5px;border-radius:3px;background:var(--line);overflow:hidden;flex-shrink:0}
 .score-bar-fill{height:100%;border-radius:3px}
 .score-val{font-variant-numeric:tabular-nums;font-weight:600;font-size:12.5px;min-width:30px;text-align:right}
+
+/* ret+pct cell */
+.ret-cell{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+.ret-val{font-size:12px;font-variant-numeric:tabular-nums}
+.pct-sub{font-size:9.5px;color:var(--mut);font-variant-numeric:tabular-nums}
+.pct-sub.hi{color:var(--grn)}
+.pct-sub.lo{color:var(--red)}
 .pos{color:var(--grn)}.neg{color:var(--red)}
 .na{color:var(--mut)}
 .loading{text-align:center;padding:60px 20px;color:var(--mut);font-size:15px}
 .err{text-align:center;padding:40px 20px;color:var(--red)}
-.footer{color:var(--mut);font-size:11.5px;margin-top:14px;line-height:1.7}
+
+/* smart money */
+.sm-v{font-size:12px;font-variant-numeric:tabular-nums}
+
+/* ── detail row ── */
+tr.det-row{display:none}
+tr.det-row.open{display:table-row}
+tr.det-row td{background:var(--card2)!important;border-bottom:2px solid var(--accent);padding:0}
+.det-in{padding:12px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px 24px}
+.det-section-title{font-size:10.5px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;margin-bottom:7px}
+.det-section-title.m{color:var(--accent)}
+.det-section-title.sm{color:var(--theme-fg)}
+.det-section-title.p{color:var(--gold)}
+.det-rows{display:flex;flex-direction:column;gap:5px}
+.det-item{display:flex;align-items:center;gap:7px;font-size:12px}
+.det-lbl{color:var(--mut);min-width:52px;flex-shrink:0}
+.det-rv{font-weight:500;min-width:52px;font-variant-numeric:tabular-nums}
+.det-pct{font-size:11px;color:var(--mut);min-width:40px}
+.pbar{height:3px;background:var(--line);border-radius:2px;overflow:hidden;width:56px;flex-shrink:0}
+.pbar-f{height:100%;background:var(--accent);border-radius:2px}
+
+/* ── formula section ── */
+.formula-sec{border:1px solid var(--line);border-radius:8px;margin-top:14px}
+.formula-trig{display:flex;align-items:center;justify-content:space-between;
+  padding:9px 14px;cursor:pointer;user-select:none;
+  font-size:13px;font-weight:600;color:var(--mut)}
+.formula-trig:hover{color:var(--tx)}
+.formula-bd{display:none;padding:14px 16px;border-top:1px solid var(--line);
+  font-size:12.5px;color:var(--mut);line-height:1.7}
+.formula-bd.open{display:block}
+.formula-bd h3{font-size:12.5px;font-weight:700;color:var(--tx);margin:14px 0 5px}
+.formula-bd h3:first-child{margin-top:0}
+.formula-bd p{margin-bottom:7px}
+.formula-bd ul{padding-left:16px;margin-bottom:8px}
+.formula-bd li{margin-bottom:2px}
+pre.fml{font-family:'SF Mono',Menlo,monospace;font-size:11.5px;
+  background:var(--card2);border:1px solid var(--line);border-radius:6px;
+  padding:8px 12px;margin:6px 0 10px;overflow-x:auto;white-space:pre;color:var(--tx)}
+.score-chip{display:inline-flex;align-items:center;justify-content:center;
+  height:20px;min-width:46px;padding:0 7px;border-radius:10px;
+  font-size:11px;font-weight:600;margin-right:5px}
+.sc-hi{background:rgba(51,194,127,.15);color:var(--grn)}
+.sc-mh{background:rgba(74,168,255,.15);color:var(--accent)}
+.sc-ne{background:rgba(143,163,189,.12);color:var(--mut)}
+.sc-lo{background:rgba(239,95,107,.15);color:var(--red)}
+
+/* ── footer ── */
+.footer{color:var(--mut);font-size:11.5px;margin-top:12px;line-height:1.7}
+
 @media(max-width:600px){
   .wrap{padding:10px}
   h1{font-size:17px}
   .cards{grid-template-columns:1fr}
   .ctrls{gap:6px}
   .ctrls input{min-width:100px}
+  .det-in{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 <div class="wrap">
-<h1 id="page-title">KR 순위모멘텀 <span style="font-size:13px;color:var(--mut)">4·12·52주 | Combined Score</span></h1>
+<h1 id="page-title">KR 순위모멘텀 <span style="font-size:13px;color:var(--mut)">4·12·25·52주 | Combined Score</span></h1>
+
 <div class="mkt-toggle">
   <button id="btn-kr" class="mkt-btn active">KR</button>
   <button id="btn-us" class="mkt-btn">US</button>
@@ -72,7 +173,26 @@ tbody tr:hover{background:#1a2536}
 <div id="cap-banner" class="cap-banner">수급 ✅ · 밸류 ⚠️부분 · 테마 ✅(25.8%)</div>
 <div class="cap-warn">⚠️ KR과 US 점수는 직접 비교 불가 — 구성 기둥 상이</div>
 <div class="sub" id="sub-info">데이터 로딩 중...</div>
+
+<!-- ── 파라미터 패널 ── -->
+<div class="params-bar">
+  <div class="params-trig" id="params-trig">
+    <span>▸ 계산 파라미터 보기</span>
+    <span id="params-caret" style="font-size:10px">▼</span>
+  </div>
+  <div class="params-body" id="params-body">
+    <div class="pm"><div class="pm-k">합산 공식</div><div class="pm-v">combined = (2×①＋③) / 3</div></div>
+    <div class="pm"><div class="pm-k">기둥 가중치</div><div class="pm-v">① 모멘텀 67% : ③ 가격 33%</div></div>
+    <div class="pm"><div class="pm-k">백분위 함수</div><div class="pm-v">PERCENTRANK (Excel 호환)</div></div>
+    <div class="pm"><div class="pm-k">② 수급 (KR)</div><div class="pm-v">표시만, 점수 미반영</div></div>
+    <div class="pm"><div class="pm-k">밸류에이션 (US)</div><div class="pm-v">참고 컬럼, 점수 미반영</div></div>
+    <div class="pm"><div class="pm-k">KR 유니버스</div><div class="pm-v">KOSPI+KOSDAQ 3,000억+</div></div>
+    <div class="pm"><div class="pm-k">US 유니버스</div><div class="pm-v">시총 $217M+ · 20일 DV $1M+</div></div>
+  </div>
+</div>
+
 <div class="cards" id="cards"></div>
+
 <div class="ctrls">
   <input id="q" placeholder="종목명 또는 코드 검색" autocomplete="off">
   <select id="mktf">
@@ -83,6 +203,9 @@ tbody tr:hover{background:#1a2536}
   <select id="sectorf" style="display:none">
     <option value="">전체 섹터</option>
   </select>
+  <select id="themef" style="display:none">
+    <option value="">전체 테마</option>
+  </select>
   <select id="topn">
     <option value="50">Top 50</option>
     <option value="100">Top 100</option>
@@ -90,48 +213,110 @@ tbody tr:hover{background:#1a2536}
     <option value="99999">전체</option>
   </select>
 </div>
-<div class="hint" id="hint-text">열 제목 클릭 = 정렬 (다시 클릭 = 역순) · Combined = 모멘텀① × 0.6 + 가격③ × 0.4 · 스코어 0=빨강 → 100=초록</div>
+<div class="hint" id="hint-text">열 제목 클릭 = 정렬 (다시 클릭 = 역순) · 행 클릭 = 기둥별 상세 펼치기 · Combined = (2×모멘텀①＋가격③) / 3</div>
+
 <div class="tablewrap">
   <table>
     <thead><tr id="thead-row"></tr></thead>
     <tbody id="tb">
-      <tr><td colspan="17" class="loading">데이터 로딩 중...</td></tr>
+      <tr><td colspan="20" class="loading">데이터 로딩 중...</td></tr>
     </tbody>
   </table>
 </div>
+
+<!-- ── 계산 방식 펼치기 ── -->
+<div class="formula-sec">
+  <div class="formula-trig" id="formula-trig">
+    <span>📐 계산 방식 (클릭하여 펼치기)</span>
+    <span id="formula-caret" style="font-size:10px">▼</span>
+  </div>
+  <div class="formula-bd" id="formula-bd">
+    <h3>PERCENTRANK 함수 (기둥 ①·③ 공통)</h3>
+    <p>각 수익률을 전체 종목 중 <strong>몇 %보다 높은가</strong>로 0~100 변환합니다. (Excel PERCENTRANK 호환)</p>
+    <pre class="fml">pct = (값보다 낮은 종목 수) / (유효 종목 수 − 1) × 100</pre>
+
+    <h3>기둥 ① 순위모멘텀 점수 (0~100)</h3>
+    <ul>
+      <li>pct_4w = PERCENTRANK(ret_4w 전체, 해당 종목.ret_4w)</li>
+      <li>pct_12w, pct_25w, pct_52w 동일</li>
+      <li><strong>mom_score = pct_4w·pct_12w·pct_25w·pct_52w 의 단순 평균</strong> (null 제외)</li>
+    </ul>
+    <pre class="fml">mom_score = mean([pct_4w, pct_12w, pct_25w, pct_52w])
+수익률 기준일: 캘린더 역산 (4w = 오늘 − 28일, 해당일이 휴장이면 직전 거래일)</pre>
+
+    <h3>기둥 ② 스마트머니 (KR만 · 표시만 · 합산 미반영)</h3>
+    <ul>
+      <li>inst_net_20d: 기관 20일 누적 순매수 (주) — tossctl flows</li>
+      <li>for_net_20d: 외국인 20일 누적 순매수 (주) — tossctl flows</li>
+    </ul>
+
+    <h3>기둥 ③ 가격모멘텀 점수 (0~100)</h3>
+    <ul>
+      <li>gap_52w_high = (현재가 − 52주 고점) / 52주 고점 × 100</li>
+      <li>pct_gap = PERCENTRANK(gap_52w_high 전체, 해당 종목.gap)</li>
+      <li><strong>price_score = pct_gap</strong> (52주 고점 대비 위치 한 가지)</li>
+    </ul>
+
+    <h3>합산</h3>
+    <pre class="fml">combined = (2 × mom_score + 1 × price_score) / 3
+원래 비율 40:20 → 두 기둥만으로 2:1 재정규화 (분모 = 2+1 = 3)</pre>
+    <p style="font-size:11.5px">한 기둥이 null인 종목은 나머지 기둥 점수를 combined로 사용.</p>
+
+    <h3>US 밸류에이션 (참고 컬럼 · 점수 미반영)</h3>
+    <ul>
+      <li>per = Yahoo Finance trailingPE — 적자기업은 null (정상)</li>
+      <li>roe = returnOnEquity × 100 (%) — KR이 밸류에이션 0%이므로 공식 통일</li>
+    </ul>
+
+    <h3>색상 기준</h3>
+    <p>
+      <span class="score-chip sc-hi">≥ 80</span>상위 모멘텀&nbsp;&nbsp;
+      <span class="score-chip sc-mh">60~79</span>중상&nbsp;&nbsp;
+      <span class="score-chip sc-ne">40~59</span>중립&nbsp;&nbsp;
+      <span class="score-chip sc-lo">&lt; 40</span>하위
+    </p>
+  </div>
+</div>
+
 <div class="footer" id="footer"></div>
 </div>
 
 <script>
 (function(){
-  // ── state ──────────────────────────────────────────
+  // ── state ────────────────────────────────────────────
   let market = 'KR';
   let allStocks = [], filteredStocks = [];
   let sortKey = 'combined', sortAsc = false;
-  let query = '', mktFilter = '', sectorFilter = '', showN = 50;
+  let query = '', mktFilter = '', sectorFilter = '', themeFilter = '', showN = 50;
+  let expandedCode = null; // currently expanded row id
 
-  const COL_COUNT = { KR: 17, US: 14 };
-  function colCount() { return COL_COUNT[market]; }
-
-  // ── color helpers ──────────────────────────────────
+  // ── color helpers ────────────────────────────────────
   function scoreColor(v) {
     const h = Math.max(0, Math.min(120, v * 1.2));
     return `hsl(${h},60%,50%)`;
   }
-
   function retColor(v) {
-    if (v === null || v === undefined || isNaN(v)) return 'var(--mut)';
+    if (v == null || isNaN(v)) return 'var(--mut)';
     return v >= 0 ? 'var(--grn)' : 'var(--red)';
   }
-
   function fmtRet(v) {
-    if (v === null || v === undefined || isNaN(v)) return '<span class="na">—</span>';
+    if (v == null || isNaN(v)) return '<span class="na">—</span>';
     const s = v >= 0 ? '+' : '';
     return `<span style="color:${retColor(v)}">${s}${v.toFixed(1)}%</span>`;
   }
-
+  function fmtRetPct(ret, pct) {
+    const rv = ret == null || isNaN(ret)
+      ? '<span class="na">—</span>'
+      : `<span class="ret-val" style="color:${retColor(ret)}">${ret>=0?'+':''}${ret.toFixed(1)}%</span>`;
+    let pctEl = '';
+    if (pct != null && !isNaN(pct)) {
+      const cls = pct >= 70 ? 'hi' : pct < 30 ? 'lo' : '';
+      pctEl = `<span class="pct-sub${cls?' '+cls:''}">${pct.toFixed(0)}pct</span>`;
+    }
+    return `<div class="ret-cell">${rv}${pctEl}</div>`;
+  }
   function fmtScore(v) {
-    if (v === null || v === undefined || isNaN(v)) return '<span class="na">—</span>';
+    if (v == null || isNaN(v)) return '<span class="na">—</span>';
     const pct = Math.max(0, Math.min(100, v));
     const col = scoreColor(pct);
     return `<div class="score-wrap">
@@ -139,150 +324,215 @@ tbody tr:hover{background:#1a2536}
       <span class="score-val" style="color:${col}">${pct.toFixed(1)}</span>
     </div>`;
   }
-
   function fmtMarcap(s) {
     if (market === 'KR') {
-      const v = s.marcap;
-      if (!v) return '<span class="na">—</span>';
-      return (v / 1e12).toFixed(1);
+      if (!s.marcap) return '<span class="na">—</span>';
+      return (s.marcap / 1e12).toFixed(1);
     } else {
-      const v = s.marcap_usd;
-      if (!v) return '<span class="na">—</span>';
-      return (v / 1e9).toFixed(1);
+      if (!s.marcap_usd) return '<span class="na">—</span>';
+      return (s.marcap_usd / 1e9).toFixed(1);
     }
   }
-
   function fmtNum(v, dec) {
-    if (v === null || v === undefined || isNaN(v)) return '<span class="na">—</span>';
+    if (v == null || isNaN(v)) return '<span class="na">—</span>';
     return v.toFixed(dec == null ? 2 : dec);
   }
-
   function fmtSmartMoney(v) {
-    if (v === null || v === undefined || isNaN(v)) return '<span class="na">—</span>';
+    if (v == null || isNaN(v)) return '<span class="na">—</span>';
     const val = v / 1e8;
-    const color = val >= 0 ? 'var(--grn)' : 'var(--red)';
-    const prefix = val >= 0 ? '+' : '';
-    return `<span style="color:${color}">${prefix}${val.toFixed(0)}</span>`;
+    const col = val >= 0 ? 'var(--grn)' : 'var(--red)';
+    return `<span class="sm-v" style="color:${col}">${val>=0?'+':''}${val.toFixed(0)}</span>`;
+  }
+  function fmtThemeChips(themes) {
+    if (!themes || !themes.length) return '';
+    const show = themes.slice(0, 2);
+    const rest = themes.length - 2;
+    let html = show.map(t => `<span class="theme-chip">${t}</span>`).join('');
+    if (rest > 0) html += `<span class="theme-more">+${rest}</span>`;
+    return `<div class="theme-chips">${html}</div>`;
+  }
+  function stockId(s) {
+    return market === 'KR' ? s.code : s.symbol;
   }
 
-  // US ret values are now stored as % (same as KR) — no conversion needed
-  // Both markets: ret_* and gap_52w_high in percent (e.g. 37.4 = +37.4%)
+  // ── header ──────────────────────────────────────────
+  const COL_COUNT = { KR: 19, US: 16 };
+  function colCount() { return COL_COUNT[market]; }
 
-  // ── header render ──────────────────────────────────
   function renderHeaders() {
     const row = document.getElementById('thead-row');
     if (market === 'KR') {
       row.innerHTML = `
-        <th class="l" data-k="rank" style="min-width:36px">순위</th>
-        <th class="l" data-k="code" style="min-width:58px">코드</th>
-        <th class="l" data-k="name" style="min-width:130px">종목</th>
-        <th class="l" data-k="market" style="min-width:72px">거래소</th>
-        <th data-k="marcap" style="min-width:64px">시총(조)</th>
+        <th class="l" data-k="rank" style="min-width:34px">순위</th>
+        <th class="l" data-k="code" style="min-width:56px">코드</th>
+        <th class="l" data-k="name" style="min-width:120px">종목</th>
+        <th class="l" data-k="market" style="min-width:68px">거래소</th>
+        <th data-k="marcap" style="min-width:60px">시총(조)</th>
         <th data-k="combined" style="min-width:80px">Combined</th>
-        <th data-k="mom_score" style="min-width:80px">모멘텀①</th>
-        <th data-k="price_score" style="min-width:80px">가격③</th>
-        <th data-k="ret_4w" style="min-width:58px">4W%</th>
-        <th data-k="ret_12w" style="min-width:58px">12W%</th>
-        <th data-k="ret_52w" style="min-width:58px">52W%</th>
+        <th data-k="mom_score" style="min-width:76px">모멘텀①</th>
+        <th data-k="price_score" style="min-width:76px">가격③</th>
+        <th data-k="ret_4w" style="min-width:66px">4W%/pct</th>
+        <th data-k="ret_12w" style="min-width:66px">12W%/pct</th>
+        <th data-k="ret_25w" style="min-width:66px">25W%/pct</th>
+        <th data-k="ret_52w" style="min-width:66px">52W%/pct</th>
         <th data-k="gap_52w_high" style="min-width:62px">갭52W</th>
-        <th data-k="per" style="min-width:50px">PER</th>
-        <th data-k="pbr" style="min-width:50px">PBR</th>
-        <th data-k="roe" style="min-width:50px">ROE</th>
-        <th data-k="inst_net_20d" style="min-width:72px">기관(억)</th>
-        <th data-k="for_net_20d" style="min-width:72px">외국인(억)</th>
+        <th data-k="per" style="min-width:46px">PER</th>
+        <th data-k="pbr" style="min-width:46px">PBR</th>
+        <th data-k="roe" style="min-width:46px">ROE</th>
+        <th data-k="inst_net_20d" style="min-width:70px">기관(억)</th>
+        <th data-k="for_net_20d" style="min-width:70px">외국인(억)</th>
+        <th style="min-width:20px"></th>
       `;
     } else {
       row.innerHTML = `
-        <th class="l" data-k="rank" style="min-width:36px">순위</th>
-        <th class="l" data-k="symbol" style="min-width:64px">Ticker</th>
-        <th class="l" data-k="name" style="min-width:140px">종목</th>
-        <th class="l" data-k="sector" style="min-width:80px">섹터</th>
-        <th data-k="marcap_usd" style="min-width:72px">시총($B)</th>
+        <th class="l" data-k="rank" style="min-width:34px">순위</th>
+        <th class="l" data-k="symbol" style="min-width:62px">Ticker</th>
+        <th class="l" data-k="name" style="min-width:130px">종목</th>
+        <th class="l" data-k="sector" style="min-width:76px">섹터</th>
+        <th data-k="marcap_usd" style="min-width:68px">시총($B)</th>
         <th data-k="combined" style="min-width:80px">Combined</th>
-        <th data-k="mom_score" style="min-width:80px">모멘텀①</th>
-        <th data-k="price_score" style="min-width:80px">가격③</th>
-        <th data-k="ret_4w" style="min-width:58px">4W%</th>
-        <th data-k="ret_12w" style="min-width:58px">12W%</th>
-        <th data-k="ret_52w" style="min-width:58px">52W%</th>
+        <th data-k="mom_score" style="min-width:76px">모멘텀①</th>
+        <th data-k="price_score" style="min-width:76px">가격③</th>
+        <th data-k="ret_4w" style="min-width:66px">4W%/pct</th>
+        <th data-k="ret_12w" style="min-width:66px">12W%/pct</th>
+        <th data-k="ret_25w" style="min-width:66px">25W%/pct</th>
+        <th data-k="ret_52w" style="min-width:66px">52W%/pct</th>
         <th data-k="gap_52w_high" style="min-width:62px">갭52W</th>
-        <th data-k="per" style="min-width:50px" title="점수 미반영 — 참고용">PER*</th>
-        <th data-k="roe" style="min-width:50px" title="점수 미반영 — 참고용">ROE*</th>
+        <th data-k="per" style="min-width:46px" title="점수 미반영 — 참고용">PER*</th>
+        <th data-k="roe" style="min-width:46px" title="점수 미반영 — 참고용">ROE*</th>
+        <th style="min-width:20px"></th>
       `;
     }
     bindHeaderClicks();
     updateSortHeaders();
   }
 
-  // ── summary cards ──────────────────────────────────
+  // ── summary cards ────────────────────────────────────
   function renderCards(stocks) {
     const top10 = stocks.slice(0, 10);
-    if (top10.length === 0) { document.getElementById('cards').innerHTML = ''; return; }
-
+    if (!top10.length) { document.getElementById('cards').innerHTML = ''; return; }
     const avg = (arr, key) => {
-      const vals = arr.map(s => s[key]).filter(v => v !== null && !isNaN(v));
+      const vals = arr.map(s => s[key]).filter(v => v != null && !isNaN(v));
       return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
     };
-
-    const avgComb = avg(top10, 'combined');
-    const avgMom = avg(top10, 'mom_score');
-    const avgPrice = avg(top10, 'price_score');
-
-    const cardData = [
-      { label: 'Top-10 Combined 평균', val: avgComb !== null ? avgComb.toFixed(1) : '—', sub: '종합 순위모멘텀 점수' },
-      { label: 'Top-10 모멘텀① 평균', val: avgMom !== null ? avgMom.toFixed(1) : '—', sub: '4·12·25·52주 횡단면 백분위' },
-      { label: 'Top-10 가격③ 평균', val: avgPrice !== null ? avgPrice.toFixed(1) : '—', sub: '52주 고점 대비 위치' },
-    ];
-
-    document.getElementById('cards').innerHTML = cardData.map(c => `
-      <div class="card">
+    const avgC = avg(top10,'combined'), avgM = avg(top10,'mom_score'), avgP = avg(top10,'price_score');
+    document.getElementById('cards').innerHTML = [
+      {label:'TOP-10 COMBINED 평균', val:avgC, sub:'종합 순위모멘텀 점수'},
+      {label:'TOP-10 모멘텀① 평균', val:avgM, sub:'4·12·25·52주 횡단면 백분위'},
+      {label:'TOP-10 가격③ 평균', val:avgP, sub:'52주 고점 대비 위치'},
+    ].map(c => {
+      const disp = c.val != null ? c.val.toFixed(1) : '—';
+      return `<div class="card">
         <h3>${c.label}</h3>
-        <div class="val" style="color:${scoreColor(parseFloat(c.val)||0)}">${c.val}</div>
+        <div class="val" style="color:${scoreColor(parseFloat(disp)||0)}">${disp}</div>
         <div class="sub2">${c.sub}</div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
   }
 
-  // ── table render ───────────────────────────────────
+  // ── detail row HTML ──────────────────────────────────
+  function detailHtml(s, colSpan) {
+    function pbar(pct) {
+      const w = pct != null ? Math.max(0,Math.min(100,pct)).toFixed(1) : 0;
+      return `<div class="pbar"><div class="pbar-f" style="width:${w}%"></div></div>`;
+    }
+    function detRow(lbl, ret, pct) {
+      const rv = ret != null
+        ? `<span style="color:${retColor(ret)}">${ret>=0?'+':''}${ret.toFixed(1)}%</span>`
+        : '<span class="na">—</span>';
+      const ps = pct != null ? `<span class="det-pct">${pct.toFixed(0)}pct</span>` : '';
+      return `<div class="det-item"><span class="det-lbl">${lbl}</span><span class="det-rv">${rv}</span>${ps}${pbar(pct)}</div>`;
+    }
+
+    // 기둥① section
+    let momSec = `<div class="det-section-title m">기둥 ① 순위모멘텀</div><div class="det-rows">
+      ${detRow('4주', s.ret_4w, s.pct_4w)}
+      ${detRow('12주', s.ret_12w, s.pct_12w)}
+      ${detRow('25주', s.ret_25w, s.pct_25w)}
+      ${detRow('52주', s.ret_52w, s.pct_52w)}
+      <div class="det-item"><span class="det-lbl" style="color:var(--accent)">점수</span>
+        <span class="det-rv" style="color:var(--accent);font-weight:700">${s.mom_score!=null?s.mom_score.toFixed(1):'—'}</span>
+      </div>
+    </div>`;
+
+    // 기둥③ section
+    let priceSec = `<div class="det-section-title p">기둥 ③ 가격모멘텀</div><div class="det-rows">
+      ${detRow('갭52W', s.gap_52w_high, s.price_score)}
+      <div class="det-item"><span class="det-lbl" style="color:var(--gold)">점수</span>
+        <span class="det-rv" style="color:var(--gold);font-weight:700">${s.price_score!=null?s.price_score.toFixed(1):'—'}</span>
+      </div>
+    </div>`;
+
+    // 기둥②/밸류 section
+    let sec3 = '';
+    if (market === 'KR') {
+      const iv = s.inst_net_20d != null ? (s.inst_net_20d/1e8).toFixed(0)+'억' : '—';
+      const fv = s.for_net_20d != null ? (s.for_net_20d/1e8).toFixed(0)+'억' : '—';
+      sec3 = `<div class="det-section-title sm">기둥 ② 스마트머니 (표시만)</div><div class="det-rows">
+        <div class="det-item"><span class="det-lbl">기관20d</span><span class="det-rv">${iv}</span></div>
+        <div class="det-item"><span class="det-lbl">외국인20d</span><span class="det-rv">${fv}</span></div>
+      </div>`;
+    } else {
+      const pv = s.per != null ? s.per.toFixed(1) : '—';
+      const rv2 = s.roe != null ? s.roe.toFixed(1)+'%' : '—';
+      const fpv = s.forward_per != null ? s.forward_per.toFixed(1) : '—';
+      sec3 = `<div class="det-section-title sm">밸류에이션 (참고 · 점수 미반영)</div><div class="det-rows">
+        <div class="det-item"><span class="det-lbl">PER (TTM)</span><span class="det-rv">${pv}</span></div>
+        <div class="det-item"><span class="det-lbl">PER (선행)</span><span class="det-rv">${fpv}</span></div>
+        <div class="det-item"><span class="det-lbl">ROE</span><span class="det-rv">${rv2}</span></div>
+      </div>`;
+    }
+
+    return `<td colspan="${colSpan}"><div class="det-in">${momSec}${priceSec}${sec3}</div></td>`;
+  }
+
+  // ── table render ──────────────────────────────────────
   function renderTable() {
     let data = filteredStocks;
     const limit = showN >= 99999 ? data.length : Math.min(showN, data.length);
     data = data.slice(0, limit);
-
     const tb = document.getElementById('tb');
-    if (data.length === 0) {
-      tb.innerHTML = `<tr><td colspan="${colCount()}" style="text-align:center;padding:30px;color:var(--mut)">검색 결과 없음</td></tr>`;
+    const cc = colCount();
+
+    if (!data.length) {
+      tb.innerHTML = `<tr><td colspan="${cc}" style="text-align:center;padding:30px;color:var(--mut)">검색 결과 없음</td></tr>`;
       renderCards([]);
       return;
     }
-
     renderCards(filteredStocks.slice(0, 10));
 
-    if (market === 'KR') {
-      tb.innerHTML = data.map(s => {
+    const rows = data.map(s => {
+      const id = stockId(s);
+      const isExp = id === expandedCode;
+      const expClass = isExp ? ' expanded' : '';
+
+      let mainRow;
+      if (market === 'KR') {
         const mktClass = s.market === 'KOSPI' ? 'mkt-kospi' : 'mkt-kosdaq';
-        return `<tr>
+        const themes = fmtThemeChips(s.themes);
+        mainRow = `<tr class="data-row${expClass}" data-id="${id}">
           <td class="l"><span class="rk">${s.rank}</span></td>
           <td class="l"><span class="code">${s.code}</span></td>
-          <td class="l"><span class="name-cell" title="${s.name}">${s.name}</span></td>
+          <td class="l"><div class="name-wrap"><span class="name-cell" title="${s.name}">${s.name}</span>${themes}</div></td>
           <td class="l"><span class="mkt-badge ${mktClass}">${s.market}</span></td>
           <td>${fmtMarcap(s)}</td>
           <td>${fmtScore(s.combined)}</td>
           <td>${fmtScore(s.mom_score)}</td>
           <td>${fmtScore(s.price_score)}</td>
-          <td>${fmtRet(s.ret_4w)}</td>
-          <td>${fmtRet(s.ret_12w)}</td>
-          <td>${fmtRet(s.ret_52w)}</td>
+          <td>${fmtRetPct(s.ret_4w, s.pct_4w)}</td>
+          <td>${fmtRetPct(s.ret_12w, s.pct_12w)}</td>
+          <td>${fmtRetPct(s.ret_25w, s.pct_25w)}</td>
+          <td>${fmtRetPct(s.ret_52w, s.pct_52w)}</td>
           <td>${fmtRet(s.gap_52w_high)}</td>
           <td>${fmtNum(s.per, 1)}</td>
           <td>${fmtNum(s.pbr, 2)}</td>
           <td>${fmtNum(s.roe, 1)}</td>
           <td>${fmtSmartMoney(s.inst_net_20d)}</td>
           <td>${fmtSmartMoney(s.for_net_20d)}</td>
+          <td style="color:var(--mut);font-size:10px;text-align:center">${isExp?'▲':'▼'}</td>
         </tr>`;
-      }).join('');
-    } else {
-      tb.innerHTML = data.map(s => {
-        return `<tr>
+      } else {
+        mainRow = `<tr class="data-row${expClass}" data-id="${id}">
           <td class="l"><span class="rk">${s.rank}</span></td>
           <td class="l"><span class="code">${s.symbol}</span></td>
           <td class="l"><span class="name-cell" title="${s.name}">${s.name}</span></td>
@@ -291,23 +541,43 @@ tbody tr:hover{background:#1a2536}
           <td>${fmtScore(s.combined)}</td>
           <td>${fmtScore(s.mom_score)}</td>
           <td>${fmtScore(s.price_score)}</td>
-          <td>${fmtRet(s.ret_4w)}</td>
-          <td>${fmtRet(s.ret_12w)}</td>
-          <td>${fmtRet(s.ret_52w)}</td>
+          <td>${fmtRetPct(s.ret_4w, s.pct_4w)}</td>
+          <td>${fmtRetPct(s.ret_12w, s.pct_12w)}</td>
+          <td>${fmtRetPct(s.ret_25w, s.pct_25w)}</td>
+          <td>${fmtRetPct(s.ret_52w, s.pct_52w)}</td>
           <td>${fmtRet(s.gap_52w_high)}</td>
           <td>${fmtNum(s.per, 1)}</td>
           <td>${fmtNum(s.roe, 1)}</td>
+          <td style="color:var(--mut);font-size:10px;text-align:center">${isExp?'▲':'▼'}</td>
         </tr>`;
-      }).join('');
-    }
+      }
+
+      const detRow = isExp
+        ? `<tr class="det-row open" data-id="${id}">${detailHtml(s, cc)}</tr>`
+        : `<tr class="det-row" data-id="${id}">${detailHtml(s, cc)}</tr>`;
+
+      return mainRow + detRow;
+    }).join('');
+
+    tb.innerHTML = rows;
+
+    // bind row clicks
+    tb.querySelectorAll('tr.data-row').forEach(tr => {
+      tr.addEventListener('click', () => {
+        const id = tr.getAttribute('data-id');
+        expandedCode = expandedCode === id ? null : id;
+        renderTable();
+      });
+    });
   }
 
-  // ── sort + filter ──────────────────────────────────
+  // ── sort + filter ────────────────────────────────────
   function applyFilter() {
     const q = query.toLowerCase().trim();
     filteredStocks = allStocks.filter(s => {
       if (market === 'KR') {
         if (mktFilter && s.market !== mktFilter) return false;
+        if (themeFilter && !(s.themes||[]).includes(themeFilter)) return false;
         if (q && !s.name.toLowerCase().includes(q) && !String(s.code).toLowerCase().includes(q)) return false;
       } else {
         if (sectorFilter && s.sector !== sectorFilter) return false;
@@ -321,12 +591,10 @@ tbody tr:hover{background:#1a2536}
   function applySort() {
     filteredStocks.sort((a, b) => {
       let av = a[sortKey], bv = b[sortKey];
-      if (av === null || av === undefined || isNaN(av)) av = sortAsc ? Infinity : -Infinity;
-      if (bv === null || bv === undefined || isNaN(bv)) bv = sortAsc ? Infinity : -Infinity;
-      // string sort for text columns
-      if (typeof av === 'string' && typeof bv === 'string') {
+      if (av == null || isNaN(av)) av = sortAsc ? Infinity : -Infinity;
+      if (bv == null || isNaN(bv)) bv = sortAsc ? Infinity : -Infinity;
+      if (typeof av === 'string' && typeof bv === 'string')
         return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
-      }
       return sortAsc ? av - bv : bv - av;
     });
     renderTable();
@@ -341,22 +609,18 @@ tbody tr:hover{background:#1a2536}
   }
 
   function bindHeaderClicks() {
-    const textKeys = ['code', 'name', 'market', 'symbol', 'sector'];
+    const textKeys = ['code','name','market','symbol','sector'];
     document.querySelectorAll('#thead-row th[data-k]').forEach(th => {
       th.addEventListener('click', () => {
         const k = th.getAttribute('data-k');
-        if (sortKey === k) {
-          sortAsc = !sortAsc;
-        } else {
-          sortKey = k;
-          sortAsc = textKeys.includes(k);
-        }
+        if (sortKey === k) sortAsc = !sortAsc;
+        else { sortKey = k; sortAsc = textKeys.includes(k); }
         applySort();
       });
     });
   }
 
-  // ── sector filter population ───────────────────────
+  // ── sector / theme filter population ─────────────────
   function populateSectorFilter(stocks) {
     const sectors = [...new Set(stocks.map(s => s.sector).filter(Boolean))].sort();
     const sel = document.getElementById('sectorf');
@@ -364,130 +628,131 @@ tbody tr:hover{background:#1a2536}
       sectors.map(s => `<option value="${s}">${s}</option>`).join('');
   }
 
-  // ── data load ──────────────────────────────────────
+  function populateThemeFilter(stocks) {
+    // collect themes and count
+    const counts = {};
+    stocks.forEach(s => (s.themes||[]).forEach(t => counts[t] = (counts[t]||0)+1));
+    const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+    const sel = document.getElementById('themef');
+    sel.innerHTML = '<option value="">전체 테마</option>' +
+      sorted.map(t => `<option value="${t}">${t}</option>`).join('');
+  }
+
+  // ── data load ─────────────────────────────────────────
   function loadData() {
     const url = market === 'KR' ? './data/kr.json' : './data/us.json';
-    const cols = colCount();
     document.getElementById('tb').innerHTML =
-      `<tr><td colspan="${cols}" class="loading">데이터 로딩 중...</td></tr>`;
+      `<tr><td colspan="${colCount()}" class="loading">데이터 로딩 중...</td></tr>`;
 
     fetch(url)
-      .then(r => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then(data => {
-        const ranked = [...data.stocks].sort((a,b) => (b.combined||0)-(a.combined||0));
+        const ranked = [...data.stocks].sort((a,b)=>(b.combined||0)-(a.combined||0));
         ranked.forEach((s,i) => s.rank = i+1);
         allStocks = ranked;
 
         if (market === 'KR') {
           document.getElementById('sub-info').innerHTML =
             `기준일 <b>${data.as_of}</b> · 유니버스 <b>KOSPI+KOSDAQ 3,000억 이상</b> · <b>${data.count}</b>종목 · ` +
-            `스코어=<b>0→100 백분위 합성</b>, 높을수록 꾸준히 강세 · <span style="color:var(--mut)">combined=mom×0.6+price×0.4</span>`;
+            `스코어=<b>0→100 백분위 합성</b> · <span style="color:var(--mut)">combined=(2×①+③)/3</span>`;
+          populateThemeFilter(allStocks);
         } else {
           document.getElementById('sub-info').innerHTML =
             `기준일 <b>${data.as_of}</b> · 유니버스 <b>시총 $217M+ · 거래대금 $1M+ (20일 avg)</b> · <b>${data.count}</b>종목 · ` +
-            `<span style="color:var(--mut)">combined=mom×0.6+price×0.4</span>`;
+            `<span style="color:var(--mut)">combined=(2×①+③)/3</span>`;
           populateSectorFilter(allStocks);
         }
-
         applyFilter();
       })
       .catch(err => {
         document.getElementById('tb').innerHTML =
-          `<tr><td colspan="${colCount()}" class="err">데이터 로드 실패: ${err.message}<br><small style="color:var(--mut)">${url} 경로를 확인하세요</small></td></tr>`;
-        document.getElementById('sub-info').textContent = '데이터 로드 실패';
+          `<tr><td colspan="${colCount()}" class="err">데이터 로드 실패: ${err.message}</td></tr>`;
       });
   }
 
-  // ── market switch ──────────────────────────────────
+  // ── market switch ─────────────────────────────────────
   function switchMarket(mkt) {
     if (market === mkt) return;
     market = mkt;
-    sortKey = 'combined';
-    sortAsc = false;
-    query = '';
-    mktFilter = '';
-    sectorFilter = '';
-    allStocks = [];
-    filteredStocks = [];
+    sortKey = 'combined'; sortAsc = false;
+    query = ''; mktFilter = ''; sectorFilter = ''; themeFilter = '';
+    allStocks = []; filteredStocks = [];
+    expandedCode = null;
 
-    // toggle button states
-    document.getElementById('btn-kr').classList.toggle('active', mkt === 'KR');
-    document.getElementById('btn-us').classList.toggle('active', mkt === 'US');
-
-    // show/hide filters
-    document.getElementById('mktf').style.display = mkt === 'KR' ? '' : 'none';
-    document.getElementById('sectorf').style.display = mkt === 'US' ? '' : 'none';
+    document.getElementById('btn-kr').classList.toggle('active', mkt==='KR');
+    document.getElementById('btn-us').classList.toggle('active', mkt==='US');
+    document.getElementById('mktf').style.display = mkt==='KR' ? '' : 'none';
+    document.getElementById('sectorf').style.display = mkt==='US' ? '' : 'none';
+    document.getElementById('themef').style.display = mkt==='KR' ? '' : 'none';
     document.getElementById('mktf').value = '';
     document.getElementById('sectorf').value = '';
+    document.getElementById('themef').value = '';
     document.getElementById('q').value = '';
 
-    // title
     document.title = `${mkt} 순위모멘텀`;
     document.getElementById('page-title').innerHTML =
-      `${mkt} 순위모멘텀 <span style="font-size:13px;color:var(--mut)">4·12·52주 | Combined Score</span>`;
+      `${mkt} 순위모멘텀 <span style="font-size:13px;color:var(--mut)">4·12·25·52주 | Combined Score</span>`;
 
-    // capability banner
     const banner = document.getElementById('cap-banner');
-    if (mkt === 'KR') {
-      banner.textContent = '수급 ✅ · 밸류 ⚠️부분 · 테마 ✅(25.8%)';
-    } else {
-      banner.textContent = '밸류 ⚠️준비중(rate-limit) · 수급 ❌개인공시없음 · 테마 없음';
-    }
+    banner.textContent = mkt === 'KR'
+      ? '수급 ✅ · 밸류 ⚠️부분 · 테마 ✅(25.8%)'
+      : '밸류 ✅(69.4% per) · 수급 ❌개인공시없음 · 테마 없음';
 
-    // hint text
-    document.getElementById('hint-text').textContent = mkt === 'KR'
-      ? '열 제목 클릭 = 정렬 (다시 클릭 = 역순) · Combined = 모멘텀① × 0.6 + 가격③ × 0.4 · 스코어 0=빨강 → 100=초록'
-      : '열 제목 클릭 = 정렬 · Combined = 모멘텀① × 0.6 + 가격③ × 0.4 · US 수익률 % 단위(KR과 동일)';
-
-    // footer
+    // update params panel
+    updateParamsPanel(mkt);
     updateFooter();
-
-    // rebuild headers then load data
     renderHeaders();
     loadData();
+  }
+
+  function updateParamsPanel(mkt) {
+    // keep generic — already covers both markets
   }
 
   function updateFooter() {
     const el = document.getElementById('footer');
     if (market === 'KR') {
-      el.innerHTML = '※ 교육용. 유니버스: KOSPI+KOSDAQ 시가총액 3,000억원 이상. mom_score=4·12·25·52주 횡단면 백분위 평균, price_score=52주 고가 대비 위치 점수, combined=두 점수의 가중합(0.6:0.4). 데이터: naver-universe + yfinance.';
+      el.innerHTML = '※ 교육용. 유니버스: KOSPI+KOSDAQ 시가총액 3,000억원 이상. ' +
+        'mom_score=4·12·25·52주 횡단면 백분위 단순평균, price_score=52주 고가 대비 위치 백분위, ' +
+        'combined=(2×mom+price)/3. 스마트머니(②)는 표시만, 합산 미포함. 데이터: naver-universe + tossctl.';
     } else {
-      el.innerHTML = '유니버스: 시총 $217M+ AND 20일 평균 거래대금 $1M+ (NASDAQ screener + yfinance). combined=mom×0.6+price×0.4 (KR과 동일 공식, 직접 비교 불가). PER*/ROE*는 참고 컬럼 — combined 점수에 미반영(KR도 밸류에이션 0%, 공식 통일). 데이터: Yahoo Finance.';
+      el.innerHTML = '유니버스: 시총 $217M+ AND 20일 평균 거래대금 $1M+ (NASDAQ screener + yfinance). ' +
+        'combined=(2×mom+price)/3 — KR과 동일 공식, 직접 비교 불가. ' +
+        'PER*/ROE*는 참고 컬럼 — combined 점수 미반영(KR도 밸류에이션 0%, 공식 통일). 데이터: Yahoo Finance.';
     }
   }
 
-  // ── event bindings ─────────────────────────────────
+  // ── params toggle ─────────────────────────────────────
+  document.getElementById('params-trig').addEventListener('click', () => {
+    const body = document.getElementById('params-body');
+    const caret = document.getElementById('params-caret');
+    const open = body.classList.toggle('open');
+    document.getElementById('params-trig').querySelector('span:first-child').textContent =
+      open ? '▾ 계산 파라미터 보기' : '▸ 계산 파라미터 보기';
+    caret.textContent = open ? '▲' : '▼';
+  });
+
+  // ── formula toggle ────────────────────────────────────
+  document.getElementById('formula-trig').addEventListener('click', () => {
+    const bd = document.getElementById('formula-bd');
+    const caret = document.getElementById('formula-caret');
+    const open = bd.classList.toggle('open');
+    caret.textContent = open ? '▲' : '▼';
+  });
+
+  // ── event bindings ────────────────────────────────────
   document.getElementById('btn-kr').addEventListener('click', () => switchMarket('KR'));
   document.getElementById('btn-us').addEventListener('click', () => switchMarket('US'));
+  document.getElementById('q').addEventListener('input', e => { query = e.target.value; applyFilter(); });
+  document.getElementById('mktf').addEventListener('change', e => { mktFilter = e.target.value; applyFilter(); });
+  document.getElementById('sectorf').addEventListener('change', e => { sectorFilter = e.target.value; applyFilter(); });
+  document.getElementById('themef').addEventListener('change', e => { themeFilter = e.target.value; applyFilter(); });
+  document.getElementById('topn').addEventListener('change', e => { showN = parseInt(e.target.value); renderTable(); });
 
-  document.getElementById('q').addEventListener('input', e => {
-    query = e.target.value;
-    applyFilter();
-  });
-
-  document.getElementById('mktf').addEventListener('change', e => {
-    mktFilter = e.target.value;
-    applyFilter();
-  });
-
-  document.getElementById('sectorf').addEventListener('change', e => {
-    sectorFilter = e.target.value;
-    applyFilter();
-  });
-
-  document.getElementById('topn').addEventListener('change', e => {
-    showN = parseInt(e.target.value);
-    renderTable();
-  });
-
-  // ── init ───────────────────────────────────────────
+  // ── init ──────────────────────────────────────────────
   updateFooter();
   renderHeaders();
   loadData();
-
 })();
 </script>
 </body>
