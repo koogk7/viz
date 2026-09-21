@@ -1,0 +1,19 @@
+{
+  "description": "NASDAQ screener sector names → WICS 10-sector Korean labels",
+  "note": "Real Estate mapped to 금융 (WICS 10-sector has no separate Real Estate)",
+  "mapping": {
+    "Technology": "IT",
+    "Health Care": "헬스케어",
+    "Finance": "금융",
+    "Consumer Discretionary": "경기소비재",
+    "Consumer Staples": "필수소비재",
+    "Industrials": "산업재",
+    "Basic Materials": "소재",
+    "Real Estate": "금융",
+    "Telecommunications": "커뮤니케이션서비스",
+    "Utilities": "유틸리티",
+    "Energy": "에너지",
+    "Miscellaneous": "",
+    "": ""
+  }
+}
