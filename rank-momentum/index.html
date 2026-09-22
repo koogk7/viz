@@ -19,20 +19,47 @@ body{margin:0;background:var(--bg);color:var(--tx);
 h1{font-size:20px;margin:0 0 10px}
 
 /* ── market toggle ── */
-.mkt-toggle{display:flex;gap:8px;margin-bottom:6px}
+.mkt-toggle{display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
 .mkt-btn{background:transparent;border:1px solid var(--card2);color:var(--mut);border-radius:8px;
   padding:5px 18px;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s}
 .mkt-btn:hover{border-color:var(--accent);color:var(--tx)}
 .mkt-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
 
 /* ── period tabs ── */
-.period-tabs{display:flex;gap:4px;margin-bottom:10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.period-tabs{display:flex;gap:4px;margin-bottom:10px;border-bottom:1px solid var(--line);padding-bottom:6px;flex-wrap:wrap}
 .period-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);
   padding:4px 6px 4px 0;align-self:center;flex-shrink:0}
 .ptab{background:transparent;border:1px solid transparent;color:var(--mut);border-radius:6px;
   padding:4px 13px;font-size:12.5px;cursor:pointer;font-family:inherit;transition:all .15s}
 .ptab:hover{border-color:var(--line);color:var(--tx)}
 .ptab.active{background:rgba(74,168,255,.15);border-color:rgba(74,168,255,.4);color:var(--accent);font-weight:600}
+
+/* ── 기준일 bar ── */
+.asof-trigger{background:transparent;border:1px solid var(--line);color:var(--mut);border-radius:7px;
+  padding:5px 13px;font-size:12.5px;cursor:pointer;font-family:inherit;transition:all .15s;margin-left:auto}
+.asof-trigger:hover{border-color:var(--gold);color:var(--gold)}
+.asof-trigger.active{background:rgba(232,176,75,.12);border-color:var(--gold);color:var(--gold)}
+.asof-bar{display:none;background:var(--card);border:1px solid var(--gold);border-radius:9px;
+  margin-bottom:10px;overflow:hidden}
+.asof-bar.open{display:block}
+.asof-inner{padding:10px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.asof-inner label{font-size:12.5px;color:var(--mut);font-weight:600}
+.asof-inner input[type=date]{background:var(--card2);color:var(--tx);border:1px solid var(--line);
+  border-radius:7px;padding:5px 9px;font-size:13px;outline:none;cursor:pointer;font-family:inherit}
+.asof-inner input[type=date]:focus{border-color:var(--gold)}
+.asof-reset{background:transparent;border:1px solid var(--line);color:var(--mut);border-radius:6px;
+  padding:4px 11px;font-size:12.5px;cursor:pointer;font-family:inherit}
+.asof-reset:hover{border-color:var(--grn);color:var(--grn)}
+.asof-snap{font-size:11.5px;color:var(--mut)}
+.asof-snap b{color:var(--gold)}
+.asof-loading{padding:8px 14px;font-size:12.5px;color:var(--mut);border-top:1px solid var(--line)}
+.asof-warn{padding:8px 14px;font-size:11.5px;border-top:1px solid rgba(232,176,75,.3);
+  background:rgba(232,176,75,.07);line-height:1.7;color:rgba(232,176,75,.85)}
+.asof-warn b{color:var(--gold)}
+.asof-warn ul{margin:4px 0 0;padding-left:16px}
+.asof-err{padding:8px 14px;font-size:12px;color:var(--red);border-top:1px solid var(--line)}
+.history-badge{display:inline-block;background:rgba(232,176,75,.15);border:1px solid rgba(232,176,75,.4);
+  color:var(--gold);font-size:10px;padding:1px 6px;border-radius:4px;margin-left:8px;font-weight:600;vertical-align:middle}
 
 .cap-banner{font-size:12px;color:var(--mut);margin-bottom:4px}
 .cap-warn{font-size:12px;color:rgba(232,176,75,.75);margin-bottom:10px}
@@ -78,7 +105,7 @@ tbody tr:last-child td{border-bottom:none}
 tbody tr:hover>td{background:#1a2536}
 tbody tr.expanded>td{background:#192030}
 
-/* ── sticky left columns ── */
+/* ── sticky left cols ── */
 th.st,td.st{position:sticky;z-index:3;background:var(--card2)}
 td.st{background:var(--card)!important}
 tbody tr:hover td.st,tbody tr.expanded td.st{background:#1a2536!important}
@@ -97,16 +124,11 @@ tbody tr:hover td.pcol-hi{background:rgba(74,168,255,.11)!important}
 .score-bar-bg{width:54px;height:5px;border-radius:3px;background:var(--line);overflow:hidden;flex-shrink:0}
 .score-bar-fill{height:100%;border-radius:3px}
 .score-val{font-variant-numeric:tabular-nums;font-weight:600;font-size:12.5px;min-width:30px;text-align:right}
-
-/* ── ret+pct cell ── */
 .ret-cell{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
 .ret-val{font-size:12px;font-variant-numeric:tabular-nums}
 .pct-sub{font-size:9.5px;color:var(--mut);font-variant-numeric:tabular-nums}
 .pct-sub.hi{color:var(--grn)}.pct-sub.lo{color:var(--red)}
-.pos{color:var(--grn)}.neg{color:var(--red)}
-.na{color:var(--mut)}
-
-/* ── misc ── */
+.pos{color:var(--grn)}.neg{color:var(--red)}.na{color:var(--mut)}
 .code{font-family:monospace;font-size:12px;color:var(--mut)}
 .rk{font-variant-numeric:tabular-nums;font-weight:700;font-size:13px}
 .rk-dim{font-weight:400;color:var(--mut);font-size:11px}
@@ -155,14 +177,11 @@ pre.fml{font-family:'SF Mono',Menlo,monospace;font-size:11.5px;
   background:var(--card2);border:1px solid var(--line);border-radius:6px;
   padding:8px 12px;margin:6px 0 10px;overflow-x:auto;white-space:pre;color:var(--tx)}
 .score-chip{display:inline-flex;align-items:center;justify-content:center;
-  height:20px;min-width:46px;padding:0 7px;border-radius:10px;
-  font-size:11px;font-weight:600;margin-right:5px}
+  height:20px;min-width:46px;padding:0 7px;border-radius:10px;font-size:11px;font-weight:600;margin-right:5px}
 .sc-hi{background:rgba(51,194,127,.15);color:var(--grn)}
 .sc-mh{background:rgba(74,168,255,.15);color:var(--accent)}
 .sc-ne{background:rgba(143,163,189,.12);color:var(--mut)}
 .sc-lo{background:rgba(239,95,107,.15);color:var(--red)}
-
-/* ── footer ── */
 .footer{color:var(--mut);font-size:11.5px;margin-top:12px;line-height:1.7}
 
 @media(max-width:600px){
@@ -172,7 +191,7 @@ pre.fml{font-family:'SF Mono',Menlo,monospace;font-size:11.5px;
   .ctrls{gap:6px}
   .ctrls input{min-width:100px}
   .det-in{grid-template-columns:1fr}
-  .period-tabs{flex-wrap:wrap;gap:3px}
+  .asof-inner{flex-direction:column;align-items:flex-start}
 }
 </style>
 </head>
@@ -184,6 +203,30 @@ pre.fml{font-family:'SF Mono',Menlo,monospace;font-size:11.5px;
 <div class="mkt-toggle">
   <button id="btn-kr" class="mkt-btn active">KR</button>
   <button id="btn-us" class="mkt-btn">US</button>
+  <button class="asof-trigger" id="asof-trigger">📅 기준일</button>
+</div>
+
+<!-- ── 기준일 패널 ── -->
+<div class="asof-bar" id="asof-bar">
+  <div class="asof-inner">
+    <label for="asof-input">기준일</label>
+    <input type="date" id="asof-input" max="">
+    <button class="asof-reset" id="asof-reset">오늘로 초기화</button>
+    <span class="asof-snap" id="asof-snap"></span>
+  </div>
+  <div id="asof-loading" style="display:none" class="asof-loading">
+    ⏳ 히스토리 데이터 로딩 중… (KR ~1.3MB / US ~7MB)
+  </div>
+  <div id="asof-err" style="display:none" class="asof-err"></div>
+  <div id="asof-warn" class="asof-warn" style="display:none">
+    <b>⚠️ 기준일 모드에서 섞이는 값 (현재 기준 고정)</b>
+    <ul>
+      <li><b>스마트머니</b>(기관/외국인 20일 수급) — 오늘 값</li>
+      <li><b>PER · PBR · ROE</b> — 오늘 값</li>
+      <li><b>섹터 · 테마 · 시총</b> — 오늘 기준</li>
+      <li><b>유니버스</b> — 오늘 시총 필터(KR 3,000억 / US $217M) 기준. 과거 기준일 당시 구성과 다를 수 있음 (생존 편향)</li>
+    </ul>
+  </div>
 </div>
 
 <!-- ── 구간 탭 ── -->
@@ -215,6 +258,7 @@ pre.fml{font-family:'SF Mono',Menlo,monospace;font-size:11.5px;
     <div class="pm"><div class="pm-k">KR 유니버스</div><div class="pm-v">KOSPI+KOSDAQ 3,000억+</div></div>
     <div class="pm"><div class="pm-k">US 유니버스</div><div class="pm-v">시총 $217M+ · 20일 DV $1M+</div></div>
     <div class="pm"><div class="pm-k">구간 탭 순위</div><div class="pm-v">해당 구간 수익률 기준 재산출</div></div>
+    <div class="pm"><div class="pm-k">기준일 룩백</div><div class="pm-v">캘린더 기준 (거래일 인덱스 아님)</div></div>
   </div>
 </div>
 
@@ -227,12 +271,8 @@ pre.fml{font-family:'SF Mono',Menlo,monospace;font-size:11.5px;
     <option value="KOSPI">KOSPI</option>
     <option value="KOSDAQ">KOSDAQ</option>
   </select>
-  <select id="sectorf" style="display:none">
-    <option value="">전체 섹터</option>
-  </select>
-  <select id="themef" style="display:none">
-    <option value="">전체 테마</option>
-  </select>
+  <select id="sectorf" style="display:none"><option value="">전체 섹터</option></select>
+  <select id="themef" style="display:none"><option value="">전체 테마</option></select>
   <select id="topn">
     <option value="50">Top 50</option>
     <option value="100">Top 100</option>
@@ -240,7 +280,7 @@ pre.fml{font-family:'SF Mono',Menlo,monospace;font-size:11.5px;
     <option value="99999">전체</option>
   </select>
 </div>
-<div class="hint" id="hint-text">구간 탭 = 그 구간 기준 재정렬 + 순위 교체 · 열 제목 클릭 = 임의 컬럼 정렬 · 행 클릭 = 상세 펼치기</div>
+<div class="hint">구간 탭 = 그 구간 기준 재정렬 + 순위 교체 · 열 클릭 = 임의 정렬 · 행 클릭 = 상세 · 📅 = 기준일 변경</div>
 
 <div class="tablewrap">
   <table>
@@ -259,81 +299,245 @@ pre.fml{font-family:'SF Mono',Menlo,monospace;font-size:11.5px;
   </div>
   <div class="formula-bd" id="formula-bd">
     <h3>PERCENTRANK 함수 (기둥 ①·③ 공통)</h3>
-    <p>각 수익률을 전체 종목 중 <strong>몇 %보다 높은가</strong>로 0~100 변환합니다. (Excel PERCENTRANK 호환)</p>
     <pre class="fml">pct = (값보다 낮은 종목 수) / (유효 종목 수 − 1) × 100</pre>
-
-    <h3>기둥 ① 순위모멘텀 점수 (0~100)</h3>
+    <h3>기둥 ① 순위모멘텀</h3>
     <ul>
-      <li>pct_4w = PERCENTRANK(ret_4w 전체, 해당 종목.ret_4w)</li>
-      <li>pct_12w, pct_25w, pct_52w 동일</li>
-      <li><strong>mom_score = pct_4w·pct_12w·pct_25w·pct_52w 의 단순 평균</strong> (null 제외)</li>
+      <li>4/12/25/52주 수익률 각각 PERCENTRANK → mom_score = 단순 평균</li>
+      <li>수익률 기준일: 캘린더 역산 (4w = 기준일 − 28일, 휴장이면 직전 거래일)</li>
     </ul>
-    <pre class="fml">mom_score = mean([pct_4w, pct_12w, pct_25w, pct_52w])
-수익률 기준일: 캘린더 역산 (4w = 오늘 − 28일, 해당일이 휴장이면 직전 거래일)</pre>
-
-    <h3>기둥 ② 스마트머니 (KR만 · 표시만 · 합산 미반영)</h3>
+    <h3>기둥 ③ 가격모멘텀</h3>
     <ul>
-      <li>inst_net_20d: 기관 20일 누적 순매수 (주)</li>
-      <li>for_net_20d: 외국인 20일 누적 순매수 (주)</li>
+      <li>gap_52w_high = (기준일 종가 − 52주 고점) / 52주 고점 × 100</li>
+      <li>price_score = PERCENTRANK(gap_52w_high 전체)</li>
     </ul>
-
-    <h3>기둥 ③ 가격모멘텀 점수 (0~100)</h3>
-    <ul>
-      <li>gap_52w_high = (현재가 − 52주 고점) / 52주 고점 × 100</li>
-      <li><strong>price_score = PERCENTRANK(gap_52w_high 전체, 해당 종목.gap)</strong></li>
-    </ul>
-
     <h3>합산</h3>
-    <pre class="fml">combined = (2 × mom_score + 1 × price_score) / 3</pre>
-
-    <h3>구간 탭 순위</h3>
-    <p>탭을 바꾸면 <strong>순위 컬럼이 해당 구간 수익률 기준으로 재산출됩니다.</strong> (클라이언트 계산 · 필터 상태 유지)</p>
-    <pre class="fml">rank_4w  = 전체 종목 중 ret_4w 내림차순 순위 (null은 맨 뒤)
-rank_12w = ret_12w 기준, … 동일</pre>
-
+    <pre class="fml">combined = (2 × mom_score + price_score) / 3</pre>
+    <h3>기준일 모드</h3>
+    <p>히스토리 파일(15개월 종가)에서 해당 날짜의 종가로 수익률·순위·점수 전체 재계산. 스마트머니·PER·섹터는 현재 값 유지.</p>
+    <pre class="fml">ref_price  = closes[ticker][snap(refDate)]
+target_4w  = last close <= refDate − 28d
+ret_4w     = (ref_price − target_price) / target_price × 100</pre>
     <h3>색상 기준</h3>
     <p>
-      <span class="score-chip sc-hi">≥ 80</span>상위 모멘텀&nbsp;&nbsp;
-      <span class="score-chip sc-mh">60~79</span>중상&nbsp;&nbsp;
-      <span class="score-chip sc-ne">40~59</span>중립&nbsp;&nbsp;
+      <span class="score-chip sc-hi">≥ 80</span>상위&nbsp;
+      <span class="score-chip sc-mh">60~79</span>중상&nbsp;
+      <span class="score-chip sc-ne">40~59</span>중립&nbsp;
       <span class="score-chip sc-lo">&lt; 40</span>하위
     </p>
   </div>
 </div>
-
 <div class="footer" id="footer"></div>
 </div>
 
 <script>
 (function(){
-  // ── tab config ───────────────────────────────────────
+  // ── tab config ──────────────────────────────────────
   const TAB_CFG = {
-    'combined': { rankField: 'rank',    sortKey: 'combined', colKey: null,    label: '종합' },
-    '4w':       { rankField: 'rank_4w', sortKey: 'ret_4w',  colKey: 'ret_4w', label: '4W' },
-    '12w':      { rankField: 'rank_12w',sortKey: 'ret_12w', colKey: 'ret_12w',label: '12W' },
-    '25w':      { rankField: 'rank_25w',sortKey: 'ret_25w', colKey: 'ret_25w',label: '25W' },
-    '52w':      { rankField: 'rank_52w',sortKey: 'ret_52w', colKey: 'ret_52w',label: '52W' },
+    'combined':{ rankField:'rank',     sortKey:'combined', colKey:null,      label:'종합' },
+    '4w':      { rankField:'rank_4w',  sortKey:'ret_4w',   colKey:'ret_4w',  label:'4W'  },
+    '12w':     { rankField:'rank_12w', sortKey:'ret_12w',  colKey:'ret_12w', label:'12W' },
+    '25w':     { rankField:'rank_25w', sortKey:'ret_25w',  colKey:'ret_25w', label:'25W' },
+    '52w':     { rankField:'rank_52w', sortKey:'ret_52w',  colKey:'ret_52w', label:'52W' },
   };
+  const LOOKBACK = { '4w':28, '12w':84, '25w':175, '52w':364 };
 
   // ── state ────────────────────────────────────────────
   let market = 'KR';
   let activeTab = 'combined';
   let allStocks = [], filteredStocks = [];
+  let baseStocks = [];  // raw from json — never mutated
   let sortKey = 'combined', sortAsc = false;
   let query = '', mktFilter = '', sectorFilter = '', themeFilter = '', showN = 50;
   let expandedCode = null;
+  let asOfMode = false;   // true = using history file
+  let asOfDate = '';      // YYYY-MM-DD, the snapped trading date
+  const historyCache = {};  // { KR: histData, US: histData }
+  let historyLoading = false;
 
-  // ── period rank computation ──────────────────────────
+  // ── date helpers ─────────────────────────────────────
+  function todayStr() {
+    return new Date().toISOString().slice(0,10);
+  }
+  function subtractDays(dateStr, days) {
+    const d = new Date(dateStr + 'T00:00:00');
+    d.setDate(d.getDate() - days);
+    return d.toISOString().slice(0,10);
+  }
+  // Last index in sorted dates[] <= target
+  function snapDate(dates, target) {
+    let lo=0, hi=dates.length-1, res=-1;
+    while(lo<=hi){
+      const mid=(lo+hi)>>1;
+      if(dates[mid]<=target){ res=mid; lo=mid+1; }
+      else hi=mid-1;
+    }
+    return res;
+  }
+
+  // ── PERCENTRANK ───────────────────────────────────────
+  function percentRank(sorted, v) {
+    // sorted = ascending array of valid numbers
+    // pct = (count strictly below v) / (n-1) * 100
+    const n = sorted.length;
+    if (n <= 1) return 50;
+    let below = 0;
+    for (let i=0; i<n; i++) { if (sorted[i] < v) below++; else break; }
+    return below / (n-1) * 100;
+  }
+  function computePctScores(stocks) {
+    // build sorted arrays for each field
+    ['4w','12w','25w','52w'].forEach(p => {
+      const field = 'ret_' + p;
+      const pctField = 'pct_' + p;
+      const vals = stocks.map(s => s[field]).filter(v => v!=null && !isNaN(v)).sort((a,b)=>a-b);
+      stocks.forEach(s => {
+        const v = s[field];
+        s[pctField] = (v!=null && !isNaN(v)) ? percentRank(vals, v) : null;
+      });
+    });
+    // gap_52w_high → price_score
+    const gapVals = stocks.map(s => s.gap_52w_high).filter(v=>v!=null&&!isNaN(v)).sort((a,b)=>a-b);
+    stocks.forEach(s => {
+      s.price_score = (s.gap_52w_high!=null && !isNaN(s.gap_52w_high))
+        ? percentRank(gapVals, s.gap_52w_high) : null;
+    });
+    // mom_score
+    stocks.forEach(s => {
+      const vals = ['pct_4w','pct_12w','pct_25w','pct_52w'].map(k=>s[k]).filter(v=>v!=null);
+      s.mom_score = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+    });
+    // combined
+    stocks.forEach(s => {
+      const m = s.mom_score, p = s.price_score;
+      if (m!=null && p!=null) s.combined = (2*m + p) / 3;
+      else if (m!=null) s.combined = m;
+      else if (p!=null) s.combined = p;
+      else s.combined = null;
+    });
+  }
+
+  // ── period rank computation ───────────────────────────
   function computePeriodRanks(stocks) {
     ['4w','12w','25w','52w'].forEach(p => {
       const retField = 'ret_' + p;
       const rankField = 'rank_' + p;
-      const valid = stocks
-        .filter(s => s[retField] != null && !isNaN(s[retField]))
-        .sort((a,b) => b[retField] - a[retField]);
-      valid.forEach((s, i) => s[rankField] = i + 1);
-      // stocks with null ret get null rank (shown as — in table)
-      stocks.forEach(s => { if (s[rankField] === undefined) s[rankField] = null; });
+      const valid = [...stocks].filter(s=>s[retField]!=null&&!isNaN(s[retField]))
+                               .sort((a,b)=>b[retField]-a[retField]);
+      valid.forEach((s,i) => s[rankField] = i+1);
+      stocks.forEach(s => { if(s[rankField]===undefined) s[rankField]=null; });
+    });
+  }
+
+  // ── compute from history ─────────────────────────────
+  function applyHistory(hist, refDateStr) {
+    const dates = hist.dates;
+    const refIdx = snapDate(dates, refDateStr);
+    if (refIdx < 0) return null;
+
+    const snapped = dates[refIdx];
+    // update UI snap label
+    document.getElementById('asof-snap').innerHTML =
+      snapped === refDateStr ? `기준일 <b>${snapped}</b>` : `스냅 <b>${snapped}</b> (선택일 ${refDateStr}은 휴장)`;
+    asOfDate = snapped;
+
+    const computed = baseStocks.map(s => {
+      const ticker = market === 'KR' ? s.code : s.symbol;
+      const closeArr = hist.closes[ticker];
+      const out = Object.assign({}, s);
+
+      if (!closeArr) {
+        // no history for this ticker — null out computed fields
+        ['4w','12w','25w','52w'].forEach(p => { out['ret_'+p]=null; out['pct_'+p]=null; });
+        out.gap_52w_high = null;
+        return out;
+      }
+
+      const refPrice = closeArr[refIdx];
+      if (!refPrice) {
+        ['4w','12w','25w','52w'].forEach(p => { out['ret_'+p]=null; out['pct_'+p]=null; });
+        out.gap_52w_high = null;
+        return out;
+      }
+
+      // returns
+      for (const [p, days] of Object.entries(LOOKBACK)) {
+        const targetDateStr = subtractDays(snapped, days);
+        const targetIdx = snapDate(dates, targetDateStr);
+        // targetIdx must be before refIdx to avoid using future data
+        if (targetIdx < 0 || targetIdx >= refIdx) { out['ret_'+p] = null; continue; }
+        const targetPrice = closeArr[targetIdx];
+        if (!targetPrice) { out['ret_'+p] = null; continue; }
+        out['ret_'+p] = (refPrice - targetPrice) / targetPrice * 100;
+      }
+
+      // 52w high
+      const w52StartStr = subtractDays(snapped, 364);
+      const w52StartIdx = snapDate(dates, w52StartStr);
+      if (w52StartIdx >= 0 && w52StartIdx < refIdx) {
+        let high52 = refPrice;
+        for (let i = w52StartIdx; i <= refIdx; i++) {
+          if (closeArr[i] != null && closeArr[i] > high52) high52 = closeArr[i];
+        }
+        out.gap_52w_high = (refPrice - high52) / high52 * 100;
+      } else {
+        out.gap_52w_high = null;
+      }
+
+      return out;
+    });
+
+    computePctScores(computed);
+    return computed;
+  }
+
+  // ── history load ─────────────────────────────────────
+  function loadHistory(onReady) {
+    const key = market;
+    if (historyCache[key]) { onReady(historyCache[key]); return; }
+    if (historyLoading) return;
+    historyLoading = true;
+
+    const url = market === 'KR' ? './data/kr-history.json' : './data/us-history.json';
+    const loadEl = document.getElementById('asof-loading');
+    const errEl  = document.getElementById('asof-err');
+    loadEl.style.display = '';
+    errEl.style.display = 'none';
+
+    fetch(url)
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status} — 히스토리 파일 없음 (아직 수집 중일 수 있음)`);
+        return r.json();
+      })
+      .then(data => {
+        historyCache[key] = data;
+        historyLoading = false;
+        loadEl.style.display = 'none';
+        onReady(data);
+      })
+      .catch(err => {
+        historyLoading = false;
+        loadEl.style.display = 'none';
+        errEl.textContent = `히스토리 로드 실패: ${err.message}`;
+        errEl.style.display = '';
+        // disable asOf mode
+        asOfMode = false;
+        document.getElementById('asof-warn').style.display = 'none';
+      });
+  }
+
+  // ── apply asOf date ───────────────────────────────────
+  function applyAsOf(dateStr) {
+    if (!dateStr) return;
+    loadHistory(hist => {
+      const computed = applyHistory(hist, dateStr);
+      if (!computed) return;
+      // sort by combined desc to assign combined rank
+      const sorted = [...computed].sort((a,b)=>(b.combined||0)-(a.combined||0));
+      sorted.forEach((s,i) => s.rank = i+1);
+      computePeriodRanks(sorted);
+      allStocks = sorted;
+      document.getElementById('asof-warn').style.display = '';
+      applyFilter();
     });
   }
 
@@ -343,75 +547,60 @@ rank_12w = ret_12w 기준, … 동일</pre>
     return `hsl(${h},60%,50%)`;
   }
   function retColor(v) {
-    if (v == null || isNaN(v)) return 'var(--mut)';
-    return v >= 0 ? 'var(--grn)' : 'var(--red)';
+    return (!v&&v!==0)||isNaN(v) ? 'var(--mut)' : v>=0 ? 'var(--grn)' : 'var(--red)';
   }
   function fmtRet(v) {
-    if (v == null || isNaN(v)) return '<span class="na">—</span>';
-    const s = v >= 0 ? '+' : '';
-    return `<span style="color:${retColor(v)}">${s}${v.toFixed(1)}%</span>`;
+    if (v==null||isNaN(v)) return '<span class="na">—</span>';
+    return `<span style="color:${retColor(v)}">${v>=0?'+':''}${v.toFixed(1)}%</span>`;
   }
   function fmtRetPct(ret, pct, colKey) {
-    const isActive = TAB_CFG[activeTab].colKey === colKey;
-    const rv = ret == null || isNaN(ret)
+    const rv = ret==null||isNaN(ret)
       ? '<span class="na">—</span>'
       : `<span class="ret-val" style="color:${retColor(ret)}">${ret>=0?'+':''}${ret.toFixed(1)}%</span>`;
     let pctEl = '';
-    if (pct != null && !isNaN(pct)) {
-      const cls = pct >= 70 ? 'hi' : pct < 30 ? 'lo' : '';
+    if (pct!=null&&!isNaN(pct)) {
+      const cls = pct>=70?'hi':pct<30?'lo':'';
       pctEl = `<span class="pct-sub${cls?' '+cls:''}">${pct.toFixed(0)}pct</span>`;
     }
     return `<div class="ret-cell">${rv}${pctEl}</div>`;
   }
   function fmtScore(v) {
-    if (v == null || isNaN(v)) return '<span class="na">—</span>';
-    const pct = Math.max(0, Math.min(100, v));
-    const col = scoreColor(pct);
+    if (v==null||isNaN(v)) return '<span class="na">—</span>';
+    const pct=Math.max(0,Math.min(100,v)), col=scoreColor(pct);
     return `<div class="score-wrap">
       <div class="score-bar-bg"><div class="score-bar-fill" style="width:${pct.toFixed(1)}%;background:${col}"></div></div>
       <span class="score-val" style="color:${col}">${pct.toFixed(1)}</span>
     </div>`;
   }
   function fmtMarcap(s) {
-    if (market === 'KR') {
-      if (!s.marcap) return '<span class="na">—</span>';
-      return (s.marcap / 1e12).toFixed(1);
-    } else {
-      if (!s.marcap_usd) return '<span class="na">—</span>';
-      return (s.marcap_usd / 1e9).toFixed(1);
-    }
+    if (market==='KR') return s.marcap ? (s.marcap/1e12).toFixed(1) : '<span class="na">—</span>';
+    return s.marcap_usd ? (s.marcap_usd/1e9).toFixed(1) : '<span class="na">—</span>';
   }
-  function fmtNum(v, dec) {
-    if (v == null || isNaN(v)) return '<span class="na">—</span>';
-    return v.toFixed(dec == null ? 2 : dec);
+  function fmtNum(v,dec) {
+    return (v==null||isNaN(v)) ? '<span class="na">—</span>' : v.toFixed(dec??2);
   }
-  function fmtSmartMoney(v) {
-    if (v == null || isNaN(v)) return '<span class="na">—</span>';
-    const val = v / 1e8;
-    const col = val >= 0 ? 'var(--grn)' : 'var(--red)';
+  function fmtSM(v) {
+    if (v==null||isNaN(v)) return '<span class="na">—</span>';
+    const val=v/1e8, col=val>=0?'var(--grn)':'var(--red)';
     return `<span class="sm-v" style="color:${col}">${val>=0?'+':''}${val.toFixed(0)}</span>`;
   }
   function fmtThemeChips(themes) {
-    if (!themes || !themes.length) return '';
-    const show = themes.slice(0, 2);
-    const rest = themes.length - 2;
-    let html = show.map(t => `<span class="theme-chip">${t}</span>`).join('');
-    if (rest > 0) html += `<span class="theme-more">+${rest}</span>`;
+    if (!themes||!themes.length) return '';
+    const rest=themes.length-2;
+    let html=themes.slice(0,2).map(t=>`<span class="theme-chip">${t}</span>`).join('');
+    if(rest>0) html+=`<span class="theme-more">+${rest}</span>`;
     return `<div class="theme-chips">${html}</div>`;
   }
-  function stockId(s) {
-    return market === 'KR' ? s.code : s.symbol;
-  }
+  function stockId(s){ return market==='KR'?s.code:s.symbol; }
 
   // ── header render ────────────────────────────────────
   function colClass(colKey) {
-    const active = TAB_CFG[activeTab].colKey;
-    return active && active === colKey ? ' pcol-hi' : '';
+    return TAB_CFG[activeTab].colKey===colKey?' pcol-hi':'';
   }
-
   function renderHeaders() {
     const row = document.getElementById('thead-row');
-    if (market === 'KR') {
+    const cc = colClass;
+    if (market==='KR') {
       row.innerHTML = `
         <th class="l st col-rk" data-k="rank">순위</th>
         <th class="l col-code" data-k="code" style="left:36px;position:sticky;z-index:4;background:var(--card2)">코드</th>
@@ -421,18 +610,17 @@ rank_12w = ret_12w 기준, … 동일</pre>
         <th data-k="combined">Combined</th>
         <th data-k="mom_score">모멘텀①</th>
         <th data-k="price_score">가격③</th>
-        <th data-k="ret_4w" class="${colClass('ret_4w')}">4W%/pct</th>
-        <th data-k="ret_12w" class="${colClass('ret_12w')}">12W%/pct</th>
-        <th data-k="ret_25w" class="${colClass('ret_25w')}">25W%/pct</th>
-        <th data-k="ret_52w" class="${colClass('ret_52w')}">52W%/pct</th>
+        <th data-k="ret_4w" class="${cc('ret_4w')}">4W%/pct</th>
+        <th data-k="ret_12w" class="${cc('ret_12w')}">12W%/pct</th>
+        <th data-k="ret_25w" class="${cc('ret_25w')}">25W%/pct</th>
+        <th data-k="ret_52w" class="${cc('ret_52w')}">52W%/pct</th>
         <th data-k="gap_52w_high">갭52W</th>
         <th data-k="per">PER</th>
         <th data-k="pbr">PBR</th>
         <th data-k="roe">ROE</th>
         <th data-k="inst_net_20d">기관(억)</th>
         <th data-k="for_net_20d">외국인(억)</th>
-        <th></th>
-      `;
+        <th></th>`;
     } else {
       row.innerHTML = `
         <th class="l st col-rk" data-k="rank">순위</th>
@@ -443,15 +631,14 @@ rank_12w = ret_12w 기준, … 동일</pre>
         <th data-k="combined">Combined</th>
         <th data-k="mom_score">모멘텀①</th>
         <th data-k="price_score">가격③</th>
-        <th data-k="ret_4w" class="${colClass('ret_4w')}">4W%/pct</th>
-        <th data-k="ret_12w" class="${colClass('ret_12w')}">12W%/pct</th>
-        <th data-k="ret_25w" class="${colClass('ret_25w')}">25W%/pct</th>
-        <th data-k="ret_52w" class="${colClass('ret_52w')}">52W%/pct</th>
+        <th data-k="ret_4w" class="${cc('ret_4w')}">4W%/pct</th>
+        <th data-k="ret_12w" class="${cc('ret_12w')}">12W%/pct</th>
+        <th data-k="ret_25w" class="${cc('ret_25w')}">25W%/pct</th>
+        <th data-k="ret_52w" class="${cc('ret_52w')}">52W%/pct</th>
         <th data-k="gap_52w_high">갭52W</th>
-        <th data-k="per" title="점수 미반영 — 참고용">PER*</th>
-        <th data-k="roe" title="점수 미반영 — 참고용">ROE*</th>
-        <th></th>
-      `;
+        <th data-k="per" title="점수 미반영">PER*</th>
+        <th data-k="roe" title="점수 미반영">ROE*</th>
+        <th></th>`;
     }
     bindHeaderClicks();
     updateSortHeaders();
@@ -459,228 +646,183 @@ rank_12w = ret_12w 기준, … 동일</pre>
 
   // ── summary cards ────────────────────────────────────
   function renderCards(stocks) {
-    const top10 = stocks.slice(0, 10);
-    if (!top10.length) { document.getElementById('cards').innerHTML = ''; return; }
-    const avg = (arr, key) => {
-      const vals = arr.map(s => s[key]).filter(v => v != null && !isNaN(v));
-      return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
-    };
-    const avgC = avg(top10,'combined'), avgM = avg(top10,'mom_score'), avgP = avg(top10,'price_score');
-    const tab = TAB_CFG[activeTab];
-    const tabLabel = activeTab === 'combined' ? '종합' : activeTab.toUpperCase() + ' 수익률';
-    document.getElementById('cards').innerHTML = [
-      {label:`TOP-10 COMBINED 평균`, val:avgC, sub:'종합 순위모멘텀 점수'},
-      {label:`TOP-10 모멘텀① 평균`, val:avgM, sub:'4·12·25·52주 횡단면 백분위'},
-      {label:`TOP-10 가격③ 평균`, val:avgP, sub:'52주 고점 대비 위치'},
-    ].map(c => {
-      const disp = c.val != null ? c.val.toFixed(1) : '—';
-      return `<div class="card">
-        <h3>${c.label}</h3>
-        <div class="val" style="color:${scoreColor(parseFloat(disp)||0)}">${disp}</div>
-        <div class="sub2">${c.sub}</div>
-      </div>`;
+    const top10 = stocks.slice(0,10);
+    if (!top10.length) { document.getElementById('cards').innerHTML=''; return; }
+    const avg=(arr,k)=>{const v=arr.map(s=>s[k]).filter(v=>v!=null&&!isNaN(v));return v.length?v.reduce((a,b)=>a+b)/v.length:null;};
+    [['TOP-10 COMBINED 평균','combined','종합 순위모멘텀'],
+     ['TOP-10 모멘텀① 평균','mom_score','4·12·25·52주 백분위'],
+     ['TOP-10 가격③ 평균','price_score','52주 고점 대비 위치']
+    ].map(([lbl,k,sub])=>{
+      const v=avg(top10,k), d=v!=null?v.toFixed(1):'—';
+      return `<div class="card"><h3>${lbl}</h3><div class="val" style="color:${scoreColor(parseFloat(d)||0)}">${d}</div><div class="sub2">${sub}</div></div>`;
+    }).join('');
+    document.getElementById('cards').innerHTML=[['TOP-10 COMBINED 평균','combined','종합 순위모멘텀'],
+     ['TOP-10 모멘텀① 평균','mom_score','4·12·25·52주 백분위'],
+     ['TOP-10 가격③ 평균','price_score','52주 고점 대비 위치']
+    ].map(([lbl,k,sub])=>{
+      const v=avg(top10,k), d=v!=null?v.toFixed(1):'—';
+      return `<div class="card"><h3>${lbl}</h3><div class="val" style="color:${scoreColor(parseFloat(d)||0)}">${d}</div><div class="sub2">${sub}</div></div>`;
     }).join('');
   }
 
-  // ── detail row HTML ──────────────────────────────────
+  // ── detail row ────────────────────────────────────────
   function detailHtml(s, colSpan) {
-    function pbar(pct) {
-      const w = pct != null ? Math.max(0,Math.min(100,pct)).toFixed(1) : 0;
-      return `<div class="pbar"><div class="pbar-f" style="width:${w}%"></div></div>`;
-    }
-    function detRow(lbl, ret, pct) {
-      const rv = ret != null
-        ? `<span style="color:${retColor(ret)}">${ret>=0?'+':''}${ret.toFixed(1)}%</span>`
-        : '<span class="na">—</span>';
-      const ps = pct != null ? `<span class="det-pct">${pct.toFixed(0)}pct</span>` : '';
-      return `<div class="det-item"><span class="det-lbl">${lbl}</span><span class="det-rv">${rv}</span>${ps}${pbar(pct)}</div>`;
-    }
-    let momSec = `<div class="det-section-title m">기둥 ① 순위모멘텀</div><div class="det-rows">
-      ${detRow('4주', s.ret_4w, s.pct_4w)}
-      ${detRow('12주', s.ret_12w, s.pct_12w)}
-      ${detRow('25주', s.ret_25w, s.pct_25w)}
-      ${detRow('52주', s.ret_52w, s.pct_52w)}
+    const pb = pct=>`<div class="pbar"><div class="pbar-f" style="width:${pct!=null?Math.max(0,Math.min(100,pct)).toFixed(1):0}%"></div></div>`;
+    const dr = (lbl,ret,pct)=>{
+      const rv=ret!=null?`<span style="color:${retColor(ret)}">${ret>=0?'+':''}${ret.toFixed(1)}%</span>`:'<span class="na">—</span>';
+      return `<div class="det-item"><span class="det-lbl">${lbl}</span><span class="det-rv">${rv}</span>${pct!=null?`<span class="det-pct">${pct.toFixed(0)}pct</span>`:''} ${pb(pct)}</div>`;
+    };
+    const mom=`<div class="det-section-title m">기둥 ① 순위모멘텀</div><div class="det-rows">
+      ${dr('4주',s.ret_4w,s.pct_4w)}${dr('12주',s.ret_12w,s.pct_12w)}
+      ${dr('25주',s.ret_25w,s.pct_25w)}${dr('52주',s.ret_52w,s.pct_52w)}
       <div class="det-item"><span class="det-lbl" style="color:var(--accent)">점수</span>
-        <span class="det-rv" style="color:var(--accent);font-weight:700">${s.mom_score!=null?s.mom_score.toFixed(1):'—'}</span>
-      </div></div>`;
-    let priceSec = `<div class="det-section-title p">기둥 ③ 가격모멘텀</div><div class="det-rows">
-      ${detRow('갭52W', s.gap_52w_high, s.price_score)}
+        <span class="det-rv" style="color:var(--accent);font-weight:700">${s.mom_score!=null?s.mom_score.toFixed(1):'—'}</span></div></div>`;
+    const prc=`<div class="det-section-title p">기둥 ③ 가격모멘텀</div><div class="det-rows">
+      ${dr('갭52W',s.gap_52w_high,s.price_score)}
       <div class="det-item"><span class="det-lbl" style="color:var(--gold)">점수</span>
-        <span class="det-rv" style="color:var(--gold);font-weight:700">${s.price_score!=null?s.price_score.toFixed(1):'—'}</span>
-      </div></div>`;
-    let sec3 = '';
-    if (market === 'KR') {
-      const iv = s.inst_net_20d != null ? (s.inst_net_20d/1e8).toFixed(0)+'억' : '—';
-      const fv = s.for_net_20d != null ? (s.for_net_20d/1e8).toFixed(0)+'억' : '—';
-      sec3 = `<div class="det-section-title sm">기둥 ② 스마트머니 (표시만)</div><div class="det-rows">
-        <div class="det-item"><span class="det-lbl">기관20d</span><span class="det-rv">${iv}</span></div>
-        <div class="det-item"><span class="det-lbl">외국인20d</span><span class="det-rv">${fv}</span></div></div>`;
+        <span class="det-rv" style="color:var(--gold);font-weight:700">${s.price_score!=null?s.price_score.toFixed(1):'—'}</span></div></div>`;
+    let sec3='';
+    if (market==='KR') {
+      sec3=`<div class="det-section-title sm">기둥 ② 스마트머니${asOfMode?' (오늘 값)':''}</div><div class="det-rows">
+        <div class="det-item"><span class="det-lbl">기관20d</span><span class="det-rv">${s.inst_net_20d!=null?(s.inst_net_20d/1e8).toFixed(0)+'억':'—'}</span></div>
+        <div class="det-item"><span class="det-lbl">외국인20d</span><span class="det-rv">${s.for_net_20d!=null?(s.for_net_20d/1e8).toFixed(0)+'억':'—'}</span></div></div>`;
     } else {
-      const pv = s.per != null ? s.per.toFixed(1) : '—';
-      const rv2 = s.roe != null ? s.roe.toFixed(1)+'%' : '—';
-      const fpv = s.forward_per != null ? s.forward_per.toFixed(1) : '—';
-      sec3 = `<div class="det-section-title sm">밸류에이션 (참고)</div><div class="det-rows">
-        <div class="det-item"><span class="det-lbl">PER (TTM)</span><span class="det-rv">${pv}</span></div>
-        <div class="det-item"><span class="det-lbl">PER (선행)</span><span class="det-rv">${fpv}</span></div>
-        <div class="det-item"><span class="det-lbl">ROE</span><span class="det-rv">${rv2}</span></div></div>`;
+      sec3=`<div class="det-section-title sm">밸류에이션${asOfMode?' (오늘 값)':''} (참고)</div><div class="det-rows">
+        <div class="det-item"><span class="det-lbl">PER</span><span class="det-rv">${s.per!=null?s.per.toFixed(1):'—'}</span></div>
+        <div class="det-item"><span class="det-lbl">PER(선행)</span><span class="det-rv">${s.forward_per!=null?s.forward_per.toFixed(1):'—'}</span></div>
+        <div class="det-item"><span class="det-lbl">ROE</span><span class="det-rv">${s.roe!=null?s.roe.toFixed(1)+'%':'—'}</span></div></div>`;
     }
-    return `<td colspan="${colSpan}"><div class="det-in">${momSec}${priceSec}${sec3}</div></td>`;
+    return `<td colspan="${colSpan}"><div class="det-in">${mom}${prc}${sec3}</div></td>`;
   }
 
   // ── table render ─────────────────────────────────────
   function renderTable() {
-    let data = filteredStocks;
-    const limit = showN >= 99999 ? data.length : Math.min(showN, data.length);
-    data = data.slice(0, limit);
+    const limit = showN>=99999 ? filteredStocks.length : Math.min(showN,filteredStocks.length);
+    const data = filteredStocks.slice(0, limit);
     const tb = document.getElementById('tb');
-    const cc = market === 'KR' ? 19 : 16;
+    const cc = market==='KR'?19:16;
     const tab = TAB_CFG[activeTab];
 
     if (!data.length) {
-      tb.innerHTML = `<tr><td colspan="${cc}" style="text-align:center;padding:30px;color:var(--mut)">검색 결과 없음</td></tr>`;
+      tb.innerHTML=`<tr><td colspan="${cc}" style="text-align:center;padding:30px;color:var(--mut)">검색 결과 없음</td></tr>`;
       renderCards([]);
       return;
     }
-    renderCards(filteredStocks.slice(0, 10));
+    renderCards(filteredStocks.slice(0,10));
 
-    function pcClass(colKey) {
-      return tab.colKey === colKey ? ' pcol-hi' : '';
-    }
-
+    const pcC = k => TAB_CFG[activeTab].colKey===k?' pcol-hi':'';
     const rows = data.map(s => {
       const id = stockId(s);
-      const isExp = id === expandedCode;
-      const expClass = isExp ? ' expanded' : '';
-
-      // rank display: show active tab's rank
+      const isExp = id===expandedCode;
+      const expCls = isExp?' expanded':'';
       const rankNum = s[tab.rankField];
-      const rankHtml = rankNum != null
-        ? `<span class="rk">${rankNum}</span>`
-        : '<span class="rk-dim">—</span>';
-
-      let mainRow;
-      if (market === 'KR') {
-        const mktClass = s.market === 'KOSPI' ? 'mkt-kospi' : 'mkt-kosdaq';
-        const themes = fmtThemeChips(s.themes);
-        mainRow = `<tr class="data-row${expClass}" data-id="${id}">
+      const rankHtml = rankNum!=null?`<span class="rk">${rankNum}</span>`:'<span class="rk-dim">—</span>';
+      let main;
+      if (market==='KR') {
+        const mkC=s.market==='KOSPI'?'mkt-kospi':'mkt-kosdaq';
+        const chips=fmtThemeChips(s.themes);
+        main=`<tr class="data-row${expCls}" data-id="${id}">
           <td class="l st col-rk">${rankHtml}</td>
           <td class="l col-code" style="left:36px;position:sticky;z-index:1;background:inherit"><span class="code">${s.code}</span></td>
-          <td class="l st col-nm" style="left:102px">
-            <div class="name-wrap"><span class="name-cell" title="${s.name}">${s.name}</span>${themes}</div></td>
-          <td class="l"><span class="mkt-badge ${mktClass}">${s.market}</span></td>
+          <td class="l st col-nm" style="left:102px"><div class="name-wrap"><span class="name-cell" title="${s.name}">${s.name}</span>${chips}</div></td>
+          <td class="l"><span class="mkt-badge ${mkC}">${s.market}</span></td>
           <td>${fmtMarcap(s)}</td>
           <td>${fmtScore(s.combined)}</td>
           <td>${fmtScore(s.mom_score)}</td>
           <td>${fmtScore(s.price_score)}</td>
-          <td class="${pcClass('ret_4w')}">${fmtRetPct(s.ret_4w, s.pct_4w, 'ret_4w')}</td>
-          <td class="${pcClass('ret_12w')}">${fmtRetPct(s.ret_12w, s.pct_12w, 'ret_12w')}</td>
-          <td class="${pcClass('ret_25w')}">${fmtRetPct(s.ret_25w, s.pct_25w, 'ret_25w')}</td>
-          <td class="${pcClass('ret_52w')}">${fmtRetPct(s.ret_52w, s.pct_52w, 'ret_52w')}</td>
+          <td class="${pcC('ret_4w')}">${fmtRetPct(s.ret_4w,s.pct_4w,'ret_4w')}</td>
+          <td class="${pcC('ret_12w')}">${fmtRetPct(s.ret_12w,s.pct_12w,'ret_12w')}</td>
+          <td class="${pcC('ret_25w')}">${fmtRetPct(s.ret_25w,s.pct_25w,'ret_25w')}</td>
+          <td class="${pcC('ret_52w')}">${fmtRetPct(s.ret_52w,s.pct_52w,'ret_52w')}</td>
           <td>${fmtRet(s.gap_52w_high)}</td>
-          <td>${fmtNum(s.per, 1)}</td>
-          <td>${fmtNum(s.pbr, 2)}</td>
-          <td>${fmtNum(s.roe, 1)}</td>
-          <td>${fmtSmartMoney(s.inst_net_20d)}</td>
-          <td>${fmtSmartMoney(s.for_net_20d)}</td>
+          <td>${fmtNum(s.per,1)}</td><td>${fmtNum(s.pbr,2)}</td><td>${fmtNum(s.roe,1)}</td>
+          <td>${fmtSM(s.inst_net_20d)}</td><td>${fmtSM(s.for_net_20d)}</td>
           <td style="color:var(--mut);font-size:10px;text-align:center">${isExp?'▲':'▼'}</td>
         </tr>`;
       } else {
-        mainRow = `<tr class="data-row${expClass}" data-id="${id}">
+        main=`<tr class="data-row${expCls}" data-id="${id}">
           <td class="l st col-rk">${rankHtml}</td>
           <td class="l col-code" style="left:36px;position:sticky;z-index:1;background:inherit"><span class="code">${s.symbol}</span></td>
-          <td class="l st col-nm" style="left:102px">
-            <span class="name-cell" title="${s.name}">${s.name}</span></td>
+          <td class="l st col-nm" style="left:102px"><span class="name-cell" title="${s.name}">${s.name}</span></td>
           <td class="l"><span class="sector-tag">${s.sector||'—'}</span></td>
           <td>${fmtMarcap(s)}</td>
-          <td>${fmtScore(s.combined)}</td>
-          <td>${fmtScore(s.mom_score)}</td>
-          <td>${fmtScore(s.price_score)}</td>
-          <td class="${pcClass('ret_4w')}">${fmtRetPct(s.ret_4w, s.pct_4w, 'ret_4w')}</td>
-          <td class="${pcClass('ret_12w')}">${fmtRetPct(s.ret_12w, s.pct_12w, 'ret_12w')}</td>
-          <td class="${pcClass('ret_25w')}">${fmtRetPct(s.ret_25w, s.pct_25w, 'ret_25w')}</td>
-          <td class="${pcClass('ret_52w')}">${fmtRetPct(s.ret_52w, s.pct_52w, 'ret_52w')}</td>
+          <td>${fmtScore(s.combined)}</td><td>${fmtScore(s.mom_score)}</td><td>${fmtScore(s.price_score)}</td>
+          <td class="${pcC('ret_4w')}">${fmtRetPct(s.ret_4w,s.pct_4w,'ret_4w')}</td>
+          <td class="${pcC('ret_12w')}">${fmtRetPct(s.ret_12w,s.pct_12w,'ret_12w')}</td>
+          <td class="${pcC('ret_25w')}">${fmtRetPct(s.ret_25w,s.pct_25w,'ret_25w')}</td>
+          <td class="${pcC('ret_52w')}">${fmtRetPct(s.ret_52w,s.pct_52w,'ret_52w')}</td>
           <td>${fmtRet(s.gap_52w_high)}</td>
-          <td>${fmtNum(s.per, 1)}</td>
-          <td>${fmtNum(s.roe, 1)}</td>
+          <td>${fmtNum(s.per,1)}</td><td>${fmtNum(s.roe,1)}</td>
           <td style="color:var(--mut);font-size:10px;text-align:center">${isExp?'▲':'▼'}</td>
         </tr>`;
       }
-
-      const detRow = isExp
-        ? `<tr class="det-row open" data-id="${id}">${detailHtml(s, cc)}</tr>`
-        : `<tr class="det-row" data-id="${id}">${detailHtml(s, cc)}</tr>`;
-
-      return mainRow + detRow;
+      const det=isExp
+        ?`<tr class="det-row open" data-id="${id}">${detailHtml(s,cc)}</tr>`
+        :`<tr class="det-row" data-id="${id}">${detailHtml(s,cc)}</tr>`;
+      return main+det;
     }).join('');
 
     tb.innerHTML = rows;
-    tb.querySelectorAll('tr.data-row').forEach(tr => {
-      tr.addEventListener('click', () => {
-        const id = tr.getAttribute('data-id');
-        expandedCode = expandedCode === id ? null : id;
+    tb.querySelectorAll('tr.data-row').forEach(tr=>{
+      tr.addEventListener('click',()=>{
+        const id=tr.getAttribute('data-id');
+        expandedCode=expandedCode===id?null:id;
         renderTable();
       });
     });
   }
 
-  // ── period tab switch ────────────────────────────────
+  // ── period tab switch ─────────────────────────────────
   function switchTab(tab) {
-    activeTab = tab;
-    const cfg = TAB_CFG[tab];
-    sortKey = cfg.sortKey;
-    sortAsc = false;
-    document.querySelectorAll('.ptab').forEach(btn => {
-      btn.classList.toggle('active', btn.getAttribute('data-tab') === tab);
-    });
-    expandedCode = null;
-    applyFilter(); // re-sort + re-render (also updates headers)
+    activeTab=tab;
+    sortKey=TAB_CFG[tab].sortKey;
+    sortAsc=false;
+    document.querySelectorAll('.ptab').forEach(b=>b.classList.toggle('active',b.getAttribute('data-tab')===tab));
+    expandedCode=null;
+    applyFilter();
   }
 
   // ── sort + filter ────────────────────────────────────
   function applyFilter() {
-    const q = query.toLowerCase().trim();
-    filteredStocks = allStocks.filter(s => {
-      if (market === 'KR') {
-        if (mktFilter && s.market !== mktFilter) return false;
-        if (themeFilter && !(s.themes||[]).includes(themeFilter)) return false;
-        if (q && !s.name.toLowerCase().includes(q) && !String(s.code).toLowerCase().includes(q)) return false;
+    const q=query.toLowerCase().trim();
+    filteredStocks=allStocks.filter(s=>{
+      if(market==='KR'){
+        if(mktFilter&&s.market!==mktFilter) return false;
+        if(themeFilter&&!(s.themes||[]).includes(themeFilter)) return false;
+        if(q&&!s.name.toLowerCase().includes(q)&&!String(s.code).toLowerCase().includes(q)) return false;
       } else {
-        if (sectorFilter && s.sector !== sectorFilter) return false;
-        if (q && !s.name.toLowerCase().includes(q) && !String(s.symbol).toLowerCase().includes(q)) return false;
+        if(sectorFilter&&s.sector!==sectorFilter) return false;
+        if(q&&!s.name.toLowerCase().includes(q)&&!String(s.symbol).toLowerCase().includes(q)) return false;
       }
       return true;
     });
     applySort();
   }
-
   function applySort() {
-    filteredStocks.sort((a, b) => {
-      let av = a[sortKey], bv = b[sortKey];
-      if (av == null || (typeof av === 'number' && isNaN(av))) av = sortAsc ? Infinity : -Infinity;
-      if (bv == null || (typeof bv === 'number' && isNaN(bv))) bv = sortAsc ? Infinity : -Infinity;
-      if (typeof av === 'string' && typeof bv === 'string')
-        return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
-      return sortAsc ? av - bv : bv - av;
+    filteredStocks.sort((a,b)=>{
+      let av=a[sortKey],bv=b[sortKey];
+      if(av==null||(typeof av==='number'&&isNaN(av))) av=sortAsc?Infinity:-Infinity;
+      if(bv==null||(typeof bv==='number'&&isNaN(bv))) bv=sortAsc?Infinity:-Infinity;
+      if(typeof av==='string'&&typeof bv==='string') return sortAsc?av.localeCompare(bv):bv.localeCompare(av);
+      return sortAsc?av-bv:bv-av;
     });
-    renderHeaders(); // re-render headers for pcol-hi class
+    renderHeaders();
     renderTable();
     updateSortHeaders();
   }
-
   function updateSortHeaders() {
-    document.querySelectorAll('#thead-row th').forEach(th => {
+    document.querySelectorAll('#thead-row th').forEach(th=>{
       th.classList.remove('act');
-      if (th.getAttribute('data-k') === sortKey) th.classList.add('act');
+      if(th.getAttribute('data-k')===sortKey) th.classList.add('act');
     });
   }
-
   function bindHeaderClicks() {
-    const textKeys = ['code','name','market','symbol','sector'];
-    document.querySelectorAll('#thead-row th[data-k]').forEach(th => {
-      th.addEventListener('click', () => {
-        const k = th.getAttribute('data-k');
-        if (sortKey === k) sortAsc = !sortAsc;
-        else { sortKey = k; sortAsc = textKeys.includes(k); }
+    const textKeys=['code','name','market','symbol','sector'];
+    document.querySelectorAll('#thead-row th[data-k]').forEach(th=>{
+      th.addEventListener('click',()=>{
+        const k=th.getAttribute('data-k');
+        if(sortKey===k) sortAsc=!sortAsc;
+        else{sortKey=k;sortAsc=textKeys.includes(k);}
         applySort();
       });
     });
@@ -688,85 +830,77 @@ rank_12w = ret_12w 기준, … 동일</pre>
 
   // ── dropdown population ──────────────────────────────
   function populateSectorFilter(stocks) {
-    const sectors = [...new Set(stocks.map(s => s.sector).filter(Boolean))].sort();
-    const sel = document.getElementById('sectorf');
-    sel.innerHTML = '<option value="">전체 섹터</option>' +
-      sectors.map(s => `<option value="${s}">${s}</option>`).join('');
+    const sectors=[...new Set(stocks.map(s=>s.sector).filter(Boolean))].sort();
+    document.getElementById('sectorf').innerHTML='<option value="">전체 섹터</option>'+sectors.map(s=>`<option value="${s}">${s}</option>`).join('');
   }
-
   function populateThemeFilter(stocks) {
-    const counts = {};
-    stocks.forEach(s => (s.themes||[]).forEach(t => counts[t] = (counts[t]||0)+1));
-    const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
-    const sel = document.getElementById('themef');
-    sel.innerHTML = '<option value="">전체 테마</option>' +
-      sorted.map(t => `<option value="${t}">${t}</option>`).join('');
+    const counts={};
+    stocks.forEach(s=>(s.themes||[]).forEach(t=>counts[t]=(counts[t]||0)+1));
+    const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+    document.getElementById('themef').innerHTML='<option value="">전체 테마</option>'+sorted.map(t=>`<option value="${t}">${t}</option>`).join('');
   }
 
   // ── data load ─────────────────────────────────────────
   function loadData() {
-    const url = market === 'KR' ? './data/kr.json' : './data/us.json';
-    document.getElementById('tb').innerHTML =
-      `<tr><td colspan="${market==='KR'?19:16}" class="loading">데이터 로딩 중...</td></tr>`;
-
+    const url=market==='KR'?'./data/kr.json':'./data/us.json';
+    const cc=market==='KR'?19:16;
+    document.getElementById('tb').innerHTML=`<tr><td colspan="${cc}" class="loading">데이터 로딩 중...</td></tr>`;
     fetch(url)
-      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
-      .then(data => {
-        const sorted = [...data.stocks].sort((a,b)=>(b.combined||0)-(a.combined||0));
-        sorted.forEach((s,i) => s.rank = i+1);
+      .then(r=>{if(!r.ok) throw new Error(`HTTP ${r.status}`);return r.json();})
+      .then(data=>{
+        const sorted=[...data.stocks].sort((a,b)=>(b.combined||0)-(a.combined||0));
+        sorted.forEach((s,i)=>s.rank=i+1);
         computePeriodRanks(sorted);
-        allStocks = sorted;
-
-        if (market === 'KR') {
-          document.getElementById('sub-info').innerHTML =
-            `기준일 <b>${data.as_of}</b> · 유니버스 <b>KOSPI+KOSDAQ 3,000억 이상</b> · <b>${data.count}</b>종목`;
+        baseStocks=[...sorted];  // keep pristine copy
+        allStocks=sorted;
+        if(market==='KR'){
+          document.getElementById('sub-info').innerHTML=`기준일 <b>${data.as_of}</b> · <b>KOSPI+KOSDAQ 3,000억+</b> · <b>${data.count}</b>종목`;
           populateThemeFilter(allStocks);
         } else {
-          document.getElementById('sub-info').innerHTML =
-            `기준일 <b>${data.as_of}</b> · 유니버스 <b>시총 $217M+ · 거래대금 $1M+</b> · <b>${data.count}</b>종목`;
+          document.getElementById('sub-info').innerHTML=`기준일 <b>${data.as_of}</b> · <b>시총 $217M+ · 거래대금 $1M+</b> · <b>${data.count}</b>종목`;
           populateSectorFilter(allStocks);
         }
+        // set date picker default to as_of date
+        const inp=document.getElementById('asof-input');
+        inp.value=data.as_of;
+        inp.max=data.as_of;  // can't go beyond data date
         applyFilter();
       })
-      .catch(err => {
-        document.getElementById('tb').innerHTML =
-          `<tr><td colspan="${market==='KR'?19:16}" class="err">데이터 로드 실패: ${err.message}</td></tr>`;
+      .catch(err=>{
+        document.getElementById('tb').innerHTML=`<tr><td colspan="${cc}" class="err">데이터 로드 실패: ${err.message}</td></tr>`;
       });
   }
 
   // ── market switch ─────────────────────────────────────
   function switchMarket(mkt) {
-    if (market === mkt) return;
-    market = mkt;
-    activeTab = 'combined';
-    sortKey = 'combined'; sortAsc = false;
-    query = ''; mktFilter = ''; sectorFilter = ''; themeFilter = '';
-    allStocks = []; filteredStocks = [];
-    expandedCode = null;
+    if(market===mkt) return;
+    market=mkt;
+    activeTab='combined'; sortKey='combined'; sortAsc=false;
+    query=''; mktFilter=''; sectorFilter=''; themeFilter='';
+    allStocks=[]; filteredStocks=[]; baseStocks=[];
+    expandedCode=null;
+    // reset asOf but keep panel open if it was
+    asOfMode=false;
+    document.getElementById('asof-warn').style.display='none';
+    document.getElementById('asof-snap').innerHTML='';
 
-    document.getElementById('btn-kr').classList.toggle('active', mkt==='KR');
-    document.getElementById('btn-us').classList.toggle('active', mkt==='US');
-    document.getElementById('mktf').style.display = mkt==='KR' ? '' : 'none';
-    document.getElementById('sectorf').style.display = mkt==='US' ? '' : 'none';
-    document.getElementById('themef').style.display = mkt==='KR' ? '' : 'none';
-    document.getElementById('mktf').value = '';
-    document.getElementById('sectorf').value = '';
-    document.getElementById('themef').value = '';
-    document.getElementById('q').value = '';
+    document.getElementById('btn-kr').classList.toggle('active',mkt==='KR');
+    document.getElementById('btn-us').classList.toggle('active',mkt==='US');
+    document.getElementById('mktf').style.display=mkt==='KR'?'':'none';
+    document.getElementById('sectorf').style.display=mkt==='US'?'':'none';
+    document.getElementById('themef').style.display=mkt==='KR'?'':'none';
+    document.getElementById('mktf').value='';
+    document.getElementById('sectorf').value='';
+    document.getElementById('themef').value='';
+    document.getElementById('q').value='';
+    document.querySelectorAll('.ptab').forEach(b=>b.classList.toggle('active',b.getAttribute('data-tab')==='combined'));
 
-    // reset period tab to 종합
-    document.querySelectorAll('.ptab').forEach(btn => {
-      btn.classList.toggle('active', btn.getAttribute('data-tab') === 'combined');
-    });
-
-    document.title = `${mkt} 순위모멘텀`;
-    document.getElementById('page-title').innerHTML =
+    document.title=`${mkt} 순위모멘텀`;
+    document.getElementById('page-title').innerHTML=
       `${mkt} 순위모멘텀 <span style="font-size:13px;color:var(--mut)">4·12·25·52주 | Combined Score</span>`;
-
-    const banner = document.getElementById('cap-banner');
-    banner.textContent = mkt === 'KR'
-      ? '수급 ✅ · 밸류 ⚠️부분 · 테마 ✅(25.8%)'
-      : '밸류 ✅(69.4% per) · 수급 ❌ · 테마 없음';
+    document.getElementById('cap-banner').textContent=mkt==='KR'
+      ?'수급 ✅ · 밸류 ⚠️부분 · 테마 ✅(25.8%)'
+      :'밸류 ✅(69.4% per) · 수급 ❌ · 테마 없음';
 
     updateFooter();
     renderHeaders();
@@ -774,44 +908,67 @@ rank_12w = ret_12w 기준, … 동일</pre>
   }
 
   function updateFooter() {
-    const el = document.getElementById('footer');
-    if (market === 'KR') {
-      el.innerHTML = '※ 교육용. 유니버스: KOSPI+KOSDAQ 시가총액 3,000억원 이상. ' +
-        'mom_score=4·12·25·52주 횡단면 백분위 단순평균, price_score=52주 고가 대비 위치 백분위, ' +
-        'combined=(2×mom+price)/3. 스마트머니(②)는 표시만, 합산 미포함. 데이터: naver-universe + tossctl.';
-    } else {
-      el.innerHTML = '유니버스: 시총 $217M+ AND 20일 평균 거래대금 $1M+ (NASDAQ screener + yfinance). ' +
-        'combined=(2×mom+price)/3 — KR과 동일 공식, 직접 비교 불가. ' +
-        'PER*/ROE*는 참고 컬럼, combined 점수 미반영. 데이터: Yahoo Finance.';
-    }
+    document.getElementById('footer').innerHTML = market==='KR'
+      ? '※ 교육용. KOSPI+KOSDAQ 3,000억+. combined=(2×mom+price)/3. 스마트머니는 표시만. 기준일 모드: 15개월 히스토리 재계산 (스마트머니·PER·섹터는 현재값 고정).'
+      : '유니버스: 시총 $217M+ AND 20일 DV $1M+. combined=(2×mom+price)/3. PER*/ROE*는 참고. 기준일 모드 US: ⚠️히스토리 파일 ~7MB — 셀룰러 주의.';
   }
 
   // ── toggle handlers ───────────────────────────────────
-  document.getElementById('params-trig').addEventListener('click', () => {
-    const body = document.getElementById('params-body');
-    const open = body.classList.toggle('open');
-    document.getElementById('params-trig').querySelector('span:first-child').textContent =
-      open ? '▾ 계산 파라미터 보기' : '▸ 계산 파라미터 보기';
-    document.getElementById('params-caret').textContent = open ? '▲' : '▼';
+  document.getElementById('params-trig').addEventListener('click',()=>{
+    const b=document.getElementById('params-body'), open=b.classList.toggle('open');
+    document.getElementById('params-trig').querySelector('span:first-child').textContent=open?'▾ 계산 파라미터 보기':'▸ 계산 파라미터 보기';
+    document.getElementById('params-caret').textContent=open?'▲':'▼';
+  });
+  document.getElementById('formula-trig').addEventListener('click',()=>{
+    const b=document.getElementById('formula-bd'), open=b.classList.toggle('open');
+    document.getElementById('formula-caret').textContent=open?'▲':'▼';
   });
 
-  document.getElementById('formula-trig').addEventListener('click', () => {
-    const bd = document.getElementById('formula-bd');
-    const open = bd.classList.toggle('open');
-    document.getElementById('formula-caret').textContent = open ? '▲' : '▼';
+  // ── asOf panel ────────────────────────────────────────
+  document.getElementById('asof-trigger').addEventListener('click',()=>{
+    const bar=document.getElementById('asof-bar');
+    const open=bar.classList.toggle('open');
+    document.getElementById('asof-trigger').classList.toggle('active',open);
+    if (open && market==='US') {
+      // show data warning when panel opens for US
+      const errEl=document.getElementById('asof-err');
+      if (!errEl.textContent) errEl.style.display='none';
+    }
+  });
+
+  document.getElementById('asof-input').addEventListener('change', e=>{
+    const val=e.target.value;
+    if (!val) return;
+    asOfMode=true;
+    document.getElementById('asof-trigger').textContent=`📅 ${val}`;
+    applyAsOf(val);
+  });
+
+  document.getElementById('asof-reset').addEventListener('click',()=>{
+    asOfMode=false;
+    document.getElementById('asof-snap').innerHTML='';
+    document.getElementById('asof-warn').style.display='none';
+    document.getElementById('asof-trigger').textContent='📅 기준일';
+    // restore from base
+    const sorted=[...baseStocks].sort((a,b)=>(b.combined||0)-(a.combined||0));
+    sorted.forEach((s,i)=>s.rank=i+1);
+    computePeriodRanks(sorted);
+    allStocks=sorted;
+    // reset input to as_of date
+    const inp=document.getElementById('asof-input');
+    inp.value=inp.max;
+    applyFilter();
   });
 
   // ── event bindings ────────────────────────────────────
-  document.getElementById('btn-kr').addEventListener('click', () => switchMarket('KR'));
-  document.getElementById('btn-us').addEventListener('click', () => switchMarket('US'));
-  document.querySelectorAll('.ptab').forEach(btn => {
-    btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
-  });
-  document.getElementById('q').addEventListener('input', e => { query = e.target.value; applyFilter(); });
-  document.getElementById('mktf').addEventListener('change', e => { mktFilter = e.target.value; applyFilter(); });
-  document.getElementById('sectorf').addEventListener('change', e => { sectorFilter = e.target.value; applyFilter(); });
-  document.getElementById('themef').addEventListener('change', e => { themeFilter = e.target.value; applyFilter(); });
-  document.getElementById('topn').addEventListener('change', e => { showN = parseInt(e.target.value); renderTable(); });
+  document.getElementById('btn-kr').addEventListener('click',()=>switchMarket('KR'));
+  document.getElementById('btn-us').addEventListener('click',()=>switchMarket('US'));
+  document.querySelectorAll('.ptab').forEach(b=>b.addEventListener('click',()=>switchTab(b.getAttribute('data-tab'))));
+  document.getElementById('q').addEventListener('input',e=>{query=e.target.value;applyFilter();});
+  document.getElementById('mktf').addEventListener('change',e=>{mktFilter=e.target.value;applyFilter();});
+  document.getElementById('sectorf').addEventListener('change',e=>{sectorFilter=e.target.value;applyFilter();});
+  document.getElementById('themef').addEventListener('change',e=>{themeFilter=e.target.value;applyFilter();});
+  document.getElementById('topn').addEventListener('change',e=>{showN=parseInt(e.target.value);renderTable();});
 
   // ── init ──────────────────────────────────────────────
   updateFooter();
