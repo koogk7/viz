@@ -528,10 +528,25 @@ ret_4w     = (ref_price − target_price) / target_price × 100</pre>
   // ── apply asOf date ───────────────────────────────────
   function applyAsOf(dateStr) {
     if (!dateStr) return;
+    const inp = document.getElementById('asof-input');
+    const baseDate = inp.max;  // as_of date from the loaded json
+
+    // SHORT-CIRCUIT: if user selects today (= json as_of date), restore exact base data
+    if (dateStr >= baseDate) {
+      const sorted = [...baseStocks].sort((a,b)=>(b.combined||0)-(a.combined||0));
+      sorted.forEach((s,i) => s.rank = i+1);
+      computePeriodRanks(sorted);
+      allStocks = sorted;
+      document.getElementById('asof-warn').style.display = 'none';
+      document.getElementById('asof-snap').innerHTML = `기준일 <b>${baseDate}</b> (현재 화면 — 정확 일치)`;
+      applyFilter();
+      return;
+    }
+
+    // historical date → load history and recompute
     loadHistory(hist => {
       const computed = applyHistory(hist, dateStr);
       if (!computed) return;
-      // sort by combined desc to assign combined rank
       const sorted = [...computed].sort((a,b)=>(b.combined||0)-(a.combined||0));
       sorted.forEach((s,i) => s.rank = i+1);
       computePeriodRanks(sorted);
