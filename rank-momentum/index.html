@@ -182,6 +182,11 @@ pre.fml{font-family:'SF Mono',Menlo,monospace;font-size:11.5px;
 .sc-mh{background:rgba(74,168,255,.15);color:var(--accent)}
 .sc-ne{background:rgba(143,163,189,.12);color:var(--mut)}
 .sc-lo{background:rgba(239,95,107,.15);color:var(--red)}
+/* COMP book thresholds */
+.thr-sb{background:rgba(51,194,127,.25);color:#22c55e;font-weight:700}
+.thr-b {background:rgba(51,194,127,.12);color:var(--grn)}
+.thr-h {background:rgba(255,200,60,.12);color:#b8960a}
+.thr-s {background:rgba(239,95,107,.12);color:var(--red)}
 .footer{color:var(--mut);font-size:11.5px;margin-top:12px;line-height:1.7}
 
 @media(max-width:600px){
@@ -240,7 +245,7 @@ pre.fml{font-family:'SF Mono',Menlo,monospace;font-size:11.5px;
 </div>
 
 <div id="cap-banner" class="cap-banner">수급 ✅ · 밸류 ⚠️부분 · 테마 ✅(25.8%)</div>
-<div class="cap-warn">⚠️ KR과 US 점수는 직접 비교 불가 — 구성 기둥 상이</div>
+<div class="cap-warn">⚠️ KR과 US 점수는 직접 비교 불가 — 구성 기둥 상이 · US 탭은 KR COMP 공식 임시 적용 중 (저자 해외 모델 = 4대 팩터 16개, 미구현)</div>
 <div class="sub" id="sub-info">데이터 로딩 중...</div>
 
 <!-- ── 파라미터 패널 ── -->
@@ -250,11 +255,12 @@ pre.fml{font-family:'SF Mono',Menlo,monospace;font-size:11.5px;
     <span id="params-caret" style="font-size:10px">▼</span>
   </div>
   <div class="params-body" id="params-body">
-    <div class="pm"><div class="pm-k">합산 공식</div><div class="pm-v">combined = (2×①＋③) / 3</div></div>
-    <div class="pm"><div class="pm-k">기둥 가중치</div><div class="pm-v">① 모멘텀 67% : ③ 가격 33%</div></div>
+    <div class="pm"><div class="pm-k">합산 공식</div><div class="pm-v">combined = (2×①＋③) / 3 — 책: 40/30/20/10, ②④ 미구현으로 67/0/33/0 적용 중</div></div>
+    <div class="pm"><div class="pm-k">기둥 가중치</div><div class="pm-v">① 모멘텀 67% : ③ 가격 33% (② 스마트머니·④ 밸류 미구현)</div></div>
+    <div class="pm"><div class="pm-k">③ 가격 성분</div><div class="pm-v">1W + 1M + 3M 수익률 + 52W 고가 괴리율 동일가중 — 우리 선택 (책 세부 미공개)</div></div>
     <div class="pm"><div class="pm-k">백분위 함수</div><div class="pm-v">PERCENTRANK (Excel 호환)</div></div>
-    <div class="pm"><div class="pm-k">② 수급 (KR)</div><div class="pm-v">표시만, 점수 미반영</div></div>
-    <div class="pm"><div class="pm-k">밸류에이션 (US)</div><div class="pm-v">참고 컬럼, 점수 미반영</div></div>
+    <div class="pm"><div class="pm-k">② 스마트머니 (KR)</div><div class="pm-v">표시만, 점수 미반영 — 외국인 보유비율 결측으로 점수화 보류</div></div>
+    <div class="pm"><div class="pm-k">④ 밸류에이션</div><div class="pm-v">비중 결정 단계용 (선정 후) — PER*·ROE* 참고 컬럼, 합산 미반영</div></div>
     <div class="pm"><div class="pm-k">KR 유니버스</div><div class="pm-v">KOSPI+KOSDAQ 3,000억+</div></div>
     <div class="pm"><div class="pm-k">US 유니버스</div><div class="pm-v">시총 $217M+ · 20일 DV $1M+</div></div>
     <div class="pm"><div class="pm-k">구간 탭 순위</div><div class="pm-v">해당 구간 수익률 기준 재산출</div></div>
@@ -305,13 +311,20 @@ pre.fml{font-family:'SF Mono',Menlo,monospace;font-size:11.5px;
       <li>4/12/25/52주 수익률 각각 PERCENTRANK → mom_score = 단순 평균</li>
       <li>수익률 기준일: 캘린더 역산 (4w = 기준일 − 28일, 휴장이면 직전 거래일)</li>
     </ul>
-    <h3>기둥 ③ 가격모멘텀</h3>
+    <h3>기둥 ③ 가격모멘텀 (4 성분 동일가중 — 우리 선택)</h3>
     <ul>
-      <li>gap_52w_high = (기준일 종가 − 52주 고점) / 52주 고점 × 100</li>
-      <li>price_score = PERCENTRANK(gap_52w_high 전체)</li>
+      <li>1W 수익률 PERCENTRANK</li>
+      <li>1M(4W) 수익률 PERCENTRANK</li>
+      <li>3M(12W) 수익률 PERCENTRANK</li>
+      <li>gap_52w_high = (기준일 종가 − 52주 고점) / 52주 고점 × 100 → PERCENTRANK</li>
+      <li>price_score = 위 4개 단순 평균</li>
+      <li>⚠️ 저자 세부 결합 공식 미공개 — 동일가중은 우리 임의 선택</li>
     </ul>
     <h3>합산</h3>
     <pre class="fml">combined = (2 × mom_score + price_score) / 3</pre>
+    <p style="font-size:11px;color:var(--mut)">※ 책 원본: ① 40% + ② 30% + ③ 20% + ④ 10%. ②④ 미구현으로 현재 67/0/33/0 적용.</p>
+    <h3>US 탭 주의</h3>
+    <p style="font-size:12px;color:var(--mut)">⚠️ 저자는 국내(COMP)와 해외에 다른 룰을 사용한다. 해외 모델은 4대 팩터(가치·성장·모멘텀·퀄리티) 16개 세부 팩터 가중 배분 방식이며 이 화면의 KR COMP 공식과 다르다. US 탭은 현재 KR COMP 공식을 그대로 적용 중 — 미구현 항목.</p>
     <h3>기준일 모드</h3>
     <p>히스토리 파일(15개월 종가)에서 해당 날짜의 종가로 수익률·순위·점수 전체 재계산. 스마트머니·PER·섹터는 현재 값 유지.</p>
     <pre class="fml">ref_price  = closes[ticker][snap(refDate)]
@@ -323,6 +336,13 @@ ret_4w     = (ref_price − target_price) / target_price × 100</pre>
       <span class="score-chip sc-mh">60~79</span>중상&nbsp;
       <span class="score-chip sc-ne">40~59</span>중립&nbsp;
       <span class="score-chip sc-lo">&lt; 40</span>하위
+    </p>
+    <h3>책 문턱 (종합 점수 기준)</h3>
+    <p>
+      <span class="score-chip thr-sb">≥ 90</span>강력매수&nbsp;
+      <span class="score-chip thr-b">80~89</span>매수&nbsp;
+      <span class="score-chip thr-h">65~79</span>보유&nbsp;
+      <span class="score-chip thr-s">&lt; 65</span>매도검토
     </p>
   </div>
 </div>
@@ -339,7 +359,7 @@ ret_4w     = (ref_price − target_price) / target_price × 100</pre>
     '25w':     { rankField:'rank_25w', sortKey:'ret_25w',  colKey:'ret_25w', label:'25W' },
     '52w':     { rankField:'rank_52w', sortKey:'ret_52w',  colKey:'ret_52w', label:'52W' },
   };
-  const LOOKBACK = { '4w':28, '12w':84, '25w':175, '52w':364 };
+  const LOOKBACK = { '1w':7, '4w':28, '12w':84, '25w':175, '52w':364 };
 
   // ── state ────────────────────────────────────────────
   let market = 'KR';
@@ -386,7 +406,7 @@ ret_4w     = (ref_price − target_price) / target_price × 100</pre>
   }
   function computePctScores(stocks) {
     // build sorted arrays for each field
-    ['4w','12w','25w','52w'].forEach(p => {
+    ['1w','4w','12w','25w','52w'].forEach(p => {
       const field = 'ret_' + p;
       const pctField = 'pct_' + p;
       const vals = stocks.map(s => s[field]).filter(v => v!=null && !isNaN(v)).sort((a,b)=>a-b);
@@ -395,16 +415,22 @@ ret_4w     = (ref_price − target_price) / target_price × 100</pre>
         s[pctField] = (v!=null && !isNaN(v)) ? percentRank(vals, v) : null;
       });
     });
-    // gap_52w_high → price_score
+    // gap_52w_high → gap percentrank (1 of 4 price components)
     const gapVals = stocks.map(s => s.gap_52w_high).filter(v=>v!=null&&!isNaN(v)).sort((a,b)=>a-b);
     stocks.forEach(s => {
-      s.price_score = (s.gap_52w_high!=null && !isNaN(s.gap_52w_high))
+      s._pct_gap = (s.gap_52w_high!=null && !isNaN(s.gap_52w_high))
         ? percentRank(gapVals, s.gap_52w_high) : null;
     });
-    // mom_score
+    // mom_score: ① 4/12/25/52주 PERCENTRANK 평균
     stocks.forEach(s => {
       const vals = ['pct_4w','pct_12w','pct_25w','pct_52w'].map(k=>s[k]).filter(v=>v!=null);
       s.mom_score = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+    });
+    // price_score: ③ 4 components equal-weight (1w + 4w + 12w + 52W-gap)
+    // 성분 동일가중은 우리 선택 — 저자 세부 공식 미공개
+    stocks.forEach(s => {
+      const parts = [s.pct_1w, s.pct_4w, s.pct_12w, s._pct_gap].filter(v=>v!=null);
+      s.price_score = parts.length ? parts.reduce((a,b)=>a+b,0)/parts.length : null;
     });
     // combined
     stocks.forEach(s => {
@@ -569,12 +595,25 @@ ret_4w     = (ref_price − target_price) / target_price × 100</pre>
     }
     return `<div class="ret-cell">${rv}${pctEl}</div>`;
   }
-  function fmtScore(v) {
+  function thrClass(v) {
+    if (v >= 90) return 'thr-sb';
+    if (v >= 80) return 'thr-b';
+    if (v >= 65) return 'thr-h';
+    return 'thr-s';
+  }
+  function thrLabel(v) {
+    if (v >= 90) return '강력매수';
+    if (v >= 80) return '매수';
+    if (v >= 65) return '보유';
+    return '매도검토';
+  }
+  function fmtScore(v, showThr) {
     if (v==null||isNaN(v)) return '<span class="na">—</span>';
     const pct=Math.max(0,Math.min(100,v)), col=scoreColor(pct);
+    const thrBadge = showThr ? `<span class="score-chip ${thrClass(pct)}" style="font-size:9px;padding:1px 4px;margin-left:3px">${thrLabel(pct)}</span>` : '';
     return `<div class="score-wrap">
       <div class="score-bar-bg"><div class="score-bar-fill" style="width:${pct.toFixed(1)}%;background:${col}"></div></div>
-      <span class="score-val" style="color:${col}">${pct.toFixed(1)}</span>
+      <span class="score-val" style="color:${col}">${pct.toFixed(1)}</span>${thrBadge}
     </div>`;
   }
   function fmtMarcap(s) {
@@ -732,7 +771,7 @@ ret_4w     = (ref_price − target_price) / target_price × 100</pre>
           <td class="l st col-nm" style="left:102px"><div class="name-wrap"><span class="name-cell" title="${s.name}">${s.name}</span>${chips}</div></td>
           <td class="l"><span class="mkt-badge ${mkC}">${s.market}</span></td>
           <td>${fmtMarcap(s)}</td>
-          <td>${fmtScore(s.combined)}</td>
+          <td>${fmtScore(s.combined, true)}</td>
           <td>${fmtScore(s.mom_score)}</td>
           <td>${fmtScore(s.price_score)}</td>
           <td class="${pcC('ret_4w')}">${fmtRetPct(s.ret_4w,s.pct_4w,'ret_4w')}</td>
@@ -751,7 +790,7 @@ ret_4w     = (ref_price − target_price) / target_price × 100</pre>
           <td class="l st col-nm" style="left:102px"><span class="name-cell" title="${s.name}">${s.name}</span></td>
           <td class="l"><span class="sector-tag">${s.sector||'—'}</span></td>
           <td>${fmtMarcap(s)}</td>
-          <td>${fmtScore(s.combined)}</td><td>${fmtScore(s.mom_score)}</td><td>${fmtScore(s.price_score)}</td>
+          <td>${fmtScore(s.combined, true)}</td><td>${fmtScore(s.mom_score)}</td><td>${fmtScore(s.price_score)}</td>
           <td class="${pcC('ret_4w')}">${fmtRetPct(s.ret_4w,s.pct_4w,'ret_4w')}</td>
           <td class="${pcC('ret_12w')}">${fmtRetPct(s.ret_12w,s.pct_12w,'ret_12w')}</td>
           <td class="${pcC('ret_25w')}">${fmtRetPct(s.ret_25w,s.pct_25w,'ret_25w')}</td>
