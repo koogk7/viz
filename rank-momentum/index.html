@@ -442,6 +442,20 @@ ret_4w     = (ref_price − target_price) / target_price × 100</pre>
     });
   }
 
+  // ── smart money: 수급 주(株) → %시총 근사 ──────────────
+  // inst_net_20d/for_net_20d는 주 단위. 시총(marcap/marcap_usd)·price는 원(KR)/달러(US) 단위.
+  // pct = 순매수 수량 × 현재가 / 시총 × 100. 기간 중 주가 변동분은 반영 못하는 근사치.
+  function computeSmartMoneyPct(stocks) {
+    const mcapField = market === 'KR' ? 'marcap' : 'marcap_usd';
+    stocks.forEach(s => {
+      const mcap = s[mcapField], price = s.price;
+      s.inst_pct_mcap = (mcap && price != null && s.inst_net_20d != null)
+        ? s.inst_net_20d * price / mcap * 100 : null;
+      s.for_pct_mcap = (mcap && price != null && s.for_net_20d != null)
+        ? s.for_net_20d * price / mcap * 100 : null;
+    });
+  }
+
   // ── period rank computation ───────────────────────────
   function computePeriodRanks(stocks) {
     ['4w','12w','25w','52w'].forEach(p => {
@@ -513,6 +527,7 @@ ret_4w     = (ref_price − target_price) / target_price × 100</pre>
     });
 
     computePctScores(computed);
+    computeSmartMoneyPct(computed);
     return computed;
   }
 
@@ -623,10 +638,17 @@ ret_4w     = (ref_price − target_price) / target_price × 100</pre>
   function fmtNum(v,dec) {
     return (v==null||isNaN(v)) ? '<span class="na">—</span>' : v.toFixed(dec??2);
   }
-  function fmtSM(v) {
-    if (v==null||isNaN(v)) return '<span class="na">—</span>';
-    const val=v/1e8, col=val>=0?'var(--grn)':'var(--red)';
-    return `<span class="sm-v" style="color:${col}">${val>=0?'+':''}${val.toFixed(0)}</span>`;
+  function fmtSM(pct) {
+    if (pct==null||isNaN(pct)) return '<span class="na">—</span>';
+    const col=pct>=0?'var(--grn)':'var(--red)';
+    return `<span class="sm-v" style="color:${col}">${pct>=0?'+':''}${pct.toFixed(2)}</span>`;
+  }
+  function fmtSMDetail(v, price, pct) {
+    // v = 20일 누적 순매수 수량(株). 금액(억) = v × 현재가 / 1e8 — 원 단위 환산.
+    if (v==null||isNaN(v)||price==null) return '<span class="na">—</span>';
+    const amt=v*price/1e8, col=amt>=0?'var(--grn)':'var(--red)';
+    const pctStr = (pct!=null&&!isNaN(pct)) ? ` <span class="det-pct">(시총 ${pct>=0?'+':''}${pct.toFixed(2)}%)</span>` : '';
+    return `<span class="sm-v" style="color:${col}">${amt>=0?'+':''}${amt.toFixed(0)}억</span>${pctStr}`;
   }
   function fmtThemeChips(themes) {
     if (!themes||!themes.length) return '';
@@ -662,8 +684,8 @@ ret_4w     = (ref_price − target_price) / target_price × 100</pre>
         <th data-k="per">PER</th>
         <th data-k="pbr">PBR</th>
         <th data-k="roe">ROE</th>
-        <th data-k="inst_net_20d">기관(억)</th>
-        <th data-k="for_net_20d">외국인(억)</th>
+        <th data-k="inst_pct_mcap" title="20일 누적 순매수 수량 × 현재가 / 시총. 근사치">기관(%시총)</th>
+        <th data-k="for_pct_mcap" title="20일 누적 순매수 수량 × 현재가 / 시총. 근사치">외국인(%시총)</th>
         <th></th>`;
     } else {
       row.innerHTML = `
@@ -728,8 +750,8 @@ ret_4w     = (ref_price − target_price) / target_price × 100</pre>
     let sec3='';
     if (market==='KR') {
       sec3=`<div class="det-section-title sm">기둥 ② 스마트머니${asOfMode?' (오늘 값)':''}</div><div class="det-rows">
-        <div class="det-item"><span class="det-lbl">기관20d</span><span class="det-rv">${s.inst_net_20d!=null?(s.inst_net_20d/1e8).toFixed(0)+'억':'—'}</span></div>
-        <div class="det-item"><span class="det-lbl">외국인20d</span><span class="det-rv">${s.for_net_20d!=null?(s.for_net_20d/1e8).toFixed(0)+'억':'—'}</span></div></div>`;
+        <div class="det-item"><span class="det-lbl">기관20d</span><span class="det-rv">${fmtSMDetail(s.inst_net_20d,s.price,s.inst_pct_mcap)}</span></div>
+        <div class="det-item"><span class="det-lbl">외국인20d</span><span class="det-rv">${fmtSMDetail(s.for_net_20d,s.price,s.for_pct_mcap)}</span></div></div>`;
     } else {
       sec3=`<div class="det-section-title sm">밸류에이션${asOfMode?' (오늘 값)':''} (참고)</div><div class="det-rows">
         <div class="det-item"><span class="det-lbl">PER</span><span class="det-rv">${s.per!=null?s.per.toFixed(1):'—'}</span></div>
@@ -780,7 +802,7 @@ ret_4w     = (ref_price − target_price) / target_price × 100</pre>
           <td class="${pcC('ret_52w')}">${fmtRetPct(s.ret_52w,s.pct_52w,'ret_52w')}</td>
           <td>${fmtRet(s.gap_52w_high)}</td>
           <td>${fmtNum(s.per,1)}</td><td>${fmtNum(s.pbr,2)}</td><td>${fmtNum(s.roe,1)}</td>
-          <td>${fmtSM(s.inst_net_20d)}</td><td>${fmtSM(s.for_net_20d)}</td>
+          <td>${fmtSM(s.inst_pct_mcap)}</td><td>${fmtSM(s.for_pct_mcap)}</td>
           <td style="color:var(--mut);font-size:10px;text-align:center">${isExp?'▲':'▼'}</td>
         </tr>`;
       } else {
@@ -895,6 +917,7 @@ ret_4w     = (ref_price − target_price) / target_price × 100</pre>
         const sorted=[...data.stocks].sort((a,b)=>(b.combined||0)-(a.combined||0));
         sorted.forEach((s,i)=>s.rank=i+1);
         computePeriodRanks(sorted);
+        computeSmartMoneyPct(sorted);
         baseStocks=[...sorted];  // keep pristine copy
         allStocks=sorted;
         if(market==='KR'){
@@ -953,8 +976,8 @@ ret_4w     = (ref_price − target_price) / target_price × 100</pre>
 
   function updateFooter() {
     document.getElementById('footer').innerHTML = market==='KR'
-      ? '※ 교육용. KOSPI+KOSDAQ 3,000억+. combined=(2×mom+price)/3. 스마트머니는 표시만. 기준일 모드: 15개월 히스토리 재계산 (스마트머니·PER·섹터는 현재값 고정).'
-      : '유니버스: 시총 $217M+ AND 20일 DV $1M+. combined=(2×mom+price)/3. PER*/ROE*는 참고. 기준일 모드 US: ⚠️히스토리 파일 ~7MB — 셀룰러 주의.';
+      ? '※ 교육용. KOSPI+KOSDAQ 3,000억+. combined=(2×mom+price)/3. 스마트머니는 표시만. 기준일 모드: 15개월 히스토리 재계산 (스마트머니·PER·섹터는 현재값 고정). 수급: 20일 누적 순매수 수량 × 현재가 근사 · 기간 중 주가 변동분 오차 있음 · US 미지원(국내 전용).'
+      : '유니버스: 시총 $217M+ AND 20일 DV $1M+. combined=(2×mom+price)/3. PER*/ROE*는 참고. 기준일 모드 US: ⚠️히스토리 파일 ~7MB — 셀룰러 주의. 수급 데이터 없음(국내 전용, KR 탭 참고).';
   }
 
   // ── toggle handlers ───────────────────────────────────
@@ -997,6 +1020,7 @@ ret_4w     = (ref_price − target_price) / target_price × 100</pre>
     const sorted=[...baseStocks].sort((a,b)=>(b.combined||0)-(a.combined||0));
     sorted.forEach((s,i)=>s.rank=i+1);
     computePeriodRanks(sorted);
+    computeSmartMoneyPct(sorted);
     allStocks=sorted;
     // reset input to as_of date
     const inp=document.getElementById('asof-input');
