@@ -235,7 +235,7 @@ const AXES = [
     options:[
       {v:'clean', label:'청소만', price:0, src:'실사례(반셀프 사례 다수)'},
       {v:'partial', label:'부분보수', price:300, src:'일반 시장가 추정'},
-      {v:'full', label:'전체교체(특올수리)', price:700, src:'노트: 특올수리는 올수리 대비 +500~1,000만 추정, 중간값'},
+      {v:'full', label:'전체교체·특올수리', price:700, src:'노트: 특올수리는 올수리 대비 +500~1,000만 추정, 중간값'},
     ],
     criteria:'30년 구축이면 녹물·누수 이력, 배관 재질(PVC/PPC)을 먼저 확인한다. 이력이 없어도 30년이면 교체 시효는 이미 지났다고 보는 게 업계 통념이다.',
     trap:'"배관공사 포함"이라는 말만 믿으면 안 된다 — 청소·부분보수·전체교체가 전부 "포함"으로 뭉뚱그려 적힌다. 범위를 숫자(전체/부분/구간)로 못 박아야 한다.',
@@ -714,7 +714,7 @@ qEl.innerHTML = QUOTE.map((q,i)=>`
   <div class="q-row">
     <div class="q-line" data-i="${i}"><span>${q.line}</span><span class="qt">${q.amt}</span></div>
     <div class="q-ans" id="qa-${i}"><div class="flagline">${q.ans}</div></div>
-  </div>`).join('') + `<div class="q-total"><span>합계</span><span>5,072만원 (VAT 표기 없음 ⚠)</span></div>`;
+  </div>`).join('');
 qEl.addEventListener('click', e=>{
   const line = e.target.closest('.q-line');
   if(!line) return;
