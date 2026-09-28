@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>인테리어 기초 — 59㎡ 특올수리</title>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#1a2029; --panel2:#151b22; --line:#2a323d; --txt:#e6e9ee; --muted:#8b97a7;
+    --a:#5b8def; --b:#f0b429; --c:#27ae60; --bad:#e05c5c; --accent:#4dd0a7; --purple:#a78bfa;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0; background:var(--bg); color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif;
+    line-height:1.55; -webkit-text-size-adjust:100%;}
+  body{padding:16px 16px 60px; max-width:720px; margin:0 auto; overflow-x:hidden;}
+  h1{font-size:21px; margin:4px 0 2px; letter-spacing:-.2px}
+  .sub{color:var(--muted); font-size:13px; margin:0 0 16px}
+  h2.sec-title{font-size:16px; margin:0 0 4px; display:flex; align-items:center; gap:8px}
+  .sec-desc{color:var(--muted); font-size:12.5px; margin:0 0 14px}
+  section{margin-bottom:34px; scroll-margin-top:54px}
+  .num{display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px;
+    border-radius:6px; background:var(--accent); color:#0f1419; font-size:12px; font-weight:800; flex:none}
+
+  /* sticky nav */
+  nav.tabs{position:sticky; top:0; z-index:20; display:flex; gap:6px; overflow-x:auto;
+    background:rgba(15,20,25,.92); backdrop-filter:blur(6px); padding:10px 0 10px;
+    margin:0 -16px 18px; padding-left:16px; padding-right:16px; border-bottom:1px solid var(--line);
+    -webkit-overflow-scrolling:touch; scrollbar-width:none;}
+  nav.tabs::-webkit-scrollbar{display:none}
+  nav.tabs a{flex:none; font-size:12px; color:var(--muted); text-decoration:none; padding:7px 11px;
+    border:1px solid var(--line); border-radius:20px; background:var(--panel); white-space:nowrap;}
+  nav.tabs a:active{background:var(--accent); color:#0f1419; border-color:var(--accent)}
+
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:10px}
+
+  /* ① timeline */
+  .tl{display:flex; flex-direction:column; gap:0}
+  .tl-item{position:relative; padding-left:30px; padding-bottom:4px}
+  .tl-item:not(:last-child)::before{content:''; position:absolute; left:10px; top:26px; bottom:-6px; width:2px; background:var(--line)}
+  .tl-dot{position:absolute; left:2px; top:2px; width:18px; height:18px; border-radius:50%; background:var(--a);
+    display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; color:#fff}
+  .tl-head{display:flex; align-items:center; justify-content:space-between; gap:8px; cursor:pointer;
+    padding:8px 10px; margin-bottom:4px; border-radius:10px; background:var(--panel2); border:1px solid var(--line)}
+  .tl-head:active{background:#1e2733}
+  .tl-name{font-size:14.5px; font-weight:600}
+  .tl-days{font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums; flex:none}
+  .tl-arrow{color:var(--muted); font-size:11px; transition:transform .15s; flex:none}
+  .tl-body{display:none; padding:10px 12px 14px; font-size:13px; color:#cfd6e0}
+  .tl-body.open{display:block}
+  .tl-item.active .tl-arrow{transform:rotate(90deg)}
+  .tl-row{margin-bottom:8px}
+  .tl-row b{color:var(--accent); font-size:12px; display:block; margin-bottom:2px; font-weight:700}
+  .tl-row.skip b{color:var(--bad)}
+  .tl-row.skip{background:#2a1518; border:1px solid #4a2226; border-radius:8px; padding:8px 10px; margin-top:8px}
+
+  /* ② glossary */
+  .gcard{background:var(--panel); border:1px solid var(--line); border-radius:12px; margin-bottom:8px; overflow:hidden}
+  .ghead{display:flex; justify-content:space-between; align-items:center; padding:12px 14px; cursor:pointer}
+  .ghead:active{background:var(--panel2)}
+  .gterm{font-size:14.5px; font-weight:700}
+  .gbody{display:none; padding:0 14px 14px; font-size:13px; color:#cfd6e0}
+  .gbody.open{display:block}
+  .gbody .def{margin:0 0 8px}
+  .gbody .mis{background:#26200f; border:1px solid #4a3d1a; border-radius:8px; padding:8px 10px; margin-bottom:8px; font-size:12.5px}
+  .gbody .mis b{color:var(--b)}
+  .gbody .money{background:#0f2419; border:1px solid #1e4a35; border-radius:8px; padding:8px 10px; font-size:12.5px}
+  .gbody .money b{color:var(--accent)}
+
+  /* ③ five forks */
+  .fork{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:10px}
+  .fork h3{font-size:14px; margin:0 0 8px; display:flex; align-items:center; gap:6px}
+  .fork-bars{display:flex; flex-direction:column; gap:6px; margin-bottom:8px}
+  .fbar-row{display:flex; align-items:center; gap:8px; font-size:12px}
+  .fbar-label{width:76px; flex:none; color:var(--muted)}
+  .fbar-track{flex:1; height:18px; background:#0f151c; border-radius:5px; overflow:hidden; position:relative}
+  .fbar-fill{height:100%; border-radius:5px; display:flex; align-items:center; justify-content:flex-end; padding-right:6px}
+  .fbar-fill span{font-size:10.5px; font-weight:700; color:#0f1419; font-variant-numeric:tabular-nums}
+  .fork-note{font-size:12px; color:var(--muted); margin:0}
+  .fork-note b{color:var(--txt)}
+  .fork-src{font-size:10.5px; color:#5c6672; margin-top:6px}
+
+  /* ④ simulator */
+  .ctrl{margin-bottom:14px}
+  .ctrl-top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px}
+  .ctrl-top .lab{font-size:13.5px; font-weight:600}
+  .ctrl-top .val{font-size:13px; color:var(--accent); font-variant-numeric:tabular-nums; font-weight:700}
+  .ctrl-src{font-size:10.5px; color:#5c6672; margin-top:3px}
+  input[type=range]{width:100%; accent-color:var(--accent); height:4px}
+  .seg{display:flex; gap:6px; margin-top:4px}
+  .seg button{flex:1; padding:8px 4px; font-size:12.5px; border-radius:9px; border:1px solid var(--line);
+    background:var(--panel2); color:var(--txt); font-family:inherit}
+  .seg button.on{background:var(--accent); color:#0f1419; border-color:var(--accent); font-weight:700}
+  .toggle-row{display:flex; align-items:center; justify-content:space-between; padding:10px 0;
+    border-bottom:1px solid var(--line)}
+  .toggle-row:last-child{border-bottom:none}
+  .toggle-row .lab{font-size:13.5px}
+  .toggle-row .amt{font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums}
+  .sw{position:relative; width:42px; height:24px; flex:none}
+  .sw input{opacity:0; width:100%; height:100%; margin:0; position:absolute; z-index:1; cursor:pointer}
+  .sw .track{position:absolute; inset:0; background:#2a323d; border-radius:14px; transition:.15s}
+  .sw .knob{position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#8b97a7; transition:.15s}
+  .sw input:checked + .track{background:var(--accent)}
+  .sw input:checked ~ .knob{transform:translateX(18px); background:#0f1419}
+
+  .total-card{background:linear-gradient(180deg,#1a2029,#151b22); border:1px solid var(--line); border-radius:14px;
+    padding:16px; text-align:center; margin:14px 0}
+  .total-card .tv{font-size:32px; font-weight:800; font-variant-numeric:tabular-nums}
+  .total-card .tl2{font-size:11.5px; color:var(--muted); margin-top:2px}
+  .total-card .flag{margin-top:8px; font-size:12.5px; padding:6px 10px; border-radius:8px; display:inline-block}
+  .flag.in{background:#0f2419; color:var(--accent); border:1px solid #1e4a35}
+  .flag.over{background:#2a1518; color:var(--bad); border:1px solid #4a2226}
+  .flag.under{background:#151b22; color:var(--muted); border:1px solid var(--line)}
+
+  .gauge-wrap{margin-top:18px}
+  .gauge{position:relative; height:34px; background:#0f151c; border-radius:8px; border:1px solid var(--line); margin-top:26px}
+  .gauge .band{position:absolute; top:0; bottom:0; background:rgba(77,208,167,.18); border-left:1px dashed var(--accent);
+    border-right:1px dashed var(--accent)}
+  .gauge .needle{position:absolute; top:-6px; bottom:-6px; width:3px; background:var(--b); border-radius:2px; z-index:5}
+  .gauge .needle::after{content:''; position:absolute; top:-5px; left:50%; transform:translateX(-50%);
+    width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-top:6px solid var(--b)}
+  .gauge .mk{position:absolute; top:0; bottom:0; width:2px; background:var(--purple)}
+  .gauge-axis{display:flex; justify-content:space-between; font-size:10px; color:var(--muted); margin-top:4px}
+  .mk-list{margin-top:10px; display:flex; flex-direction:column; gap:6px}
+  .mk-row{display:flex; align-items:baseline; gap:8px; font-size:11.5px; color:var(--muted)}
+  .mk-dot{width:8px; height:8px; border-radius:50%; background:var(--purple); flex:none}
+  .mk-row b{color:var(--txt); font-variant-numeric:tabular-nums}
+  .mk-warn{color:var(--b); font-size:10.5px}
+
+  /* ⑤ tradeoffs */
+  .to-card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:10px}
+  .to-card h3{font-size:14.5px; margin:0 0 8px; display:flex; align-items:center; gap:6px}
+  .to-badge{width:22px; height:22px; border-radius:6px; background:var(--purple); color:#0f1419; font-weight:800;
+    font-size:12px; display:flex; align-items:center; justify-content:center; flex:none}
+  .to-grid{display:flex; gap:8px}
+  .to-col{flex:1; background:var(--panel2); border-radius:9px; padding:10px}
+  .to-col .h{font-size:11px; color:var(--muted); margin-bottom:4px; font-weight:700}
+  .to-col.gain .h{color:var(--accent)}
+  .to-col.cost .h{color:var(--bad)}
+  .to-col p{font-size:12.5px; margin:0}
+
+  .foot{font-size:11px; color:#5c6672; text-align:center; margin-top:30px; padding-top:16px; border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+
+  <h1>🧱 인테리어 기초 — 59㎡ 30년 구축</h1>
+  <p class="sub">방3·화장실1 · 예산 5,000~6,000만원 · 인테리어 지식 0에서 견적서를 읽는 상태까지</p>
+
+  <nav class="tabs">
+    <a href="#s1">① 공정순서</a>
+    <a href="#s2">② 용어사전</a>
+    <a href="#s3">③ 다섯 갈래</a>
+    <a href="#s4">④ 예산 시뮬레이터</a>
+    <a href="#s5">⑤ 무엇을 포기하나</a>
+  </nav>
+
+  <!-- ① 공정 순서 -->
+  <section id="s1">
+    <h2 class="sec-title"><span class="num">1</span>공정 순서 — 왜 이 순서인가</h2>
+    <p class="sec-desc">업체 일정표는 이 순서대로 짜인다. 순서를 바꾸면 앞 공정을 다시 뜯는 일이 생긴다. 항목을 눌러 펼쳐보세요.</p>
+    <div class="tl" id="timeline"></div>
+  </section>
+
+  <!-- ② 용어 사전 -->
+  <section id="s2">
+    <h2 class="sec-title"><span class="num">2</span>용어 사전</h2>
+    <p class="sec-desc">견적서에 반드시 나오는 15개 용어. 오해하기 쉬운 지점과 돈으로 연결되는 지점을 함께 적었다.</p>
+    <div id="glossary"></div>
+  </section>
+
+  <!-- ③ 다섯 갈래 -->
+  <section id="s3">
+    <h2 class="sec-title"><span class="num">3</span>돈이 갈리는 다섯 갈래</h2>
+    <p class="sec-desc">같은 단지(중화한신) 실사례에서 뽑은 있고·없고의 금액 차이. 단위 만원.</p>
+    <div id="forks"></div>
+  </section>
+
+  <!-- ④ 예산 시뮬레이터 -->
+  <section id="s4">
+    <h2 class="sec-title"><span class="num">4</span>예산 시뮬레이터</h2>
+    <p class="sec-desc">항목을 켜고 끄면 총액이 실시간으로 바뀐다. 기본값은 "화장실+주방+샷시 전체, 확장·에어컨 없음, 턴키" — 노트 결론(부가항목 없이 배관 올수리 본체에 집중하면 예산 안에 들어오되 여유는 없다)을 그대로 반영한 구성이다.</p>
+
+    <div class="panel">
+      <div class="ctrl">
+        <div class="ctrl-top"><span class="lab">시공 방식</span></div>
+        <div class="seg" id="seg-method">
+          <button data-v="diy">반셀프</button>
+          <button data-v="turnkey" class="on">턴키(업체 일괄)</button>
+        </div>
+        <div class="ctrl-src">근거: 반셀프 we_onus 4,555만 vs 턴키 환산 ~5,700만 — "반셀프는 턴키 대비 20~30% 저렴" (견적사례 노트). 아래 모든 항목가는 반셀프 기준이며 턴키 선택 시 전체 ×1.25.</div>
+      </div>
+
+      <div class="toggle-row">
+        <div><div class="lab">기본 올수리 <span style="color:var(--muted);font-size:11px">(철거·설비·목공·전기·도배·바닥, 필수)</span></div></div>
+        <div class="amt">2,300만</div>
+      </div>
+      <div class="toggle-row">
+        <div class="lab">화장실 전체</div>
+        <label class="sw"><input type="checkbox" id="t-bath" checked><span class="track"></span><span class="knob"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div class="lab">주방 전체</div>
+        <label class="sw"><input type="checkbox" id="t-kitchen" checked><span class="track"></span><span class="knob"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div class="lab">중문</div>
+        <label class="sw"><input type="checkbox" id="t-door" checked><span class="track"></span><span class="knob"></span></label>
+      </div>
+
+      <div class="ctrl" style="margin-top:14px">
+        <div class="ctrl-top"><span class="lab">샷시(창호)</span></div>
+        <div class="seg" id="seg-sash">
+          <button data-v="none">안 함</button>
+          <button data-v="part">부분</button>
+          <button data-v="full" class="on">전체</button>
+        </div>
+        <div class="ctrl-src">부분 400만(84타입 실사례, 베란다외창+거실창) · 전체 550만(59타입 KCC 2026년 실사례, 최신가)</div>
+      </div>
+
+      <div class="ctrl">
+        <div class="ctrl-top"><span class="lab">발코니 확장</span></div>
+        <div class="seg" id="seg-ext">
+          <button data-v="no" class="on">안 함</button>
+          <button data-v="yes">함</button>
+        </div>
+        <div class="ctrl-src">+300만 추정(서울 25평 실사례 확장 추가분 190만 + 구조보강 여유분). 84타입 3,800만 실사례는 확장 제외 구성.</div>
+      </div>
+
+      <div class="ctrl">
+        <div class="ctrl-top"><span class="lab">시스템에어컨</span><span class="val" id="ac-v">0대</span></div>
+        <input type="range" id="ac" min="0" max="4" value="0" step="1">
+        <div class="ctrl-src">대당 170만(서울 25평 실사례 3대 510만 ÷ 3, 에어컨 별도 견적 기준)</div>
+      </div>
+    </div>
+
+    <div class="total-card">
+      <div class="tv" id="total">—</div>
+      <div class="tl2">예상 총액 (만원, VAT 포함 가정)</div>
+      <div id="flag"></div>
+    </div>
+
+    <div class="panel gauge-wrap">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:2px">0 ~ 9,000만원 축 위에서 내 조합의 위치</div>
+      <div class="gauge" id="gauge"></div>
+      <div class="gauge-axis"><span>0</span><span>3,000</span><span>6,000</span><span>9,000만</span></div>
+      <div class="mk-list" id="marklist"></div>
+    </div>
+  </section>
+
+  <!-- ⑤ 무엇을 포기하나 -->
+  <section id="s5">
+    <h2 class="sec-title"><span class="num">5</span>5~6천으로 무엇을 포기하나</h2>
+    <p class="sec-desc">결론은 없다. 각 갈림길의 절감액과 대가만 나열한다 — 선택은 사용자 몫.</p>
+    <div id="tradeoffs"></div>
+  </section>
+
+  <div class="foot">중화한신 단지 실사례(오픈카톡 2026-09-28 추출) + 24~25평 구축 블로그 실후기(2026-09-27 스크랩) 기반. 개인정보·단지 특정정보는 제외했다.</div>
+
+<script>
+/* ===================== ① 공정 순서 ===================== */
+const timeline = [
+  {n:'철거', days:'1~2일', desc:'기존 벽지·바닥재·타일·붙박이·경우에 따라 경량벽체까지 뜯어낸다. 이후 모든 공정의 전제가 되는 "빈 상자" 상태를 만드는 일.',
+   why:'배관·전기 위치와 벽체 상태를 눈으로 확인해야 설비·목공 계획이 정확해진다. 마감재 위에 덧시공하면 안쪽 하자를 못 본다.',
+   skip:'철거 없이 진행하면 기존 마감 위에 새 마감을 덧대는 셈이라, 습기·곰팡이·들뜸이 새 마감 밑에서 그대로 진행된다.'},
+  {n:'설비 (배관·전기)', days:'2~4일', desc:'급수·배수관 점검/교체, 전기 배선 재배치, 콘센트·스위치·조명 위치를 확정한다.',
+   why:'벽과 바닥을 다시 뜯지 않으려면 마감(타일·도배·바닥) 전에 배관·배선을 끝내야 한다. "숨는 공사"라 나중엔 손댈 방법이 없다.',
+   skip:'마감을 끝낸 뒤 배관 문제가 생기면 타일·도배·바닥을 전부 다시 뜯어야 한다 — 재시공 비용이 원래 공정비보다 커진다.'},
+  {n:'샷시 (창호)', days:'1~2일', desc:'창틀·유리를 통째로 교체한다. 발코니 확장을 한다면 이 단계에서 구조도 함께 정리된다.',
+   why:'외기를 먼저 차단해야 이후 목공·도배 자재가 습기·먼지·온도 변화에 상하지 않는다.',
+   skip:'샷시를 뒤로 미루면 공사 기간 내내 창이 열려 있어 목공 자재가 뒤틀리고, 이미 바른 도배지가 먼지·습기로 들뜬다.'},
+  {n:'목공', days:'5~7일', desc:'몰딩·걸레받이·중문틀·붙박이장·우물천장 등 구조적인 틀을 짠다. 공정 중 가장 손이 많이 간다.',
+   why:'타일과 도배가 "붙을 자리"를 목공이 먼저 잡아준다 — 순서가 반대면 마감재가 목공 작업 중 긁히거나 파손된다.',
+   skip:'목공을 나중에 하면 이미 붙인 타일·도배지를 깎아내거나 구멍을 뚫어야 해서 새로 한 마감이 훼손된다.'},
+  {n:'타일', days:'3~5일', desc:'욕실·주방 바닥과 벽에 타일을 붙이고 도기(변기·세면대)를 설치한다. "물 작업"의 핵심.',
+   why:'목공 이후, 도배 이전에 해야 한다 — 물을 쓰는 공정이라 먼저 하면 목공 자재가 젖고, 늦게 하면 벽지에 물이 튄다.',
+   skip:'도배를 먼저 하면 타일 시공 중 튄 물과 시멘트가 벽지를 얼룩지게 만들어 도배를 다시 해야 한다.'},
+  {n:'도배·도장', days:'2~3일', desc:'벽지 시공 또는 페인트. 집안 전체 톤을 결정하는 마감의 얼굴.',
+   why:'먼지가 가장 많이 나는 목공·타일이 끝난 뒤, 가장 깨끗한 상태에서 붙여야 들뜸·오염이 없다.',
+   skip:'먼저 도배하면 이후 공정의 먼지·부스러기가 접착이 덜 마른 벽지에 눌어붙어 얼룩·들뜸으로 남는다.'},
+  {n:'바닥 (강마루/장판)', days:'1~2일', desc:'강마루·장판·마루를 깐다. 공정 막바지에 가까운 "젖지 않는" 마감.',
+   why:'목공·타일 작업 중 떨어지는 자재·공구에 바닥이 긁히지 않도록 가장 늦게 깐다.',
+   skip:'바닥을 먼저 깔면 이후 공정에서 떨어뜨리는 각재·타일 파편에 흠집이 나고, 최악의 경우 전체 재시공이 필요하다.'},
+  {n:'조명·가구', days:'1~2일', desc:'조명 기구 설치, 붙박이가 아닌 가구·가전 반입 및 배치.',
+   why:'모든 마감이 끝난 뒤 배치해야 운반 중 벽·바닥이 긁히지 않는다.',
+   skip:'가구를 먼저 들이면 이후 공정 작업자들이 동선 확보를 위해 옮기다 파손 위험이 커진다.'},
+  {n:'준공', days:'1일', desc:'최종 점검, 하자 리스트 작성, 입주청소.',
+   why:'계약서상 하자보수 기준점이 되는 시점 — 이때 발견 못한 하자는 나중에 책임 소재가 애매해진다.',
+   skip:'점검 없이 넘어가면 숨은 하자(문 안 맞음, 실리콘 불량 등)를 입주 후 본인 비용으로 고쳐야 할 수 있다.'},
+];
+
+const tlEl = document.getElementById('timeline');
+timeline.forEach((t,i)=>{
+  const item = document.createElement('div');
+  item.className = 'tl-item';
+  item.innerHTML = `
+    <div class="tl-dot">${i+1}</div>
+    <div class="tl-head" data-i="${i}">
+      <span class="tl-name">${t.n}</span>
+      <span class="tl-days">${t.days}</span>
+      <span class="tl-arrow">▸</span>
+    </div>
+    <div class="tl-body" id="tlb-${i}">
+      <div class="tl-row"><b>무슨 공사인지</b>${t.desc}</div>
+      <div class="tl-row"><b>왜 이 순서인지</b>${t.why}</div>
+      <div class="tl-row skip"><b>건너뛰면 / 순서를 어기면</b>${t.skip}</div>
+    </div>`;
+  tlEl.appendChild(item);
+});
+tlEl.addEventListener('click', e=>{
+  const head = e.target.closest('.tl-head');
+  if(!head) return;
+  const i = head.dataset.i;
+  const body = document.getElementById('tlb-'+i);
+  const wasOpen = body.classList.contains('open');
+  document.querySelectorAll('.tl-body.open').forEach(b=>b.classList.remove('open'));
+  document.querySelectorAll('.tl-item.active').forEach(el=>el.classList.remove('active'));
+  if(!wasOpen){ body.classList.add('open'); head.closest('.tl-item').classList.add('active'); }
+});
+
+/* ===================== ② 용어 사전 ===================== */
+const glossary = [
+  {t:'올수리', d:'집 전체(바닥·벽·천장·욕실·주방·배관·전기)를 손대는 전면 리모델링. "특올수리"는 여기에 급수·배수 배관까지 전면 교체하는 것을 더한 것.',
+   mis:'"올수리"라는 말만 듣고 배관까지 다 바꾸는 줄 아는 경우가 많다. 배관 전면교체 여부는 반드시 별도로 확인해야 한다.',
+   money:'배관 전면교체가 빠진 "올수리"와, 포함된 "특올수리"는 500만~1,000만원 차이가 난다.'},
+  {t:'부분수리', d:'집 전체가 아니라 욕실만, 도배만, 샷시만 등 일부 공간·항목만 고치는 것.',
+   mis:'부분수리를 여러 번 나눠 하면 항목별로는 싸 보여도 업체 출장비·철거 중복으로 총액이 올수리보다 비싸질 수 있다.',
+   money:'항목이 2개 이상 겹치면(예: 욕실+주방) 한 번에 올수리로 묶는 게 대개 더 저렴하다.'},
+  {t:'반셀프', d:'인테리어 업체(턴키)에 일괄 맡기지 않고, 본인이 공정별 업체·자재를 직접 섭외·조율하는 방식.',
+   mis:'"셀프"라는 이름 때문에 직접 시공하는 걸로 오해하기 쉽지만, 실제 시공은 여전히 각 공정 전문업체가 한다 — 본인이 하는 건 "관리"다.',
+   money:'중화한신 실사례에서 반셀프는 턴키 대비 20~30% 저렴(예: 4,555만 vs 환산 5,700만). 대신 하자 발생 시 어느 업체 책임인지 본인이 가려야 한다.'},
+  {t:'턴키', d:'인테리어 업체 한 곳에 전 공정을 일괄 위임하는 방식. 업체가 하청업체를 관리하고 사용자는 업체 한 곳과만 소통한다.',
+   mis:'턴키라고 다 비싼 건 아니다 — 업체 규모·자재 등급에 따라 반셀프보다 비쌀 수도, 큰 차이 안 날 수도 있다.',
+   money:'관리 부담이 적은 대신 반셀프 대비 20~30% 프리미엄이 붙는 게 이 단지 실사례 패턴이다.'},
+  {t:'발코니 확장', d:'발코니(베란다)를 철거해 거실·방과 하나의 공간으로 합치는 것. 합법 시공이려면 구청 신고 대상.',
+   mis:'확장은 "공간을 넓히는 것"이라 단순하게 생각하기 쉽지만, 실제로는 단열재 시공·바닥난방 신설이 함께 들어가는 별도 공정이다.',
+   money:'평당 단가가 아니라 통으로 수백만원이 붙는다(이 단지 기준 확장 유무 차이 약 200~400만원).'},
+  {t:'샷시 (창호)', d:'창틀+유리 세트. 단열·방음·결로 방지의 핵심 부위. 부분(일부 창만) 또는 전체 교체로 나뉜다.',
+   mis:'"어차피 창문"이라 저렴할 거라 생각하기 쉽지만, 30년 구축에서는 골조와 맞물려 있어 견적 편차가 가장 큰 항목 중 하나다(이 단지 400만~1,500만).',
+   money:'브랜드(KCC/한샘/LX Z:IN)·유리 두께·부분/전체 여부로 3배 가까이 벌어진다.'},
+  {t:'시스템에어컨', d:'벽걸이형이 아니라 천장에 매립해 설치하는 에어컨. 목공·전기 공정과 맞물려야 해서 인테리어와 함께 결정해야 하는 항목.',
+   mis:'입주 후 따로 설치해도 될 것 같지만, 천장 매립이라 인테리어 완료 후엔 천장을 다시 뜯어야 한다 — 반드시 공정 중에 결정.',
+   money:'대당 약 170만원(서울 25평 실사례 3대 510만원 기준). 방 개수만큼 늘어난다.'},
+  {t:'중문', d:'현관과 거실 사이에 다는 유리/알루미늄 문. 단열·미세먼지 차단 목적.',
+   mis:'인테리어 필수 항목처럼 광고되지만, 실제로는 선택 항목이고 없어도 생활에 지장 없다.',
+   money:'이 단지 실사례 기준 약 95만~130만원. 예산이 빠듯하면 가장 먼저 뺄 수 있는 항목.'},
+  {t:'강마루 / 장판 / 마루', d:'바닥 마감재 3종. 강마루(합판+무늬목, 내구성 좋음) > 장판(비닐, 저렴) > 원목마루(고급, 관리 까다로움) 순으로 대체로 단가가 갈린다.',
+   mis:'"마루"라고 다 같은 게 아니다. 강마루와 원목마루는 관리법·단가가 전혀 다르다.',
+   money:'같은 면적이라도 장판→강마루→원목마루로 갈수록 단가가 크게 뛴다. 이 단지 실사례 강마루 시공비는 약 260만원(24평 기준).'},
+  {t:'급수/배수 배관', d:'수돗물이 들어오고(급수) 나가는(배수) 관. 30년 구축은 노후로 녹물·누수 위험이 있어 교체 여부가 쟁점.',
+   mis:'"배관청소"와 "배관 전면교체"는 완전히 다른 공사다. 견적서에 "배관" 항목이 있다고 안심하면 안 되고 범위를 확인해야 한다.',
+   money:'전면교체가 포함되면(특올수리) 500만~1,000만원이 추가된다. 이 단지 실사례 대부분은 청소·부분교체 수준이었다.'},
+  {t:'몰딩', d:'벽과 천장이 만나는 경계, 문틀 주변 등에 대는 마감재 띠. 마감의 완성도를 좌우하는 디테일.',
+   mis:'몰딩이 없거나 저품질이면 도배·페인트가 아무리 깔끔해도 전체적으로 "안 끝난" 느낌이 난다.',
+   money:'목공 견적에 포함되는 경우가 많아 별도 항목으로 잘 안 보이지만, 자재 등급(무몰딩/단순몰딩/고급몰딩)에 따라 목공비가 달라진다.'},
+  {t:'걸레받이', d:'벽과 바닥이 만나는 부분에 대는 마감재. 바닥재 들뜸·충격을 막고 벽 오염을 방지.',
+   mis:'없어도 되는 장식으로 오해하기 쉽지만, 바닥재 마감 처리와 청소 편의에 실질적으로 관여한다.',
+   money:'바닥 공사비에 통상 포함되어 별도 청구되지 않는 경우가 많다 — 견적서에서 빠져 있다면 확인이 필요하다.'},
+  {t:'도기', d:'변기·세면대·양변기 등 욕실 위생 도자기 제품 전체를 부르는 말.',
+   mis:'"타일 공사"에 도기가 당연히 포함될 거라 생각하기 쉽지만, 견적서에 타일과 도기가 별도 항목으로 잡히는 경우가 흔하다.',
+   money:'브랜드(대림/아메리칸스탠다드 등)와 등급에 따라 욕실 하나에 50만~200만원 이상 차이 난다.'},
+  {t:'젠다이', d:'욕실 세면대나 욕조 옆에 타일/대리석으로 만드는 평평한 선반. 수납·미관 목적.',
+   mis:'필수 구조물이 아니라 선택 마감이라, 있으면 "고급스러워 보이는" 효과가 크지만 없어도 기능상 문제없다.',
+   money:'욕실 공사에 옵션으로 붙는 항목이라 견적서에서 별도 확인 없으면 빠져 있을 수 있다.'},
+  {t:'우물천장', d:'천장 중앙부를 한 단 낮춰 단(段)을 만드는 목공 디자인. 간접조명을 넣는 자리로도 쓰인다.',
+   mis:'천장이 낮아지는 구조라 층고가 낮은 30년 구축에서는 오히려 답답해 보일 수 있다 — 무조건 고급스러운 게 아니다.',
+   money:'목공 공정에 별도 자재·시간이 들어가는 항목이라 견적에 추가로 잡힌다.'},
+  {t:'간접조명', d:'전구가 직접 보이지 않고 몰딩·우물천장 안쪽에 숨겨 빛만 새어 나오게 하는 조명 방식.',
+   mis:'"조명 하나 다는 것"처럼 보이지만 실제로는 우물천장·목공 작업과 묶여 있어 단독으로 추가하기 어렵다.',
+   money:'우물천장·목공 견적에 포함되는 경우가 많아, 간접조명만 따로 빼서 절감하기는 쉽지 않다.'},
+];
+
+const gEl = document.getElementById('glossary');
+glossary.forEach((g,i)=>{
+  const card = document.createElement('div');
+  card.className = 'gcard';
+  card.innerHTML = `
+    <div class="ghead" data-i="${i}">
+      <span class="gterm">${g.t}</span>
+      <span class="tl-arrow">▸</span>
+    </div>
+    <div class="gbody" id="gb-${i}">
+      <p class="def">${g.d}</p>
+      <div class="mis"><b>오해하는 지점 —</b> ${g.mis}</div>
+      <div class="money"><b>돈과의 연결 —</b> ${g.money}</div>
+    </div>`;
+  gEl.appendChild(card);
+});
+gEl.addEventListener('click', e=>{
+  const head = e.target.closest('.ghead');
+  if(!head) return;
+  const i = head.dataset.i;
+  const body = document.getElementById('gb-'+i);
+  const arrow = head.querySelector('.tl-arrow');
+  const wasOpen = body.classList.contains('open');
+  body.classList.toggle('open');
+  arrow.style.transform = (!wasOpen) ? 'rotate(90deg)' : 'rotate(0)';
+});
+
+/* ===================== ③ 다섯 갈래 ===================== */
+const forks = [
+  {t:'확장', a:'안 함', av:0, b:'함', bv:300, unit:'만원 추가',
+   note:'확장을 하면 <b>+약 200~400만원</b>이 붙는다. 84타입 3,800만 실사례는 확장을 뺀 구성이라 상대적으로 저렴했다.',
+   src:'서울 25평 실사례(확장 추가분 190만) + 84타입 실사례(확장 제외 3,800만)'},
+  {t:'샷시', a:'부분', av:400, b:'전체', bv:550, unit:'만원',
+   note:'부분(베란다외창+거실창)과 전체 교체 차이는 <b>약 150만원</b>. 다만 안 하면 0원이라 편차의 시작점은 더 넓다.',
+   src:'84타입 부분샷시 400만 vs 59타입 전체샷시 550만(2026년 KCC 실사례)'},
+  {t:'시스템에어컨', a:'0대', av:0, b:'3대', bv:510, unit:'만원',
+   note:'대당 약 170만원. 방3+거실 기준 3~4대면 <b>510만~680만원</b>이 통으로 붙는다.',
+   src:'서울 25평 실사례 3대 510만원(에어컨 별도 견적)'},
+  {t:'브랜드 자재', a:'무명(KCC 등)', av:550, b:'한샘 견적', bv:1500, unit:'만원(샷시 기준)',
+   note:'같은 "샷시 전체"인데 브랜드에 따라 <b>거의 3배</b> 차이(550만 vs 1,500만). 한샘 1,500만은 실사례에서도 "아웃라이어"로 분류됐다.',
+   src:'59타입 KCC 550만(실시공) vs 한샘 1,500만(견적만, 미시공)'},
+  {t:'턴키 vs 반셀프', a:'반셀프', av:4555, b:'턴키', bv:5700, unit:'만원(24평 전체 환산)',
+   note:'같은 범위 공사라도 방식만으로 <b>20~30%(약 1,000만원 내외)</b> 차이가 난다. 대신 반셀프는 관리 부담이 사용자에게 넘어온다.',
+   src:'24평 완전일치 반셀프 실사례 4,555만 → 턴키 환산 ~5,700만(같은 단지 턴키 견적 중심 5,000만과 정합)'},
+];
+const fEl = document.getElementById('forks');
+forks.forEach(f=>{
+  const max = Math.max(f.av, f.bv) * 1.08;
+  const wa = Math.max(6, (f.av/max)*100);
+  const wb = Math.max(6, (f.bv/max)*100);
+  const card = document.createElement('div');
+  card.className = 'fork';
+  card.innerHTML = `
+    <h3>${f.t}</h3>
+    <div class="fork-bars">
+      <div class="fbar-row"><span class="fbar-label">${f.a}</span>
+        <div class="fbar-track"><div class="fbar-fill" style="width:${wa}%;background:var(--muted)"><span>${f.av.toLocaleString()}</span></div></div></div>
+      <div class="fbar-row"><span class="fbar-label">${f.b}</span>
+        <div class="fbar-track"><div class="fbar-fill" style="width:${wb}%;background:var(--accent)"><span>${f.bv.toLocaleString()}</span></div></div></div>
+    </div>
+    <p class="fork-note">${f.note}</p>
+    <p class="fork-src">근거: ${f.src}</p>`;
+  fEl.appendChild(card);
+});
+
+/* ===================== ④ 예산 시뮬레이터 ===================== */
+const BASE = 2300;
+const COST = { bath:840, kitchen:450, door:130, sash:{none:0,part:400,full:550}, ext:{no:0,yes:300}, acPerUnit:170 };
+const state = { method:'turnkey', bath:true, kitchen:true, door:true, sash:'full', ext:'no', ac:0 };
+
+function seg(id, key, cast){
+  document.querySelectorAll('#'+id+' button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#'+id+' button').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+      state[key] = cast ? cast(btn.dataset.v) : btn.dataset.v;
+      compute();
+    });
+  });
+}
+seg('seg-method','method');
+seg('seg-sash','sash');
+seg('seg-ext','ext');
+
+['bath','kitchen','door'].forEach(k=>{
+  document.getElementById('t-'+k).addEventListener('change', e=>{ state[k]=e.target.checked; compute(); });
+});
+document.getElementById('ac').addEventListener('input', e=>{
+  state.ac = +e.target.value;
+  document.getElementById('ac-v').textContent = state.ac + '대';
+  compute();
+});
+
+const MARKERS = [
+  {label:'반셀프 최소 (샷시 제외)', v:1500, note:'59타입, 반셀프, 샷시 별도'},
+  {label:'84타입 · 32평 (확장·에어컨 제외)', v:3800, note:'⚠ 더 큰 평형 — 직접 비교 주의'},
+  {label:'59타입 올수리 · 2025년 시공', v:5800, note:'"지금 하면 6~7천" 이라 본인이 직접 물가 보정 언급'},
+  {label:'서울 25평 턴키 확장포함 (에어컨 별도)', v:5490, note:'koala_log 실사례'},
+  {label:'풀옵션 프리미엄', v:8500, note:'⚠ 부엌·조명 고급라인, 참고용'},
+];
+
+function compute(){
+  let total = BASE;
+  if(state.bath) total += COST.bath;
+  if(state.kitchen) total += COST.kitchen;
+  if(state.door) total += COST.door;
+  total += COST.sash[state.sash];
+  total += COST.ext[state.ext];
+  total += state.ac * COST.acPerUnit;
+  if(state.method === 'turnkey') total *= 1.25;
+  total = Math.round(total);
+
+  document.getElementById('total').textContent = total.toLocaleString() + '만원';
+  const flagEl = document.getElementById('flag');
+  if(total <= 6000 && total >= 5000){
+    flagEl.innerHTML = `<span class="flag in">✓ 예산 5,000~6,000만원 안</span>`;
+  } else if(total > 6000){
+    flagEl.innerHTML = `<span class="flag over">⚠ 예산 초과 (+${(total-6000).toLocaleString()}만원)</span>`;
+  } else {
+    flagEl.innerHTML = `<span class="flag under">예산 아래 (여유 ${(5000-total).toLocaleString()}만원)</span>`;
+  }
+
+  // gauge
+  const MAX = 9000;
+  const gauge = document.getElementById('gauge');
+  const bandL = (5000/MAX)*100, bandR = (6000/MAX)*100;
+  const needleL = Math.min(96, (total/MAX)*100);
+  let html = `<div class="band" style="left:${bandL}%; width:${bandR-bandL}%"></div>`;
+  MARKERS.forEach(m=>{
+    const l = Math.min(97,(m.v/MAX)*100);
+    html += `<div class="mk" style="left:${l}%"></div>`;
+  });
+  html += `<div class="needle" style="left:${needleL}%"></div>`;
+  gauge.innerHTML = html;
+
+  const mkList = document.getElementById('marklist');
+  mkList.innerHTML = MARKERS.map(m=>
+    `<div class="mk-row"><span class="mk-dot"></span><span><b>${m.v.toLocaleString()}만</b> — ${m.label}${m.note.startsWith('⚠') ? ` <span class="mk-warn">${m.note}</span>` : ` · ${m.note}`}</span></div>`
+  ).join('') + `<div class="mk-row"><span style="width:8px;height:8px;background:var(--b);border-radius:2px;flex:none"></span><span>노란 세로선 = 내 조합 (<b>${total.toLocaleString()}만</b>)</span></div>`;
+}
+compute();
+
+/* ===================== ⑤ 무엇을 포기하나 ===================== */
+const tradeoffs = [
+  {k:'A', t:'확장을 포기한다', gain:'절감 약 200~400만원. 예산 범위 안에서 배관 특올수리 본체(철거·설비·목공·타일·도배·바닥)를 완결할 수 있다.',
+   cost:'30년 구축 특유의 좁은 공간감이 그대로 남는다. 발코니가 거실·방과 분리된 채 유지된다.'},
+  {k:'B', t:'반셀프로 진행한다', gain:'절감 약 500만~1,000만원(턴키 대비 20~30%). 이 단지 반셀프 실사례가 여럿 있어 방식 자체는 검증됐다.',
+   cost:'공정별 업체를 직접 섭외·조율해야 한다. 하자 발생 시 어느 업체 책임인지 본인이 가려야 해서 관리 부담과 책임 분리 리스크가 커진다.'},
+  {k:'C', t:'브랜드 자재를 포기한다', gain:'샷시·도어·타일 등을 무명 제품으로 대체하면 항목별로 크게는 3배까지 절감(예: 한샘 1,500만 견적 vs KCC 550만 실시공).',
+   cost:'장기 내구성이 불확실하고, 훗날 재판매 시 상태 평가에 영향을 줄 수 있다. 저가 견적(3,500만, 미시공) 사례처럼 "너무 싼 견적"은 자재 등급을 반드시 확인해야 한다.'},
+];
+const toEl = document.getElementById('tradeoffs');
+tradeoffs.forEach(t=>{
+  const card = document.createElement('div');
+  card.className = 'to-card';
+  card.innerHTML = `
+    <h3><span class="to-badge">${t.k}</span>${t.t}</h3>
+    <div class="to-grid">
+      <div class="to-col gain"><div class="h">절감</div><p>${t.gain}</p></div>
+      <div class="to-col cost"><div class="h">대가</div><p>${t.cost}</p></div>
+    </div>`;
+  toEl.appendChild(card);
+});
+</script>
+</body>
+</html>
