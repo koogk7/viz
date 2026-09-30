@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>viz 목록</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #1a1a1a;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --accent: #2563eb;
+    --card-bg: #f9fafb;
+    --card-hover: #f0f2f5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1115;
+      --fg: #e5e7eb;
+      --muted: #9aa3af;
+      --border: #2a2e37;
+      --accent: #60a5fa;
+      --card-bg: #171a21;
+      --card-hover: #1f232c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px 16px 48px;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Pretendard, Roboto, sans-serif;
+    line-height: 1.5;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  header h1 {
+    font-size: 1.5rem;
+    margin: 0 0 4px;
+  }
+  header .meta {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin: 0 0 20px;
+  }
+  input#search {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card-bg);
+    color: var(--fg);
+    margin-bottom: 20px;
+  }
+  input#search:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  ul.list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  li.item {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card-bg);
+    transition: background 0.15s ease;
+  }
+  li.item:hover {
+    background: var(--card-hover);
+  }
+  li.item.hidden {
+    display: none;
+  }
+  a.item-link {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 12px;
+    padding: 12px 14px;
+    text-decoration: none;
+    color: var(--fg);
+  }
+  .item-title {
+    font-weight: 700;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .item-slug {
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.85rem;
+  }
+  .item-date {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.85rem;
+  }
+  #empty {
+    display: none;
+    color: var(--muted);
+    padding: 24px 0;
+    text-align: center;
+  }
+  @media (max-width: 600px) {
+    a.item-link {
+      flex-direction: column;
+      gap: 4px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>viz 목록</h1>
+    <p class="meta">29개 · 갱신일 2026-10-01</p>
+  </header>
+  <input type="text" id="search" placeholder="슬러그·제목 검색" autocomplete="off">
+  <ul class="list" id="list">
+      <li class="item" data-search="chinese-review 중국어 복습 — 최근 물어본 표현">
+        <a class="item-link" href="./chinese-review/">
+          <span class="item-title">중국어 복습 — 최근 물어본 표현</span>
+          <span class="item-slug">chinese-review</span>
+          <span class="item-date">2026-09-29</span>
+        </a>
+      </li>
+      <li class="item" data-search="interior-basics 인테리어 기초 — 59㎡ 특올수리">
+        <a class="item-link" href="./interior-basics/">
+          <span class="item-title">인테리어 기초 — 59㎡ 특올수리</span>
+          <span class="item-slug">interior-basics</span>
+          <span class="item-date">2026-09-29</span>
+        </a>
+      </li>
+      <li class="item" data-search="rank-momentum 순위모멘텀">
+        <a class="item-link" href="./rank-momentum/">
+          <span class="item-title">순위모멘텀</span>
+          <span class="item-slug">rank-momentum</span>
+          <span class="item-date">2026-09-28</span>
+        </a>
+      </li>
+      <li class="item" data-search="chinese-review-260913 중국어 복습 — 8/23~9/13">
+        <a class="item-link" href="./chinese-review-260913/">
+          <span class="item-title">중국어 복습 — 8/23~9/13</span>
+          <span class="item-slug">chinese-review-260913</span>
+          <span class="item-date">2026-09-13</span>
+        </a>
+      </li>
+      <li class="item" data-search="chinese-song-grammar-260913 像是中了你的毒 — 중국어 학습">
+        <a class="item-link" href="./chinese-song-grammar-260913/">
+          <span class="item-title">像是中了你的毒 — 중국어 학습</span>
+          <span class="item-slug">chinese-song-grammar-260913</span>
+          <span class="item-date">2026-09-13</span>
+        </a>
+      </li>
+      <li class="item" data-search="data-arch-12 데이터 아키텍처 12패턴">
+        <a class="item-link" href="./data-arch-12/">
+          <span class="item-title">데이터 아키텍처 12패턴</span>
+          <span class="item-slug">data-arch-12</span>
+          <span class="item-date">2026-09-13</span>
+        </a>
+      </li>
+      <li class="item" data-search="english-90 영어 문법 90%">
+        <a class="item-link" href="./english-90/">
+          <span class="item-title">영어 문법 90%</span>
+          <span class="item-slug">english-90</span>
+          <span class="item-date">2026-09-13</span>
+        </a>
+      </li>
+      <li class="item" data-search="kr-rank-momentum 국내 순위모멘텀">
+        <a class="item-link" href="./kr-rank-momentum/">
+          <span class="item-title">국내 순위모멘텀</span>
+          <span class="item-slug">kr-rank-momentum</span>
+          <span class="item-date">2026-09-13</span>
+        </a>
+      </li>
+      <li class="item" data-search="sp500-rank-momentum s&amp;p500 순위모멘텀">
+        <a class="item-link" href="./sp500-rank-momentum/">
+          <span class="item-title">S&amp;P500 순위모멘텀</span>
+          <span class="item-slug">sp500-rank-momentum</span>
+          <span class="item-date">2026-09-13</span>
+        </a>
+      </li>
+      <li class="item" data-search="money-scale-ladder 크기 감각 — 돈 · 석유">
+        <a class="item-link" href="./money-scale-ladder/">
+          <span class="item-title">크기 감각 — 돈 · 석유</span>
+          <span class="item-slug">money-scale-ladder</span>
+          <span class="item-date">2026-09-03</span>
+        </a>
+      </li>
+      <li class="item" data-search="result-complement-hao 결과보어 好 — 동작 완결 인터랙티브 (260831)">
+        <a class="item-link" href="./result-complement-hao/">
+          <span class="item-title">결과보어 好 — 동작 완결 인터랙티브 (260831)</span>
+          <span class="item-slug">result-complement-hao</span>
+          <span class="item-date">2026-09-01</span>
+        </a>
+      </li>
+      <li class="item" data-search="chinese-review-deck 중국어 복습 — 최근 물어본 표현">
+        <a class="item-link" href="./chinese-review-deck/">
+          <span class="item-title">중국어 복습 — 최근 물어본 표현</span>
+          <span class="item-slug">chinese-review-deck</span>
+          <span class="item-date">2026-08-11</span>
+        </a>
+      </li>
+      <li class="item" data-search="dui-practice 对 연습문제">
+        <a class="item-link" href="./dui-practice/">
+          <span class="item-title">对 연습문제</span>
+          <span class="item-slug">dui-practice</span>
+          <span class="item-date">2026-07-26</span>
+        </a>
+      </li>
+      <li class="item" data-search="theogony-family-tree 신통기 족보 — 헤시오도스 신들의 계보">
+        <a class="item-link" href="./theogony-family-tree/">
+          <span class="item-title">신통기 족보 — 헤시오도스 신들의 계보</span>
+          <span class="item-slug">theogony-family-tree</span>
+          <span class="item-date">2026-07-25</span>
+        </a>
+      </li>
+      <li class="item" data-search="chinese-word-order-0718 어순 배열 — 2026-07-18 구문">
+        <a class="item-link" href="./chinese-word-order-0718/">
+          <span class="item-title">어순 배열 — 2026-07-18 구문</span>
+          <span class="item-slug">chinese-word-order-0718</span>
+          <span class="item-date">2026-07-18</span>
+        </a>
+      </li>
+      <li class="item" data-search="personal-ledger 개인 원장 — 라이프로그 소화 시각화">
+        <a class="item-link" href="./personal-ledger/">
+          <span class="item-title">개인 원장 — 라이프로그 소화 시각화</span>
+          <span class="item-slug">personal-ledger</span>
+          <span class="item-date">2026-07-06</span>
+        </a>
+      </li>
+      <li class="item" data-search="benford-law 벤포드 법칙 시뮬레이터">
+        <a class="item-link" href="./benford-law/">
+          <span class="item-title">벤포드 법칙 시뮬레이터</span>
+          <span class="item-slug">benford-law</span>
+          <span class="item-date">2026-06-30</span>
+        </a>
+      </li>
+      <li class="item" data-search="word-order-quiz 중국어 어순 배열 퀴즈 — 18문제">
+        <a class="item-link" href="./word-order-quiz/">
+          <span class="item-title">중국어 어순 배열 퀴즈 — 18문제</span>
+          <span class="item-slug">word-order-quiz</span>
+          <span class="item-date">2026-06-29</span>
+        </a>
+      </li>
+      <li class="item" data-search="working-capital-ccc 운전자본 사이클 &amp; 현금전환주기(ccc)">
+        <a class="item-link" href="./working-capital-ccc/">
+          <span class="item-title">운전자본 사이클 &amp; 현금전환주기(CCC)</span>
+          <span class="item-slug">working-capital-ccc</span>
+          <span class="item-date">2026-06-28</span>
+        </a>
+      </li>
+      <li class="item" data-search="fx-swap-crisis 환율 1500, 진짜 위기일까? — fx스왑으로 보는 외환위기">
+        <a class="item-link" href="./fx-swap-crisis/">
+          <span class="item-title">환율 1500, 진짜 위기일까? — FX스왑으로 보는 외환위기</span>
+          <span class="item-slug">fx-swap-crisis</span>
+          <span class="item-date">2026-06-24</span>
+        </a>
+      </li>
+      <li class="item" data-search="hanja-korea 한자, 한국에 어떻게 흘러들어왔나 — 인터랙티브 타임라인">
+        <a class="item-link" href="./hanja-korea/">
+          <span class="item-title">한자, 한국에 어떻게 흘러들어왔나 — 인터랙티브 타임라인</span>
+          <span class="item-slug">hanja-korea</span>
+          <span class="item-date">2026-06-21</span>
+        </a>
+      </li>
+      <li class="item" data-search="server101-design 서버개발 101 — 설계 45주제">
+        <a class="item-link" href="./server101-design/">
+          <span class="item-title">서버개발 101 — 설계 45주제</span>
+          <span class="item-slug">server101-design</span>
+          <span class="item-date">2026-06-17</span>
+        </a>
+      </li>
+      <li class="item" data-search="server101-pilot 서버개발 101 — 파일럿 슬라이드 (2주제)">
+        <a class="item-link" href="./server101-pilot/">
+          <span class="item-title">서버개발 101 — 파일럿 슬라이드 (2주제)</span>
+          <span class="item-slug">server101-pilot</span>
+          <span class="item-date">2026-06-16</span>
+        </a>
+      </li>
+      <li class="item" data-search="journal-map 분개지도 — 시나리오 데이터 흐름">
+        <a class="item-link" href="./journal-map/">
+          <span class="item-title">분개지도 — 시나리오 데이터 흐름</span>
+          <span class="item-slug">journal-map</span>
+          <span class="item-date">2026-06-12</span>
+        </a>
+      </li>
+      <li class="item" data-search="accounting-system moc — 회계 시스템 구조">
+        <a class="item-link" href="./accounting-system/">
+          <span class="item-title">MOC — 회계 시스템 구조</span>
+          <span class="item-slug">accounting-system</span>
+          <span class="item-date">2026-06-11</span>
+        </a>
+      </li>
+      <li class="item" data-search="accounting-talk 회계 시스템 구조 — finance integration 발표">
+        <a class="item-link" href="./accounting-talk/">
+          <span class="item-title">회계 시스템 구조 — Finance Integration 발표</span>
+          <span class="item-slug">accounting-talk</span>
+          <span class="item-date">2026-06-11</span>
+        </a>
+      </li>
+      <li class="item" data-search="kv-cache kv캐쉬 vram 계산기">
+        <a class="item-link" href="./kv-cache/">
+          <span class="item-title">KV캐쉬 VRAM 계산기</span>
+          <span class="item-slug">kv-cache</span>
+          <span class="item-date">2026-06-10</span>
+        </a>
+      </li>
+      <li class="item" data-search="forgetting-curve 망각곡선 · 간격반복 시뮬레이터">
+        <a class="item-link" href="./forgetting-curve/">
+          <span class="item-title">망각곡선 · 간격반복 시뮬레이터</span>
+          <span class="item-slug">forgetting-curve</span>
+          <span class="item-date">2026-06-09</span>
+        </a>
+      </li>
+      <li class="item" data-search="insurance-csm 보험 csm · 수익인식 계산기 (ifrs 17)">
+        <a class="item-link" href="./insurance-csm/">
+          <span class="item-title">보험 CSM · 수익인식 계산기 (IFRS 17)</span>
+          <span class="item-slug">insurance-csm</span>
+          <span class="item-date">2026-06-09</span>
+        </a>
+      </li>
+  </ul>
+  <p id="empty">일치하는 항목이 없습니다.</p>
+</div>
+<script>
+(function () {
+  var input = document.getElementById('search');
+  var items = Array.prototype.slice.call(document.querySelectorAll('#list .item'));
+  var empty = document.getElementById('empty');
+
+  function applyFilter() {
+    var q = input.value.trim().toLowerCase();
+    var visibleCount = 0;
+    items.forEach(function (li) {
+      var hay = li.getAttribute('data-search') || '';
+      var match = q === '' || hay.indexOf(q) !== -1;
+      li.classList.toggle('hidden', !match);
+      if (match) visibleCount++;
+    });
+    empty.style.display = visibleCount === 0 ? 'block' : 'none';
+  }
+
+  input.addEventListener('input', applyFilter);
+})();
+</script>
+</body>
+</html>
