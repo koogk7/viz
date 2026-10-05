@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>인테리어 가격 감각 딥다이브</title>
+<link rel="icon" href="data:,">
+<meta name="description" content="59㎡ 30년차 아파트 올수리 공정별·자재 등급별 가격 감각을 기르는 도구 (2026 서울·수도권 추정)">
+<style>
+:root{
+  --bg:#f3f1ec; --surface:#fbfaf7; --surface2:#ebe8e0; --ink:#1e1c19; --ink2:#57524a; --ink3:#7a746a;
+  --line:#dbd6ca; --accent:#0d6e78; --accent-ink:#ffffff; --accent-soft:#d8eaeb;
+  --g-budget:#5a8228; --g-budget-soft:#e4ecd5; --g-mid:#a96b0f; --g-mid-soft:#f2e4c8; --g-prem:#a23d66; --g-prem-soft:#f1dbe4;
+  --ok:#2a7a4b; --ok-soft:#d9eddf; --bad:#b0352d; --bad-soft:#f3dad7;
+  --c-struct:#0d6e78; --c-finish:#8c7f68; --c-furn:#4f6a85; --c-opt:#a23d66; --c-mgmt:#9a958b;
+  --shadow:0 1px 0 rgba(30,28,25,.04),0 6px 18px -10px rgba(30,28,25,.25);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141311; --surface:#1d1b19; --surface2:#292623; --ink:#ece8e1; --ink2:#b7b0a5; --ink3:#8f897e;
+    --line:#37332e; --accent:#58bbc5; --accent-ink:#062a2e; --accent-soft:#163538;
+    --g-budget:#9cc566; --g-budget-soft:#2a331d; --g-mid:#e2a645; --g-mid-soft:#3a2d14; --g-prem:#e283a8; --g-prem-soft:#3d2230;
+    --ok:#74c796; --ok-soft:#1c3226; --bad:#f09088; --bad-soft:#3d1f1c;
+    --c-struct:#58bbc5; --c-finish:#b0a187; --c-furn:#7f9cba; --c-opt:#e283a8; --c-mgmt:#6e6a62;
+    --shadow:0 1px 0 rgba(0,0,0,.3),0 6px 18px -10px rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141311; --surface:#1d1b19; --surface2:#292623; --ink:#ece8e1; --ink2:#b7b0a5; --ink3:#8f897e;
+  --line:#37332e; --accent:#58bbc5; --accent-ink:#062a2e; --accent-soft:#163538;
+  --g-budget:#9cc566; --g-budget-soft:#2a331d; --g-mid:#e2a645; --g-mid-soft:#3a2d14; --g-prem:#e283a8; --g-prem-soft:#3d2230;
+  --ok:#74c796; --ok-soft:#1c3226; --bad:#f09088; --bad-soft:#3d1f1c;
+  --c-struct:#58bbc5; --c-finish:#b0a187; --c-furn:#7f9cba; --c-opt:#e283a8; --c-mgmt:#6e6a62;
+  --shadow:0 1px 0 rgba(0,0,0,.3),0 6px 18px -10px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.55 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR","Segoe UI",sans-serif;
+  font-variant-numeric:tabular-nums;overflow-x:hidden;word-break:keep-all;overflow-wrap:break-word}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px 64px}
+h1{font-size:26px;line-height:1.2;margin:0;letter-spacing:-.02em;font-weight:800}
+h2{font-size:20px;line-height:1.3;margin:0 0 4px;letter-spacing:-.01em;font-weight:750}
+h3{font-size:15px;margin:0 0 6px;font-weight:700}
+p{margin:0}
+.small,.muted{font-size:13px;color:var(--ink2)}
+a{color:var(--accent)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+.num{font-variant-numeric:tabular-nums}
+
+header.top{padding:20px 0 12px;display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+header.top .sub{margin-top:6px;max-width:60ch}
+.theme-btn{flex:none;min-width:44px;min-height:44px;border:1px solid var(--line);background:var(--surface);border-radius:12px;font-size:13px;padding:0 12px}
+
+.tabs{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);padding:8px 0;margin:0 -16px 16px;padding-left:16px;padding-right:16px;border-bottom:1px solid var(--line)}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--surface2);padding:4px;border-radius:14px;max-width:760px}
+.seg button{border:0;background:transparent;min-height:44px;border-radius:10px;font-size:13px;font-weight:650;color:var(--ink2);padding:0 4px;line-height:1.2}
+.seg button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+@media(min-width:520px){.seg button{font-size:15px}h1{font-size:28px}}
+
+.tabpanel[hidden]{display:none}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border:1px solid var(--line);background:var(--surface);border-radius:999px;font-size:13px;color:var(--ink2)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:650}
+.tag{display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:12px;line-height:1.5;background:var(--surface2);color:var(--ink2);white-space:nowrap}
+.tag.budget{background:var(--g-budget-soft);color:var(--g-budget)}
+.tag.mid{background:var(--g-mid-soft);color:var(--g-mid)}
+.tag.premium{background:var(--g-prem-soft);color:var(--g-prem)}
+.tag.est{background:var(--g-mid-soft);color:var(--g-mid)}
+input[type=search],select{min-height:44px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:0 12px;font:inherit;min-width:0}
+input[type=search]{flex:1 1 200px}
+
+/* process cards */
+.proc-list{list-style:none;margin:0;padding:0;position:relative}
+.proc{position:relative;padding-left:44px;padding-bottom:14px}
+.proc::before{content:"";position:absolute;left:15px;top:30px;bottom:-4px;width:2px;background:var(--line)}
+.proc:last-child::before{display:none}
+.proc .rail{position:absolute;left:0;top:10px;width:32px;height:32px;border-radius:50%;background:var(--surface);border:2px solid var(--accent);color:var(--accent);font-weight:800;font-size:13px;display:grid;place-items:center}
+.proc.last .rail{border-style:dashed}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.card-head{width:100%;text-align:left;background:transparent;border:0;padding:14px 14px 10px;display:block;border-radius:16px}
+.card-title{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center}
+.card-title b{font-size:17px;font-weight:750;letter-spacing:-.01em}
+.one{margin:4px 0 10px;color:var(--ink2);font-size:13px}
+.bars{display:grid;gap:5px}
+.brow{display:grid;grid-template-columns:44px 1fr auto;gap:8px;align-items:center;font-size:13px}
+.brow .lab{font-size:12px;font-weight:650}
+.brow .lab.budget{color:var(--g-budget)}.brow .lab.mid{color:var(--g-mid)}.brow .lab.premium{color:var(--g-prem)}
+.track{position:relative;height:14px;background:var(--surface2);border-radius:6px;overflow:hidden}
+.band{position:absolute;top:0;bottom:0;border-radius:6px;min-width:6px}
+.band.budget{background:var(--g-budget)}.band.mid{background:var(--g-mid)}.band.premium{background:var(--g-prem)}
+.brow .val{min-width:78px;text-align:right;font-size:13px;color:var(--ink)}
+.axis{display:grid;grid-template-columns:44px 1fr auto;gap:8px;font-size:11px;color:var(--ink3);margin-top:2px}
+.axis .ax{display:flex;justify-content:space-between}
+.axis>span:last-child{min-width:78px;text-align:right}
+.meta{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-top:10px}
+.meter{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink2)}
+.meter i{display:block;width:64px;height:6px;border-radius:3px;background:var(--surface2);overflow:hidden}
+.meter i b{display:block;height:100%;background:var(--accent)}
+.expand{display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:0 14px;border-top:1px solid var(--line);font-size:13px;color:var(--accent);font-weight:650;width:100%;background:transparent;border-left:0;border-right:0;border-bottom:0;border-radius:0 0 16px 16px}
+.detail{padding:4px 14px 14px;display:grid;gap:14px;border-top:1px solid var(--line)}
+.detail[hidden]{display:none}
+.detail ul{margin:0;padding-left:18px}
+.detail li{margin:3px 0}
+.dgrid{display:grid;gap:12px}
+@media(min-width:760px){.dgrid{grid-template-columns:1fr 1fr}}
+.gcard{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg)}
+.gcard .small{margin-top:2px}
+.warn{border-left:3px solid var(--bad);padding-left:10px}
+.save{border-left:3px solid var(--ok);padding-left:10px}
+.srcs{display:grid;gap:4px;font-size:13px}
+.srcs a{word-break:break-all}
+.note-est{font-size:12px;color:var(--g-mid)}
+
+/* quiz */
+.qwrap{max-width:720px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+.prog{height:6px;border-radius:3px;background:var(--surface2);overflow:hidden;margin:8px 0 16px}
+.prog b{display:block;height:100%;background:var(--accent);transition:width .25s}
+.prompt{font-size:17px;font-weight:700;line-height:1.5;margin:10px 0 14px}
+.choices{display:grid;gap:8px}
+.choice{display:flex;gap:10px;align-items:flex-start;text-align:left;min-height:52px;padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);font-size:15px;width:100%}
+.choice .k{flex:none;width:24px;height:24px;border-radius:50%;background:var(--surface2);display:grid;place-items:center;font-size:12px;font-weight:750}
+.choice:hover:not(:disabled){border-color:var(--accent)}
+.choice.correct{border-color:var(--ok);background:var(--ok-soft)}
+.choice.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.choice:disabled{cursor:default;color:var(--ink)}
+.choice .res{margin-left:auto;font-size:12px;font-weight:750;white-space:nowrap}
+.choice.correct .res{color:var(--ok)}.choice.wrong .res{color:var(--bad)}
+.expl{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--accent-soft);font-size:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 20px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:700}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.big{font-size:44px;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.acc{display:grid;gap:8px;margin-top:12px}
+.accrow{display:grid;grid-template-columns:minmax(90px,150px) 1fr 48px;gap:8px;align-items:center;font-size:13px}
+.accrow .track{height:10px}
+.accrow .track b{position:absolute;left:0;top:0;bottom:0;border-radius:5px}
+
+/* estimator */
+.est-grid{display:grid;gap:16px}
+@media(min-width:860px){.est-grid{grid-template-columns:340px 1fr;align-items:start}.ctrls{position:sticky;top:76px}}
+.field{margin-bottom:14px}
+.field label,.field .lbl{display:flex;justify-content:space-between;gap:12px;align-items:baseline;font-weight:650;font-size:14px;margin-bottom:6px}
+input[type=range]{width:100%;height:44px;accent-color:var(--accent);background:transparent}
+.sw{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;padding:6px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);margin-bottom:8px;width:100%;text-align:left}
+.sw .t{display:grid}
+.sw .t span:last-child{font-size:12px;color:var(--ink2)}
+.sw .knob{flex:none;width:44px;height:26px;border-radius:13px;background:var(--surface2);border:1px solid var(--line);position:relative;transition:background .15s}
+.sw .knob::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--ink3);transition:transform .15s,background .15s}
+.sw[aria-checked="true"] .knob{background:var(--accent);border-color:var(--accent)}
+.sw[aria-checked="true"] .knob::after{transform:translateX(18px);background:var(--accent-ink)}
+.seg3{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--surface2);padding:4px;border-radius:12px}
+.seg3 button{border:0;background:transparent;min-height:44px;border-radius:9px;font-weight:650;color:var(--ink2)}
+.seg3 button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.total{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:baseline}
+.total .big{color:var(--ink)}
+.stack{display:flex;height:40px;border-radius:10px;overflow:hidden;gap:2px;background:var(--bg);margin:12px 0 8px}
+.stack>div{min-width:2px;position:relative;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--accent-ink);overflow:hidden;white-space:nowrap}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--ink2)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.callout{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;padding:12px 14px;background:var(--surface);margin-top:14px}
+.callout ol{margin:6px 0 0;padding-left:20px}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th,.tbl td{padding:9px 6px;text-align:right;border-bottom:1px solid var(--line)}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl th button{white-space:nowrap;background:transparent;border:0;font-weight:700;font-size:13px;min-height:44px;padding:0 4px;color:var(--ink2)}
+.tbl th[aria-sort] button{color:var(--ink)}
+.tbl tfoot td{font-weight:750;border-bottom:0}
+.toolbar#mcats{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;margin-right:-16px;padding-right:16px}
+#mcats .chip{flex:none}
+.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.nl{position:relative;height:116px;margin:40px 8px 0}
+.nl .line{position:absolute;left:0;right:0;top:76px;height:4px;background:var(--surface2);border-radius:2px}
+.nl .tick{position:absolute;top:84px;font-size:11px;color:var(--ink3);transform:translateX(-50%)}
+.nl .tick::before{content:"";position:absolute;left:50%;top:-10px;width:1px;height:6px;background:var(--line)}
+.nl .stem{position:absolute;width:1px;background:var(--ink3);opacity:.6}
+.nl .dot{position:absolute;width:20px;height:20px;margin-left:-10px;border-radius:50%;background:var(--c-furn);color:#fff;font-size:11px;font-weight:750;display:grid;place-items:center;border:2px solid var(--surface)}
+.nl .dot.k2026{background:var(--g-mid)}.nl .dot.k2025{background:var(--ink3)}.nl .dot.kb{background:var(--g-budget)}
+.nl .rng{position:absolute;top:74px;height:8px;border-radius:4px;background:var(--g-mid);opacity:.35}
+.nl .me{position:absolute;top:0;width:0;border-left:2px solid var(--accent);height:84px}
+.nl .me span{position:absolute;top:-22px;left:0;transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:750;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.cases{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:4px;font-size:13px}
+.cases li{display:flex;gap:8px;align-items:center}
+.cases .n{flex:none;width:20px;height:20px;border-radius:50%;color:#fff;font-size:11px;font-weight:750;display:grid;place-items:center}
+
+/* materials */
+.mtbl{width:100%;border-collapse:collapse;font-size:14px}
+.mtbl th{font-size:12px;text-align:left;color:var(--ink2);padding:8px 8px;border-bottom:1px solid var(--line);font-weight:650}
+.mtbl td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.mtbl tr.hit td{background:var(--ok-soft)}
+.mtbl tr.miss td{opacity:.85}
+.dots{display:inline-flex;gap:3px;vertical-align:middle}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--surface2);border:1px solid var(--line)}
+.dots i.on{background:var(--accent);border-color:var(--accent)}
+@media(max-width:640px){
+  .mtbl thead{display:none}
+  .mtbl,.mtbl tbody,.mtbl tr,.mtbl td{display:block;width:100%}
+  .mtbl tr{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:10px;background:var(--surface)}
+  .mtbl td{border:0;padding:3px 0;display:flex;justify-content:space-between;gap:12px;text-align:right}
+  .mtbl td::before{content:attr(data-label);color:var(--ink2);font-size:12px;text-align:left;flex:none}
+  .mtbl td.nm{font-weight:750;font-size:15px;text-align:left;display:block}
+  .mtbl td.nm::before{display:none}
+  .mtbl td.need{display:block;text-align:left;margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
+  .mtbl td.need::before{display:block;margin-bottom:2px}
+  .mtbl tr.hit{border-color:var(--ok)}
+  .mtbl tr.hit td{background:transparent}
+}
+.cover{height:8px;border-radius:4px;background:var(--surface2);overflow:hidden;margin-top:4px;min-width:90px}
+.cover b{display:block;height:100%;background:var(--ok)}
+.cover b.part{background:var(--g-mid)}
+
+.mini{position:sticky;bottom:10px;z-index:5;margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 16px;border-radius:14px;background:var(--accent);color:var(--accent-ink);box-shadow:0 8px 24px -8px rgba(0,0,0,.45);font-weight:700}
+.mini span:last-child{font-size:12px;font-weight:600}
+@media(min-width:860px){.mini{display:none}}
+footer{margin-top:32px;padding-top:16px;border-top:1px solid var(--line);display:grid;gap:12px}
+details summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:650}
+.srclist{columns:1;font-size:13px}
+@media(min-width:760px){.srclist{columns:2;column-gap:24px}}
+.srclist li{break-inside:avoid;margin:0 0 6px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div>
+    <h1>인테리어 가격 감각 딥다이브</h1>
+    <p class="muted sub">전용 59㎡(25평) 30년차 아파트 올수리를 기준으로 공정별 단가, 자재 등급, 견적 구조를 몸으로 익히는 도구입니다. 2026년 서울·수도권 추정 범위.</p>
+  </div>
+  <button class="theme-btn" id="themeBtn" aria-pressed="false" aria-label="다크 모드 전환">테마</button>
+</header>
+
+<nav class="tabs" aria-label="섹션">
+  <div class="seg" role="tablist" id="tablist">
+    <button role="tab" id="tab-proc" aria-controls="p-proc" aria-selected="true" data-tab="proc">공정 카드</button>
+    <button role="tab" id="tab-quiz" aria-controls="p-quiz" aria-selected="false" tabindex="-1" data-tab="quiz">가격 퀴즈</button>
+    <button role="tab" id="tab-est" aria-controls="p-est" aria-selected="false" tabindex="-1" data-tab="est">견적서 해부</button>
+    <button role="tab" id="tab-mat" aria-controls="p-mat" aria-selected="false" tabindex="-1" data-tab="mat">자재 등급표</button>
+  </div>
+</nav>
+
+<main>
+<section class="tabpanel" id="p-proc" role="tabpanel" aria-labelledby="tab-proc"></section>
+<section class="tabpanel" id="p-quiz" role="tabpanel" aria-labelledby="tab-quiz" hidden></section>
+<section class="tabpanel" id="p-est" role="tabpanel" aria-labelledby="tab-est" hidden></section>
+<section class="tabpanel" id="p-mat" role="tabpanel" aria-labelledby="tab-mat" hidden></section>
+</main>
+
+<footer>
+  <details><summary>출처 목록 (<span id="srcCount"></span>건)</summary><ul class="srclist" id="srclist"></ul></details>
+  <p class="small" id="disc"></p>
+  <p class="small">생성일 2026-10-05 · 형제 페이지: <a href="https://koogk7.github.io/viz/interior-basics/">interior-basics (공정 순서·용어·예산 시뮬레이터)</a></p>
+</footer>
+</div>
+
+<script>
+const DATA = {"meta":{"title":"인테리어 가격 감각 딥다이브","created":"2026-10-05","region":"서울·수도권","target":"전용 59㎡(공급 25평) 30년차 아파트 올수리(특올수리), 2026년","units":"금액은 만원, VAT 별도 표기(보조로 VAT 포함)"},"disclaimer":"2026년 서울·수도권 기준 추정 범위입니다. 현장 상태·업체·시기에 따라 ±30% 달라질 수 있고, VAT 10% 별도가 관행입니다. 자재비·인건비 2024~26 상승분을 반영했지만 개별 견적을 대체하지 않습니다.","processes":[{"id":"demo","name":"철거·폐기물","category":"골조·설비","oneLiner":"기존 바닥·벽·주방·욕실을 뜯어내고 폐기물을 치우는 첫 공정. 뜯는 범위가 곧 가격입니다.","orderIndex":1,"unit":"평","qty25":25,"grades":{"budget":{"range":[9,13],"materialExample":"바닥·주방·욕실 철거, 25톤 폐기물 1~2차","note":"붙박이장·몰딩은 보존하는 부분 철거"},"mid":{"range":[12,16],"materialExample":"올철거(욕실 방수층 포함) + 폐기물 2~3차 + 엘리베이터 보양","note":"주방·욕실 2개소 올철거, 확장부 포함"},"premium":{"range":[16,22],"materialExample":"올철거 + 천장/가벽 철거 + 사다리차(저층 아님)","note":"구조 보강 전 단계까지 뜯는 풀 철거"}},"laborShare":0.85,"days":"2~3일","costDrivers":["철거 범위(올철거 vs 부분)","폐기물 톤수·차수","사다리차·엘리베이터 사용 가능 여부"],"gotchas":["폐기물 처리비·양중비가 '철거 일체' 한 줄에 숨어 있는지 확인","욕실 방수층까지 깨는지 여부가 빠지면 나중에 추가금"],"savingTips":["철거 직영 분리는 최소 50만원 이상 규모부터 이득(업체 마진 회피)","엘리베이터 사용 시간대 협의로 사다리차 비용 회피"],"sources":[{"title":"셀프 인테리어 비용 예산표 공정별 총정리(2026 노임·철거·도배·목공 단가)","url":"https://blog.naver.com/nstartkkh/224431918921","date":"2026-10","kind":"단가표"},{"title":"(서울/경기 인테리어 철거) 아파트 철거 직영으로 하면 저렴할까","url":"https://blog.naver.com/zooks00/224431831222","date":"2026-10","kind":"단가표"},{"title":"진주 47평 전체 리모델링 견적서 공정별 전체 공개(고미하우스, 2026)","url":"https://blog.naver.com/gomicompany/224429656588","date":"2026-09","kind":"견적공개"},{"title":"30평대 인테리어 추가금 폭탄 피하는 법(2026 평당 100~180만)","url":"https://blog.naver.com/design_harang/224343449971","date":"2026-08","kind":"단가표"},{"title":"종합 보정(위 출처 범위를 59㎡·서울 기준으로 교차 보정한 추정)","url":"","date":"2026-10","kind":"추정"}]},{"id":"window","name":"샷시(창호)","category":"골조·설비","oneLiner":"발코니 외창·거실창·내창을 새 단열 창호로 교체. 창 면적·개소 단위로 가격이 움직입니다.","orderIndex":2,"unit":"식","qty25":1,"grades":{"budget":{"range":[400,520],"materialExample":"공장직영/실속 브랜드 22mm 로이 복층","note":"같은 단지 59타입 사례 400~550(부분·KCC) 근처"},"mid":{"range":[520,680],"materialExample":"KCC 24mm 로이 복층 / LX 지인 실속 라인","note":"전체 교체 기준 중앙 구간, 2026-04 이후 관세로 약 30% 인상 언급"},"premium":{"range":[680,950],"materialExample":"LX Z:IN 26mm 더블로이·아르곤·단열 간봉","note":"익명 사례 740(서울시 BRP 사업 이용 전체 교체)"}},"laborShare":0.3,"days":"1~2일","costDrivers":["창 면적(㎡)과 개소 수 — 평수가 아님","유리 두께·로이·아르곤·간봉 사양","15층 이상 장비 사용료·기존 틀 철거 포함 여부"],"gotchas":["'평당 얼마'로 부르는 견적은 창 면적과 무관한 경우가 많아 비교 불가","유리 '24mm'만 쓰고 로이 여부를 안 적는 견적"],"savingTips":["거실·큰 외창만 교체하는 부분 교체(400~500)로 효과 대부분 확보","공장직영 도매가는 유통 마진 약 20% 절감 가능(업체 주장)"],"sources":[{"title":"같은 단지 59타입 거주자 사례(익명, 오픈채팅 취합 2026-09-28)","url":"","date":"2026-09","kind":"커뮤니티"},{"title":"아파트 샷시 가격 비교 가이드: 브랜드별 차이와 견적 거품 빼는 법","url":"https://blog.naver.com/korgget222/224431633118","date":"2026-10","kind":"단가표"},{"title":"창호 견적은 어떻게 계산할까? 평수 산출부터 교체비용까지(㎡ 단가 계산 예시)","url":"https://blog.naver.com/dy7894543/224431019006","date":"2026-10","kind":"단가표"},{"title":"2026년 아파트 인테리어 리모델링 비용 평형대별 상세 분석","url":"https://blog.naver.com/asalies/224416652700","date":"2026-09","kind":"단가표"},{"title":"종합 보정(위 출처 범위를 59㎡·서울 기준으로 교차 보정한 추정)","url":"","date":"2026-10","kind":"추정"}],"optionKey":"window"},{"id":"balcony","name":"발코니 확장(단열·난방)","category":"골조·설비","oneLiner":"거실·방 앞 발코니를 실내로 편입. 단열과 난방 배관 연장이 비용의 핵심입니다.","orderIndex":3,"unit":"식","qty25":1,"grades":{"budget":{"range":[300,400],"materialExample":"거실 1면 확장 + 단열보드 + 난방 연장","note":"확장 면 수가 1면일 때"},"mid":{"range":[380,520],"materialExample":"거실+방 1면 확장, 단열 강화 + 바닥 난방 연장","note":"확장 시 외창 사양이 중요(샷시와 같이 묶기)"},"premium":{"range":[500,750],"materialExample":"거실·방 2~3면 확장 + 고단열 시공 + 창틀 일체 마감","note":"재확장(이미 확장된 세대) 때 철거 난이도 추가"}},"laborShare":0.6,"days":"3~5일","costDrivers":["확장 면 수와 폭","단열재 등급·두께","보일러 배관 연장·분배기 교체"],"gotchas":["확장은 샷시와 한 세트라 따로 견적하면 이중 계상","결로 보수 하자는 단열 시공 사진 기록 없으면 입증 어려움"],"savingTips":["확장 포기 시 그만큼 통째로 절약(선택 사항)","확장 면을 줄이고 거실 1면만 하는 절충"],"sources":[{"title":"30평대 인테리어 추가금 폭탄 피하는 법(발코니 확장 250~300만 + 단열)","url":"https://blog.naver.com/design_harang/224343449971","date":"2026-08","kind":"단가표"},{"title":"같은 단지 59타입 거주자 사례(익명, 오픈채팅 취합 2026-09-28)","url":"","date":"2026-09","kind":"커뮤니티"},{"title":"종합 보정(위 출처 범위를 59㎡·서울 기준으로 교차 보정한 추정)","url":"","date":"2026-10","kind":"추정"}],"optionKey":"balcony"},{"id":"plumb","name":"설비(배관 교체·수전 이설)","category":"골조·설비","oneLiner":"급수·온수·배수 배관 교체와 주방·욕실 위치 이동. 30년차 아파트는 사실상 필수.","orderIndex":4,"unit":"식","qty25":1,"grades":{"budget":{"range":[180,260],"materialExample":"급수·온수 배관 부분 교체, 위치 이동 없음","note":"주방·욕실 위치 그대로"},"mid":{"range":[260,360],"materialExample":"주방·욕실 급배수 전면 교체(PB→동관/PPR 등) + 보일러 배관 점검","note":"수전 위치 소폭 이동 포함"},"premium":{"range":[360,520],"materialExample":"배관 전면 교체 + 주방/욕실 배수관 이동 + 가스 이설","note":"대면형 주방 등 구조 변경"}},"laborShare":0.65,"days":"2~3일","costDrivers":["배관 재질·교체 범위","위치 이동 거리(배수 구배 확보)","가스 이설 안전 검사 비용"],"gotchas":["위치를 옮기면 배수 구배 때문에 바닥 높이가 올라갈 수 있음","'배관 교체'가 주방만인지 전체인지 명시 확인"],"savingTips":["위치를 그대로 두면 이설 비용 대부분 제거(같은 디자인도 크게 절감)","누수 이력 없으면 부분 교체 + 사진 기록"],"sources":[{"title":"30평대 아파트 전체 인테리어 공정별 시장 범위(레이백 디자인, 2026)","url":"https://blog.naver.com/lay_back88/224408278221","date":"2026-09","kind":"단가표"},{"title":"진주 47평 전체 리모델링 견적서 공정별 전체 공개(고미하우스, 2026)","url":"https://blog.naver.com/gomicompany/224429656588","date":"2026-09","kind":"견적공개"},{"title":"30평대 인테리어 추가금 폭탄 피하는 법(2026 평당 100~180만)","url":"https://blog.naver.com/design_harang/224343449971","date":"2026-08","kind":"단가표"},{"title":"종합 보정(위 출처 범위를 59㎡·서울 기준으로 교차 보정한 추정)","url":"","date":"2026-10","kind":"추정"}]},{"id":"elec","name":"전기(배선·분전반·콘센트 증설)","category":"골조·설비","oneLiner":"노후 배선·분전반 교체와 콘센트·전용선 증설. 벽 닫기 전에 결정해야 합니다.","orderIndex":5,"unit":"평","qty25":25,"grades":{"budget":{"range":[8,12],"materialExample":"스위치·콘센트 교체 + 일부 배선 + 분전함 정리","note":"나노닉스/르그랑급 일부"},"mid":{"range":[12,16],"materialExample":"전체 배선 재시공 + 분전반 교체 + 주방/에어컨 전용선 분리","note":"콘센트 개수 증설 포함"},"premium":{"range":[16,24],"materialExample":"전체 재배선 + 스마트 스위치 + 매립 박스 다수 + 승압 검토","note":"한전 승압 시 kW당 15~25만 별도"}},"laborShare":0.7,"days":"2~3일","costDrivers":["콘센트·스위치 개수","전용선 분리(인덕션·에어컨·건조기)","분전반 용량 교체"],"gotchas":["인덕션 사면 전기 증설 50~100만이 뒤늦게 붙는 사례","'전기 일체' 한 줄 견적 — 타공·콘센트 개수 명시 요구"],"savingTips":["조명 위치를 목공 전에 확정해 재타공 방지","마감 스위치는 자체 구매 시 비용 절감"],"sources":[{"title":"전기공사 비용 및 종류 배선 및 콘센트 신설·이설","url":"https://blog.naver.com/free498704/224429501285","date":"2026-09","kind":"단가표"},{"title":"셀프 인테리어 비용 예산표 공정별 총정리(2026 노임·철거·도배·목공 단가)","url":"https://blog.naver.com/nstartkkh/224431918921","date":"2026-10","kind":"단가표"},{"title":"30평대 아파트 전체 인테리어 공정별 시장 범위(레이백 디자인, 2026)","url":"https://blog.naver.com/lay_back88/224408278221","date":"2026-09","kind":"단가표"},{"title":"진주 47평 전체 리모델링 견적서 공정별 전체 공개(고미하우스, 2026)","url":"https://blog.naver.com/gomicompany/224429656588","date":"2026-09","kind":"견적공개"},{"title":"종합 보정(위 출처 범위를 59㎡·서울 기준으로 교차 보정한 추정)","url":"","date":"2026-10","kind":"추정"}]},{"id":"sysac","name":"시스템에어컨","category":"가전·가구","oneLiner":"천장 매립형 실내기 + 실외기. 배관·전기·천장 마감이 목공 전에 들어갑니다.","orderIndex":6,"unit":"대","qty25":3,"grades":{"budget":{"range":[130,160],"materialExample":"삼성/LG 1way·소형 4way 3대 기본 구성","note":"옵션: 거실 4way + 방 1way 2"},"mid":{"range":[160,190],"materialExample":"삼성 무풍·LG 휘센 중급 구성 + 배관 보강","note":"천장 단내림 KIT 소수"},"premium":{"range":[190,230],"materialExample":"4way 고급 라인 + 공기청정/스마트 연동","note":"용량 상향·배관 길이 추가"}},"laborShare":0.3,"days":"1~2일","costDrivers":["실내기 대수·용량·타입(1way/4way)","배관 길이(15m 초과 m당 2~2.6만)","천장 높이(단내림)·점검구·배수펌프"],"gotchas":["'3대 450만' 같은 총액은 천장 복구·전기·추가 배관 포함 여부를 모르면 비교 불가","추가 배관·앵글·점검구로 50~70만이 현장에서 붙는 경우"],"savingTips":["가전 행사 시기 구매 + 시공 분리 발주는 가능하나 책임 소재 주의","방 1~2개는 벽걸이로 대체하면 대당 절감"],"sources":[{"title":"시스템에어컨 설치비용, 아파트 4대 견적이 달라지는 이유와 추가비용","url":"https://blog.naver.com/hppp0561/224369125231","date":"2026-08","kind":"단가표"},{"title":"시스템에어컨 추가설치비 배관·전기·천장공사 비용 총정리","url":"https://blog.naver.com/pumping77/224391772231","date":"2026-08","kind":"단가표"},{"title":"같은 단지 59타입 거주자 사례(익명, 오픈채팅 취합 2026-09-28)","url":"","date":"2026-09","kind":"커뮤니티"},{"title":"종합 보정(위 출처 범위를 59㎡·서울 기준으로 교차 보정한 추정)","url":"","date":"2026-10","kind":"추정"}],"optionKey":"sysac"},{"id":"carp","name":"목공(천장·가벽·몰딩·걸레받이)","category":"마감","oneLiner":"천장 평탄화·우물천장·가벽·몰딩과 걸레받이. 집 골격을 새로 짜는 공정이라 인건비 비중이 큽니다.","orderIndex":7,"unit":"평","qty25":25,"grades":{"budget":{"range":[12,17],"materialExample":"천장 평탄 최소화, 걸레받이·문틀 보강 위주","note":"석고 9.5T, 각재 위주 기본 구성"},"mid":{"range":[22,30],"materialExample":"천장 평탄 + 간접조명 박스 + 무몰딩 일부 + 문틀 교체","note":"우물천장 정리, 커튼박스"},"premium":{"range":[38,50],"materialExample":"전면 무몰딩·가벽·아트월·히든도어·천장 단차 다수","note":"설계 난이도 높은 디자인 시공"}},"laborShare":0.7,"days":"5~8일","costDrivers":["천장 단차·간접박스 수","무몰딩·히든 등 디테일 난이도","가벽·아트월 면적"],"gotchas":["'목공 일체'만 적힌 견적 — 범위(천장/가벽/몰딩) 쪼개서 확인","붙박이장 포함 여부 불분명(별도 공정으로 분리 권장)"],"savingTips":["몰딩 있는 일반 천장은 목공비 절감","간접조명은 거실 한 곳에만 집중"],"sources":[{"title":"셀프 인테리어 비용 예산표 공정별 총정리(2026 노임·철거·도배·목공 단가)","url":"https://blog.naver.com/nstartkkh/224431918921","date":"2026-10","kind":"단가표"},{"title":"30평대 아파트 전체 인테리어 공정별 시장 범위(레이백 디자인, 2026)","url":"https://blog.naver.com/lay_back88/224408278221","date":"2026-09","kind":"단가표"},{"title":"거실 우물천장 간접조명 시공 단가와 목공 작업 부하량","url":"https://blog.naver.com/savelog_dh/224431949014","date":"2026-10","kind":"단가표"},{"title":"진주 47평 전체 리모델링 견적서 공정별 전체 공개(고미하우스, 2026)","url":"https://blog.naver.com/gomicompany/224429656588","date":"2026-09","kind":"견적공개"},{"title":"종합 보정(위 출처 범위를 59㎡·서울 기준으로 교차 보정한 추정)","url":"","date":"2026-10","kind":"추정"}]},{"id":"bath","name":"욕실(1개소 전체)","category":"마감","oneLiner":"방수·타일·도기·수전·욕실장·천장까지 한 칸 풀 공사. 철거·방수 포함 여부가 가격 갈림길.","orderIndex":8,"unit":"개소","qty25":2,"grades":{"budget":{"range":[270,360],"materialExample":"덧방 또는 저가 올철거, 국산 300×600 타일, 국산 도기","note":"방수는 보수 수준 → 장기 하자 위험"},"mid":{"range":[380,500],"materialExample":"올철거 + 2중 방수 + 국산 도기(대림/아메리칸스탠다드급)","note":"타일 600×600 / 300×600 혼용"},"premium":{"range":[550,850],"materialExample":"대형 포세린·조적 세면대·매립 수전·욕실 환풍 고급","note":"시공 난이도 높은 디자인 욕실"}},"laborShare":0.5,"days":"5~7일","costDrivers":["철거 방수 포함 여부(덧방 vs 올철거)","타일 크기·등급","도기·수전·환풍기 사양"],"gotchas":["'덧방 250만'과 '올철거 400만'은 다른 상품 — 방수 포함 비교 필수","욕조 철거·폐기물·양중이 별도인 견적"],"savingTips":["위치 변경 없으면 배관 이동 비용 제거","수전·액세서리는 직구매 후 시공만 의뢰"],"sources":[{"title":"2026 욕실리모델링 비용 총정리 예산별 견적 가이드","url":"https://blog.naver.com/skytile81/224344508235","date":"2026-07","kind":"단가표"},{"title":"2026년 화장실 올철거 리모델링 비용 총정리","url":"https://blog.naver.com/kkey1314/224389398227","date":"2026-08","kind":"단가표"},{"title":"30평대 아파트 전체 인테리어 공정별 시장 범위(레이백 디자인, 2026)","url":"https://blog.naver.com/lay_back88/224408278221","date":"2026-09","kind":"단가표"},{"title":"진주 47평 전체 리모델링 견적서 공정별 전체 공개(고미하우스, 2026)","url":"https://blog.naver.com/gomicompany/224429656588","date":"2026-09","kind":"견적공개"},{"title":"같은 단지 59타입 거주자 사례(익명, 오픈채팅 취합 2026-09-28)","url":"","date":"2026-09","kind":"커뮤니티"},{"title":"종합 보정(위 출처 범위를 59㎡·서울 기준으로 교차 보정한 추정)","url":"","date":"2026-10","kind":"추정"}]},{"id":"tile","name":"타일(현관·주방벽·베란다)","category":"마감","oneLiner":"욕실 외 현관 바닥, 주방 벽, 베란다 타일. 면적 대비 시공 난이도가 높은 편.","orderIndex":9,"unit":"식","qty25":1,"grades":{"budget":{"range":[90,160],"materialExample":"현관 300×300/600 + 주방 벽 일부","note":"베란다 타일은 선택"},"mid":{"range":[160,260],"materialExample":"현관 600×600 포세린 + 주방 벽 + 베란다","note":"줄눈 에폭시 일부"},"premium":{"range":[260,420],"materialExample":"600×1200 대형 + 코너 졸리컷 + 현관 단차 정리","note":"대형판 시공은 공수 증가"}},"laborShare":0.6,"days":"2~4일","costDrivers":["타일 크기·등급","면적과 줄눈(에폭시) 등급","졸리컷 등 마감 디테일"],"gotchas":["타일 자재비가 '자재 일체'로 합산돼 확인 불가","대형 타일은 공수가 늘어 평당이 크게 오름"],"savingTips":["현관만 포세린, 나머지는 국산으로 믹스","줄눈은 일반줄눈 + 부분 에폭시"],"sources":[{"title":"진주 47평 전체 리모델링 견적서 공정별 전체 공개(고미하우스, 2026)","url":"https://blog.naver.com/gomicompany/224429656588","date":"2026-09","kind":"견적공개"},{"title":"셀프 인테리어 비용 예산표 공정별 총정리(2026 노임·철거·도배·목공 단가)","url":"https://blog.naver.com/nstartkkh/224431918921","date":"2026-10","kind":"단가표"},{"title":"30평대 아파트 전체 인테리어 공정별 시장 범위(레이백 디자인, 2026)","url":"https://blog.naver.com/lay_back88/224408278221","date":"2026-09","kind":"단가표"},{"title":"종합 보정(위 출처 범위를 59㎡·서울 기준으로 교차 보정한 추정)","url":"","date":"2026-10","kind":"추정"}]},{"id":"film","name":"필름(문틀·현관문·몰딩)","category":"마감","oneLiner":"문틀·현관문·붙박이 문짝에 필름을 입혀 색을 맞춤. 교체보다 훨씬 저렴한 대안.","orderIndex":10,"unit":"식","qty25":1,"grades":{"budget":{"range":[80,160],"materialExample":"문틀·현관문 일부 필름","note":"LX 인테리어 필름 일부"},"mid":{"range":[150,230],"materialExample":"문틀·현관문·창틀 전체 + 붙박이 문짝 필름","note":"색 통일감 중시"},"premium":{"range":[220,330],"materialExample":"전체 필름 + 가구 도어 필름 리폼 + 몰딩 래핑","note":"디자인 정합성 높은 시공"}},"laborShare":0.55,"days":"2~3일","costDrivers":["필름 대상 면적","접착 불량 부위 보수","필름 등급(내스크래치)"],"gotchas":["필름은 보수·퍼티 상태에 따라 수명 차이 — 하자 보증 기간 확인","문짝 교체 대신 필름 선택 시 문틀 손상 숨김 주의"],"savingTips":["문 교체 대신 필름으로 비용 절감","현관문 안쪽만 필름하고 바깥은 유지"],"sources":[{"title":"진주 47평 전체 리모델링 견적서 공정별 전체 공개(고미하우스, 2026)","url":"https://blog.naver.com/gomicompany/224429656588","date":"2026-09","kind":"견적공개"},{"title":"셀프 인테리어 비용 예산표 공정별 총정리(2026 노임·철거·도배·목공 단가)","url":"https://blog.naver.com/nstartkkh/224431918921","date":"2026-10","kind":"단가표"},{"title":"종합 보정(위 출처 범위를 59㎡·서울 기준으로 교차 보정한 추정)","url":"","date":"2026-10","kind":"추정"}]},{"id":"wall","name":"도배·페인트","category":"마감","oneLiner":"벽·천장에 합지/실크 벽지를 바르거나 페인트 도장. 밑작업(퍼티·초배)이 품질을 좌우합니다.","orderIndex":11,"unit":"평","qty25":25,"grades":{"budget":{"range":[5.5,8],"materialExample":"합지 광폭 + 일부 페인트","note":"옛 벽지 제거/보수 최소화"},"mid":{"range":[9,12.5],"materialExample":"실크(LX 베스띠급) + 천장 포함 + 퍼티·초배","note":"표준 올수리 도배"},"premium":{"range":[13,18],"materialExample":"고급 실크 + 도장(친환경 페인트) 일부 + 곰팡이 방지 처리","note":"아트월·포인트 도장 포함"}},"laborShare":0.65,"days":"2~4일","costDrivers":["합지 vs 실크 vs 도장","기존 벽지 제거·퍼티 작업량","천장 포함 여부"],"gotchas":["도배비 낮게 부르고 밑작업·벽 보수를 추가금으로 청구","가구 반입 전에 해야 하는데 일정이 겹쳐 마감 손상"],"savingTips":["안방·거실만 실크, 나머지는 합지로 믹스","페인트는 DIY 비중 가능(반셀프)"],"sources":[{"title":"아파트 도배 비용 2026 24평·34평 합지·실크 가격 총정리","url":"https://blog.naver.com/atommanager0206/224398254798","date":"2026-08","kind":"단가표"},{"title":"셀프 인테리어 비용 예산표 공정별 총정리(2026 노임·철거·도배·목공 단가)","url":"https://blog.naver.com/nstartkkh/224431918921","date":"2026-10","kind":"단가표"},{"title":"30평대 아파트 전체 인테리어 공정별 시장 범위(레이백 디자인, 2026)","url":"https://blog.naver.com/lay_back88/224408278221","date":"2026-09","kind":"단가표"},{"title":"종합 보정(위 출처 범위를 59㎡·서울 기준으로 교차 보정한 추정)","url":"","date":"2026-10","kind":"추정"}]},{"id":"floor","name":"바닥(장판·마루·타일)","category":"마감","oneLiner":"거실·방 바닥 마감. 장판→강화마루→강마루→원목/타일로 갈수록 등급이 급상승합니다.","orderIndex":12,"unit":"평","qty25":25,"grades":{"budget":{"range":[5,8],"materialExample":"LX 지아자연애 2.2T 모노륨 장판 + 바닥 보수","note":"1.8T는 더 저렴하나 내구성 낮음"},"mid":{"range":[14,20],"materialExample":"LX 지인/구정마루 광폭 강마루 + 바닥 샌딩·단열 보강","note":"표준 중급 선택"},"premium":{"range":[26,40],"materialExample":"원목마루 또는 대형 포세린 + 바닥 난방 점검","note":"원목은 습도·온돌 관리 필수"}},"laborShare":0.4,"days":"2~4일","costDrivers":["마루 재질·폭·접착 방식","바닥 평탄(샌딩) 상태","포세린이면 바닥 난방 점검"],"gotchas":["강마루가 평당 단가만 맞고 '샌딩·부자재·몰딩'이 따로 청구","장판과 마루는 가격이 2~3배 차이 — 평당만 비교하면 오판"],"savingTips":["방은 장판, 거실만 마루로 믹스","비수기(우기·한파)에 자재 협상 유리"],"sources":[{"title":"장판 종류별 가격비교 모노륨 펫트 두께별 평당 비용(2026)","url":"https://blog.naver.com/hottn_construction/224420681887","date":"2026-09","kind":"단가표"},{"title":"셀프 인테리어 비용 예산표 공정별 총정리(2026 노임·철거·도배·목공 단가)","url":"https://blog.naver.com/nstartkkh/224431918921","date":"2026-10","kind":"단가표"},{"title":"30평대 아파트 전체 인테리어 공정별 시장 범위(레이백 디자인, 2026)","url":"https://blog.naver.com/lay_back88/224408278221","date":"2026-09","kind":"단가표"},{"title":"2026년 아파트 인테리어 리모델링 비용 평형대별 상세 분석","url":"https://blog.naver.com/asalies/224416652700","date":"2026-09","kind":"단가표"},{"title":"종합 보정(위 출처 범위를 59㎡·서울 기준으로 교차 보정한 추정)","url":"","date":"2026-10","kind":"추정"}]},{"id":"kitchen","name":"주방(싱크대·상판·후드·인덕션)","category":"마감","oneLiner":"싱크대 상·하부장, 상판, 후드, 전기·가스 연결까지 한 세트. 상판과 도어 등급이 가격을 가릅니다.","orderIndex":13,"unit":"식","qty25":1,"grades":{"budget":{"range":[300,450],"materialExample":"사제 PB 멤브레인 + 인조대리석 상판 + 일자/ㄱ자 3~4m","note":"2.4~3.0m 일자는 180~280(직영 공장)"},"mid":{"range":[520,780],"materialExample":"한샘 유로급 또는 사제 PET + 엔지니어드스톤 상판","note":"상판만 바꿔도 +100만 이상"},"premium":{"range":[880,1400],"materialExample":"한샘 키친바흐급/사제 도장 + 세라믹·덱톤 + 키큰장","note":"아일랜드 +120~150"}},"laborShare":0.35,"days":"3~5일","costDrivers":["도어 재질(PB/PET/도장)","상판 소재(인조/엔지니어드/세라믹)","레이아웃 변경 여부·후드·빌트인"],"gotchas":["상판과 후드·수전·싱크볼이 '별도 옵션'으로 빠져 있다가 합산되는 구조","같은 한샘도 라인·상판·시공점에 따라 530~590 편차"],"savingTips":["배관 위치 유지 + 일자/ㄱ자 유지가 최대 절감","후드·쿡탑은 단품 구매 후 설치"],"sources":[{"title":"한샘 싱크대 견적 2026년 기준 밀란·유로·키친바흐","url":"https://blog.naver.com/pro_interior/224291832898","date":"2026-07","kind":"단가표"},{"title":"주방 싱크대 상판 종류 장단점, 시공 비용까지(2026)","url":"https://blog.naver.com/bessgo/224375924033","date":"2026-08","kind":"단가표"},{"title":"30평대 인테리어 추가금 폭탄 피하는 법(2026 평당 100~180만)","url":"https://blog.naver.com/design_harang/224343449971","date":"2026-08","kind":"단가표"},{"title":"30평대 아파트 전체 인테리어 공정별 시장 범위(레이백 디자인, 2026)","url":"https://blog.naver.com/lay_back88/224408278221","date":"2026-09","kind":"단가표"},{"title":"같은 단지 59타입 거주자 사례(익명, 오픈채팅 취합 2026-09-28)","url":"","date":"2026-09","kind":"커뮤니티"},{"title":"종합 보정(위 출처 범위를 59㎡·서울 기준으로 교차 보정한 추정)","url":"","date":"2026-10","kind":"추정"}]},{"id":"furn","name":"붙박이·수납가구","category":"가전·가구","oneLiner":"신발장·붙박이장·드레스룸. 자(30cm) 단위로 가격이 매겨지며 마감재가 단가를 가릅니다.","orderIndex":14,"unit":"자","qty25":25,"grades":{"budget":{"range":[11,17],"materialExample":"사제 PB 멤브레인 신발장·붙박이장","note":"직영 공장 발주 11~16/자"},"mid":{"range":[18,24],"materialExample":"한솔/LX 계열 PET 도어 + 하드웨어 중급","note":"브랜드 대비 약 40% 절감 가능"},"premium":{"range":[28,40],"materialExample":"브랜드 시스템 가구 / 도장·무늬목 도어","note":"한샘/리바트급 수납 시스템"}},"laborShare":0.35,"days":"2~3일","costDrivers":["자(길이) 수","도어 재질·손잡이 방식","내부 구성(서랍·행거)"],"gotchas":["자수 계산이 업체마다 달라(높이·깊이 기준) 단가 비교가 어려움","푸시 도어·히든 손잡이는 공임 추가"],"savingTips":["기존 붙박이장 몸통 유지 + 도어만 교체(필름·도어)","수납 위치를 줄이고 시스템 선반 활용"],"sources":[{"title":"진주 47평 전체 리모델링 견적서 공정별 전체 공개(고미하우스, 2026)","url":"https://blog.naver.com/gomicompany/224429656588","date":"2026-09","kind":"견적공개"},{"title":"셀프 인테리어 비용 예산표 공정별 총정리(2026 노임·철거·도배·목공 단가)","url":"https://blog.naver.com/nstartkkh/224431918921","date":"2026-10","kind":"단가표"},{"title":"종합 보정(위 출처 범위를 59㎡·서울 기준으로 교차 보정한 추정)","url":"","date":"2026-10","kind":"추정"}]},{"id":"door","name":"도어·중문","category":"마감","oneLiner":"방문 4~5개와 현관 중문. 문틀까지 바꾸는지, 중문 형태가 무엇인지가 핵심입니다.","orderIndex":15,"unit":"식","qty25":1,"grades":{"budget":{"range":[120,200],"materialExample":"ABS 방문 4개 + 저가 3연동 중문 1","note":"문틀 교체 포함 시 상단"},"mid":{"range":[220,330],"materialExample":"멤브레인/PET 방문 4~5개 + 슬라이딩 중문","note":"3연동은 평균 75(55~130)"},"premium":{"range":[350,520],"materialExample":"도장·원목 방문 + 스윙·풀윈도우 중문","note":"히든도어 포함 시 가산"}},"laborShare":0.4,"days":"1~2일","costDrivers":["문틀 교체 여부","중문 형태(3연동/슬라이딩/스윙)","문 개수·사이즈"],"gotchas":["중문 가격에 설치비·출장비·댐퍼가 별도 청구","문틀 교체 vs 필름: 비용 2~3배 차이"],"savingTips":["문 교체 대신 문틀 필름+문짝만 교체","중문은 온라인 플랫폼 시공 포함 패키지 비교"],"sources":[{"title":"중문 설치 비용 2026년 기준 3연동·슬라이딩·여닫이","url":"https://blog.naver.com/pro_interior/224319288159","date":"2026-07","kind":"단가표"},{"title":"셀프 인테리어 비용 예산표 공정별 총정리(2026 노임·철거·도배·목공 단가)","url":"https://blog.naver.com/nstartkkh/224431918921","date":"2026-10","kind":"단가표"},{"title":"진주 47평 전체 리모델링 견적서 공정별 전체 공개(고미하우스, 2026)","url":"https://blog.naver.com/gomicompany/224429656588","date":"2026-09","kind":"견적공개"},{"title":"종합 보정(위 출처 범위를 59㎡·서울 기준으로 교차 보정한 추정)","url":"","date":"2026-10","kind":"추정"}]},{"id":"light","name":"조명(매립·간접·레일 + 전기 연계)","category":"마감","oneLiner":"다운라이트·간접조명·레일 조명. 전기·목공과 같이 설계해야 합니다.","orderIndex":16,"unit":"식","qty25":1,"grades":{"budget":{"range":[70,140],"materialExample":"매립 20개 내외 + 기본 거실등","note":"LED 다운라이트 개당 1.5~3(시공 포함)"},"mid":{"range":[160,260],"materialExample":"매립 25~30개 + 거실 간접조명 + 주방 간접","note":"브랜드 LED(플리커프리) 일부"},"premium":{"range":[300,480],"materialExample":"매립 다수 + 라인·레일·간접 + 스마트 제어","note":"설계 조명 / 수입 디자인 등"}},"laborShare":0.45,"days":"1~3일","costDrivers":["매립 개수","간접조명 m수·박스 목공","조명기구 등급"],"gotchas":["조명 기구값이 전기 견적에서 빠져 별도 정산되는 경우","간접조명은 목공+전기 이중 비용 — 한쪽에서 누락 시 추가"],"savingTips":["거실 중심 간접 + 나머지는 심플 매립","주방/식탁은 펜던트 단품 구매"],"sources":[{"title":"30평대 아파트 전체 인테리어 공정별 시장 범위(레이백 디자인, 2026)","url":"https://blog.naver.com/lay_back88/224408278221","date":"2026-09","kind":"단가표"},{"title":"거실 우물천장 간접조명 시공 단가와 목공 작업 부하량","url":"https://blog.naver.com/savelog_dh/224431949014","date":"2026-10","kind":"단가표"},{"title":"진주 47평 전체 리모델링 견적서 공정별 전체 공개(고미하우스, 2026)","url":"https://blog.naver.com/gomicompany/224429656588","date":"2026-09","kind":"견적공개"},{"title":"셀프 인테리어 비용 예산표 공정별 총정리(2026 노임·철거·도배·목공 단가)","url":"https://blog.naver.com/nstartkkh/224431918921","date":"2026-10","kind":"단가표"},{"title":"종합 보정(위 출처 범위를 59㎡·서울 기준으로 교차 보정한 추정)","url":"","date":"2026-10","kind":"추정"}]},{"id":"clean","name":"입주청소·반입·마무리","category":"가전·가구","oneLiner":"공사 먼지 제거와 가구·가전 반입, 마무리 코킹·실리콘. 가볍지만 빠뜨리기 쉬운 항목.","orderIndex":17,"unit":"평","qty25":25,"grades":{"budget":{"range":[1.2,1.5],"materialExample":"입주청소 + 기본 마감 청소","note":"평당 1.2~1.5만"},"mid":{"range":[1.3,1.8],"materialExample":"입주청소 + 가전 내부 청소 + 사다리차 포함","note":"가전 내부 대당 3~10 추가"},"premium":{"range":[1.6,2.2],"materialExample":"입주청소 + 코팅 + 실리콘 재마감 + 반입 서비스","note":"신축급 분진 제거는 평당 1.8"}},"laborShare":0.9,"days":"1일","costDrivers":["공급 평수","공사 분진 정도","추가 옵션(코팅·가전)"],"gotchas":["평당 0.9만 이하 초저가는 추가금·품질 저하 가능성","에어컨/오븐 내부는 범위 밖이 일반적"],"savingTips":["셀프 청소는 시간 대비 손익분기 낮음 — 업체 3곳 비교","공사 종료 직후 한 번만 하고 반입 후 간단 재청소"],"sources":[{"title":"입주청소 비용 2026 평수별 시세표와 셀프 손익분기점","url":"https://blog.naver.com/clouddiary_today/224429186812","date":"2026-09","kind":"단가표"},{"title":"종합 보정(위 출처 범위를 59㎡·서울 기준으로 교차 보정한 추정)","url":"","date":"2026-10","kind":"추정"}]},{"id":"mgmt","name":"현장관리·경비·이윤","category":"골조·설비","oneLiner":"턴키 업체의 현장 감독·보양·양중·경비·기업이윤. 직영(반셀프)이면 상당 부분이 빠집니다.","orderIndex":99,"unit":"%","qty25":100,"grades":{"budget":{"range":[8,12],"materialExample":"가설·보양·현장 소장 + 이윤 8~12%","note":"소규모 업체 / 직영 일부"},"mid":{"range":[10,14],"materialExample":"가설·양중·보양·현장소장 + 기업이윤 10%","note":"견적서에 이윤 10% 별도 기재 사례(진주)"},"premium":{"range":[12,16],"materialExample":"설계·감리·AS 포함 종합 수수료","note":"브랜드 턴키/설계 포함 시"}},"laborShare":0.5,"days":"전 기간","costDrivers":["업체 규모·브랜드","설계·감리 포함 여부","하자 보증 범위"],"gotchas":["총괄 마진 15~20%가 공정 단가에 섞여 있어 비교가 어려움","'기타 추가' 항목이 큰 견적은 사유 확인"],"savingTips":["이윤을 따로 적는 견적서가 비교하기 쉽다","반셀프 선택 시 이 비중이 빠지는 대신 본인 시간·하자 책임이 붙는다"],"sources":[{"title":"진주 47평 전체 리모델링 견적서 공정별 전체 공개(고미하우스, 2026)","url":"https://blog.naver.com/gomicompany/224429656588","date":"2026-09","kind":"견적공개"},{"title":"신혼부부 20평대 아파트 인테리어 견적 비교 2026년 기준","url":"https://blog.naver.com/xxxing1/224420927589","date":"2026-09","kind":"단가표"},{"title":"종합 보정(위 출처 범위를 59㎡·서울 기준으로 교차 보정한 추정)","url":"","date":"2026-10","kind":"추정"}],"overhead":true}],"materials":[{"id":"floor","title":"바닥재","rows":[{"name":"장판 1.8T 모노륨","price":[2.5,3.5],"unit":"만원/평","durability":2,"maintenance":"눌림·찍힘 쉬움, 5~8년 교체 권장","band":"가성비","need":25},{"name":"장판 2.2T 모노륨","price":[3.5,5],"unit":"만원/평","durability":3,"maintenance":"가장 보편, 관리 쉬움","band":"가성비","need":25},{"name":"장판 2.7T (프리미엄 쿠션)","price":[5,7],"unit":"만원/평","durability":3,"maintenance":"쿠션감·보온, 가구 눌림에 유리","band":"가성비","need":25},{"name":"강화마루","price":[8,11],"unit":"만원/평","durability":3,"maintenance":"습기 취약, 틈새 오염","band":"중급","need":25},{"name":"강마루 (LX 지인/구정 광폭)","price":[12,18],"unit":"만원/평","durability":4,"maintenance":"열전도 우수, 샌딩 보수 가능","band":"중급","need":25},{"name":"원목마루","price":[25,40],"unit":"만원/평","durability":4,"maintenance":"습도·온돌 관리, 스크래치 보수 필요","band":"고급","need":25},{"name":"포세린 타일 600×1200","price":[20,32],"unit":"만원/평","durability":5,"maintenance":"반영구, 난방 효율·발 시림 이슈","band":"고급","need":25}],"unit":"만원/평","need":25,"needLabel":"바닥 25평","defaultBudget":400,"note":"자재+시공 포함 평당"},{"id":"wall","title":"벽 마감","rows":[{"name":"합지 광폭 벽지","price":[3.3,5.5],"unit":"만원/평","durability":2,"maintenance":"오염에 약함, 통기성 우수","band":"가성비","need":25},{"name":"실크 벽지 (LX 베스띠급)","price":[6,9],"unit":"만원/평","durability":3,"maintenance":"세척 가능, 이음매 깔끔","band":"중급","need":25},{"name":"친환경 페인트 도장","price":[8,13],"unit":"만원/평","durability":3,"maintenance":"부분 보수 가능, 밑작업 품질이 핵심","band":"중급","need":25},{"name":"특수 마감(미장·스톤 패널)","price":[15,30],"unit":"만원/평","durability":4,"maintenance":"디자인 포인트 벽 한정","band":"고급","need":25}],"unit":"만원/평","need":25,"needLabel":"도배·도장 25평","defaultBudget":250,"note":"자재+시공 포함 평당"},{"id":"kdoor","title":"주방 도어","rows":[{"name":"PB 멤브레인","price":[45,65],"unit":"만원/m","durability":2,"maintenance":"모서리 들뜸·열 변형 주의","band":"가성비","need":4},{"name":"PET (하이글로시/무광)","price":[70,100],"unit":"만원/m","durability":3,"maintenance":"변색·스크래치 저항 양호","band":"중급","need":4},{"name":"도장 (UV/무광)","price":[110,160],"unit":"만원/m","durability":4,"maintenance":"깊은 질감, 흠집 보수 가능","band":"고급","need":4},{"name":"원목/무늬목","price":[150,240],"unit":"만원/m","durability":4,"maintenance":"습기 관리·정기 오일링","band":"고급","need":4}],"unit":"만원/m","need":4,"needLabel":"상·하부장 4m","defaultBudget":300,"note":"상판·후드는 별도"},{"id":"top","title":"주방 상판","rows":[{"name":"인조대리석","price":[10,20],"unit":"만원/m","durability":2,"maintenance":"열·스크래치 약함, 이음새 변색","band":"가성비","need":4},{"name":"엔지니어드스톤 (칸스톤류)","price":[40,70],"unit":"만원/m","durability":4,"maintenance":"오염·열에 강함, 보편 선택","band":"중급","need":4},{"name":"세라믹/덱톤","price":[50,80],"unit":"만원/m","durability":5,"maintenance":"최고 내구, 가공·시공 난이도 높음","band":"고급","need":4}],"unit":"만원/m","need":4,"needLabel":"상판 4m","defaultBudget":150,"note":""},{"id":"bath-tile","title":"욕실 타일","rows":[{"name":"국산 타일 300×600 (자재+시공)","price":[6,9],"unit":"만원/㎡","durability":3,"maintenance":"줄눈 관리 필요","band":"가성비","need":50},{"name":"수입 포세린 600×600 (자재+시공)","price":[9,15],"unit":"만원/㎡","durability":4,"maintenance":"흡수율 낮음, 큰 판일수록 시공비↑","band":"중급","need":50},{"name":"대형 포세린 600×1200","price":[15,25],"unit":"만원/㎡","durability":5,"maintenance":"줄눈 최소, 고난도 시공","band":"고급","need":50}],"unit":"만원/㎡","need":50,"needLabel":"욕실 2개소 벽·바닥 약 50㎡","defaultBudget":450,"note":"자재+시공 포함"},{"id":"bath-toilet","title":"욕실 도기(변기)","rows":[{"name":"변기 국산 일반 (대림 등)","price":[25,36],"unit":"만원/개","durability":3,"maintenance":"A/S 용이","band":"가성비","need":2},{"name":"변기 아메리칸스탠다드급","price":[36,60],"unit":"만원/개","durability":4,"maintenance":"세정력·소음 개선","band":"중급","need":2},{"name":"수입/일체형 비데 도기","price":[80,200],"unit":"만원/개","durability":4,"maintenance":"A/S 경로 확인","band":"고급","need":2}],"unit":"만원/개","need":2,"needLabel":"변기 2개","defaultBudget":100,"note":""},{"id":"bath-faucet","title":"욕실 수전","rows":[{"name":"수전 국산 기본","price":[6,10],"unit":"만원/개","durability":2,"maintenance":"물때·도금 벗겨짐","band":"가성비","need":4},{"name":"수전 무광 니켈 중급 (호림급)","price":[13,25],"unit":"만원/개","durability":3,"maintenance":"카트리지 교체형","band":"중급","need":4},{"name":"수전 수입 매립/아치형","price":[40,100],"unit":"만원/개","durability":4,"maintenance":"배관 사전 설계 필수","band":"고급","need":4}],"unit":"만원/개","need":4,"needLabel":"수전 4개(세면 2·샤워 2)","defaultBudget":60,"note":""},{"id":"sash","title":"샷시(창호)","rows":[{"name":"공장직영/실속 브랜드 22T 로이","price":[18,23],"unit":"만원/㎡","durability":3,"maintenance":"A/S 업체 의존","band":"가성비","need":24},{"name":"KCC 24T 로이 복층","price":[22,27],"unit":"만원/㎡","durability":4,"maintenance":"업계 표준, 전국 A/S","band":"중급","need":24},{"name":"LX Z:IN / 현대L&C 24T 로이","price":[24,30],"unit":"만원/㎡","durability":4,"maintenance":"기밀성·디자인 우수","band":"중급","need":24},{"name":"프리미엄 26T 더블로이 아르곤","price":[30,40],"unit":"만원/㎡","durability":5,"maintenance":"단열·방음 최고, 이중 간봉","band":"고급","need":24},{"name":"유리 두께 22→24T 추가","price":[5,8],"unit":"% 가산","durability":0,"maintenance":"결로·단열 개선 체감","band":"중급","need":null},{"name":"아르곤 충진 + 단열 간봉 추가","price":[8,15],"unit":"% 가산","durability":0,"maintenance":"결로 억제 효과","band":"고급","need":null}],"unit":"만원/㎡","need":24,"needLabel":"전체 창 면적 약 24㎡","defaultBudget":580,"note":"퍼센트 행은 가산율"},{"id":"door","title":"방문","rows":[{"name":"ABS 도어","price":[25,40],"unit":"만원/개","durability":3,"maintenance":"스크래치 저항 우수, 가성비 표준","band":"가성비","need":4},{"name":"멤브레인 도어","price":[35,55],"unit":"만원/개","durability":2,"maintenance":"가장자리 들뜸 가능","band":"가성비","need":4},{"name":"PET/도장 도어","price":[60,110],"unit":"만원/개","durability":4,"maintenance":"디자인 폭 넓음","band":"고급","need":4}],"unit":"만원/개","need":4,"needLabel":"방문 4개","defaultBudget":140,"note":""},{"id":"mdoor","title":"중문","rows":[{"name":"3연동 (기본)","price":[55,130],"unit":"만원/세트","durability":3,"maintenance":"댐퍼·레일 점검","band":"가성비","need":1},{"name":"원슬라이딩","price":[70,150],"unit":"만원/세트","durability":3,"maintenance":"현관 폭 영향 적음","band":"중급","need":1},{"name":"여닫이","price":[80,180],"unit":"만원/세트","durability":3,"maintenance":"열림 공간 필요","band":"중급","need":1},{"name":"스윙/풀윈도우 프리미엄","price":[120,250],"unit":"만원/세트","durability":4,"maintenance":"디자인 완성도, 출장·추가 시공비","band":"고급","need":1}],"unit":"만원/세트","need":1,"needLabel":"중문 1세트","defaultBudget":100,"note":"설치비 포함"},{"id":"light-down","title":"매립 조명","rows":[{"name":"매립 다운라이트 (일반 LED)","price":[1.5,3],"unit":"만원/개","durability":3,"maintenance":"드라이버 교체 필요","band":"가성비","need":25},{"name":"매립 다운라이트 (브랜드·플리커프리)","price":[3,6],"unit":"만원/개","durability":4,"maintenance":"눈부심 적음","band":"중급","need":25},{"name":"매립 다운라이트 (설계급)","price":[6,12],"unit":"만원/개","durability":5,"maintenance":"색온도 제어","band":"고급","need":25}],"unit":"만원/개","need":25,"needLabel":"다운라이트 25개","defaultBudget":100,"note":""},{"id":"light-ind","title":"간접조명","rows":[{"name":"간접조명 (T5/LED바 + 목공 박스)","price":[3,8],"unit":"만원/m","durability":3,"maintenance":"먼지 점검 필요","band":"중급","need":12},{"name":"간접 + 레일/라인조명","price":[8,15],"unit":"만원/m","durability":4,"maintenance":"설계 난이도 상승","band":"고급","need":12}],"unit":"만원/m","need":12,"needLabel":"간접조명 12m","defaultBudget":70,"note":"목공 박스는 별도"}],"sampleEstimate":{"presets":[{"id":"budget","label":"가성비"},{"id":"mid","label":"중급"},{"id":"premium","label":"고급"}],"overheadRate":{"budget":0.1,"mid":0.12,"premium":0.14},"items":[{"processId":"demo","name":"철거·폐기물","qty":25,"unit":"평","base":{"budget":300,"mid":350,"premium":450},"k":0.8,"laborShare":0.85},{"processId":"plumb","name":"설비(배관 교체·수전 이설)","qty":1,"unit":"식","base":{"budget":250,"mid":300,"premium":420},"k":0.5,"laborShare":0.65},{"processId":"elec","name":"전기(배선·분전반·콘센트 증설)","qty":25,"unit":"평","base":{"budget":270,"mid":350,"premium":500},"k":0.7,"laborShare":0.7},{"processId":"carp","name":"목공(천장·가벽·몰딩·걸레받이)","qty":25,"unit":"평","base":{"budget":420,"mid":650,"premium":1100},"k":0.9,"laborShare":0.7},{"processId":"bath","name":"욕실(1개소 전체)","qty":2,"unit":"개소","base":{"budget":660,"mid":800,"premium":1250},"k":0.3,"laborShare":0.5},{"processId":"tile","name":"타일(현관·주방벽·베란다)","qty":1,"unit":"식","base":{"budget":140,"mid":200,"premium":330},"k":0.6,"laborShare":0.6},{"processId":"film","name":"필름(문틀·현관문·몰딩)","qty":1,"unit":"식","base":{"budget":130,"mid":180,"premium":250},"k":0.7,"laborShare":0.55},{"processId":"wall","name":"도배·페인트","qty":25,"unit":"평","base":{"budget":175,"mid":260,"premium":380},"k":1.0,"laborShare":0.65},{"processId":"floor","name":"바닥(장판·마루·타일)","qty":25,"unit":"평","base":{"budget":200,"mid":420,"premium":780},"k":1.0,"laborShare":0.4},{"processId":"kitchen","name":"주방(싱크대·상판·후드·인덕션)","qty":1,"unit":"식","base":{"budget":450,"mid":650,"premium":1100},"k":0.35,"laborShare":0.35},{"processId":"furn","name":"붙박이·수납가구","qty":25,"unit":"자","base":{"budget":420,"mid":520,"premium":850},"k":0.8,"laborShare":0.35},{"processId":"door","name":"도어·중문","qty":1,"unit":"식","base":{"budget":170,"mid":260,"premium":420},"k":0.5,"laborShare":0.4},{"processId":"light","name":"조명(매립·간접·레일 + 전기 연계)","qty":1,"unit":"식","base":{"budget":120,"mid":200,"premium":380},"k":0.8,"laborShare":0.45},{"processId":"clean","name":"입주청소·반입·마무리","qty":25,"unit":"평","base":{"budget":35,"mid":40,"premium":55},"k":1.0,"laborShare":0.9}],"options":[{"id":"balcony","label":"발코니 확장","processId":"balcony","base":{"budget":350,"mid":450,"premium":600},"k":0.5,"laborShare":0.6,"rangeNote":"+350~600"},{"id":"window","label":"샷시 교체","processId":"window","base":{"budget":450,"mid":580,"premium":750},"k":0.7,"laborShare":0.3,"rangeNote":"+450~750"},{"id":"sysac","label":"시스템에어컨","processId":"sysac","base":{"budget":450,"mid":520,"premium":650},"k":0.5,"laborShare":0.3,"rangeNote":"+450~650"}],"semiSelf":{"laborCut":{"budget":0.15,"mid":0.2,"premium":0.25},"removeOverhead":true,"note":"반셀프: 모든 공정의 인건비 부분을 15/20/25% 줄이고(가성비/중급/고급) 현장관리·이윤 항목을 제거합니다. 대신 일정 관리·하자 책임은 본인에게 옵니다."},"scaler":{"refPyeong":25,"range":[20,34],"formula":"공정 금액(p) = 기준 금액(25평) × (p/25)^k. 면적 비례 공정은 k≈1(도배·바닥), 목공 0.9, 철거 0.8, 전기 0.7, 개소 고정 공정은 k≈0.3(욕실 0.3, 주방 0.35), 설비 0.5, 도어 0.5. 총액 = (공정 합 + 옵션) × (1 + 이윤율), 평당 단가 = 총액 ÷ 평수.","note":"'평'은 공급면적 기준(59㎡ 전용 ≈ 25평)입니다."}},"cases":{"note":"같은 단지 59타입 및 인접 사례(익명, 오픈채팅 취합). 시기와 범위가 달라 직접 비교용 참고선입니다.","items":[{"label":"59타입 올수리 (2025 시공)","value":5800,"kind":"2025"},{"label":"같은 조건 2026 환산(본인 언급)","value":6500,"range":[6000,7000],"kind":"2026"},{"label":"84타입 (확장·에어컨 제외, 2026)","value":3800,"kind":"2026"},{"label":"반셀프 (샷시 제외)","value":1500,"kind":"반셀프"},{"label":"반셀프 (샷시 제외, 올수리)","value":5000,"kind":"반셀프"},{"label":"반셀프 (올수리+샷시+에어컨3+재확장)","value":6000,"kind":"반셀프"}]},"quiz":[{"processId":"window","prompt":"25평 아파트(59㎡) 거실·방·베란다 창호 전체를 KCC 24T 로이 복층으로 교체합니다. 철거·장비 포함 총액은 대략?","choices":["150~250만원","300~420만원","520~680만원","1,000~1,400만원"],"answerIndex":2,"explanation":"창호 전체 교체는 평당이 아니라 창 면적과 개소로 책정되며 25평 전체 기준 중급 사양은 520~680만원 선입니다. 가격 변수는 유리 두께·로이·아르곤, 15층 이상 장비비, 기존 틀 철거 포함 여부입니다."},{"processId":"window","prompt":"'샷시 평당 25만원'이라는 견적을 받았습니다. 25평(약 625만원)처럼 곱해서 보는 이 방식의 가장 큰 함정은?","choices":["평당 가격은 항상 공정하다","창 면적이 평수와 비례하지 않아 총액이 크게 틀어진다","로이 유리는 평당에 포함되지 않는다","철거비가 항상 별도다"],"answerIndex":1,"explanation":"창호는 평수가 아니라 창 면적(㎡)과 개소 수로 가격이 결정됩니다. 같은 25평이라도 발코니 폭·확장 여부에 따라 창 면적이 달라져 평당 환산은 믿기 어렵습니다. 반드시 개소별 사양이 적힌 견적을 요청하세요."},{"processId":"window","prompt":"거실과 큰 외창만 부분 교체하고 나머지는 유지하는 경우, 2026년 서울 기준 현실적인 금액은?","choices":["80~150만원","300~500만원","700~900만원","1,200~1,500만원"],"answerIndex":1,"explanation":"부분 교체는 전체 교체 대비 약 30~40% 비용이며 거실창·큰 외창만 하면 400~500만원대 사례가 많습니다. 가격은 교체 면적과 장비 사용료, 유리 사양이 좌우합니다. 효과는 면적이 큰 창에 집중되므로 가성비 선택지로 흔합니다."},{"processId":"balcony","prompt":"거실 1면 확장(단열·난방 연장 포함)을 중급으로 시공할 때 샷시 비용을 제외한 확장 본체 비용은?","choices":["80~150만원","180~250만원","380~520만원","900~1,200만원"],"answerIndex":2,"explanation":"확장은 철거·단열 보강·난방 배관 연장·마감 목공이 함께 들어가 350만원 안팎부터 시작합니다. 샷시는 별도 계상이 일반적이라 이중 계상 여부를 확인해야 합니다. 면 수와 단열 등급이 가격을 가릅니다."},{"processId":"bath","prompt":"욕실 1개소를 덧방(기존 타일 위 시공)으로 가성비 시공할 때 현실적인 총액은?","choices":["80~150만원","270~360만원","600~800만원","1,000만원 이상"],"answerIndex":1,"explanation":"덧방은 철거·방수 비용이 빠져 올철거(380~500만원)보다 낮습니다. 가격은 철거 범위, 타일 크기, 도기·수전 등급에 따라 변합니다. 다만 방수층 상태를 모르면 장기 하자 위험이 있습니다."},{"processId":"bath","prompt":"'욕실 올철거 300만원' 견적과 '욕실 철거 방수 포함 480만원' 견적이 있습니다. 가장 먼저 확인할 것은?","choices":["타일 색상","방수 공법과 시공 범위(2중 방수 포함 여부), 철거·폐기물 포함 여부","업체 대표 연령","샤워기 브랜드"],"answerIndex":1,"explanation":"욕실은 보이지 않는 방수와 철거 범위에서 가격 차이가 가장 크게 납니다. 같은 타일이라도 방수를 1회냐 2중이냐에 따라 아랫집 누수 위험이 달라집니다. 폐기물·양중 포함 여부도 확인해야 합니다."},{"processId":"bath","prompt":"대형 포세린 + 조적 세면대 + 매립 수전을 쓰는 고급 욕실 1개소의 현실적 금액대는?","choices":["200~300만원","350~450만원","550~850만원","1,500만원 이상"],"answerIndex":2,"explanation":"대형판 시공은 공수가 늘고 조적·매립 배관은 설계 난이도가 높아 500만원대 이상이 됩니다. 변수는 타일 크기, 줄눈 방식, 수전 배관 사전 설계입니다. 과도한 사양은 하자 위험도 올립니다."},{"processId":"kitchen","prompt":"59타입 25평 일자/ㄱ자 주방(약 4m)을 사제 PB 멤브레인 + 인조대리석으로 교체. 후드·수전 포함 총액은?","choices":["120~200만원","300~450만원","700~900만원","1,200만원 이상"],"answerIndex":1,"explanation":"사제 PB 멤브레인과 인조대리석 조합은 가성비 구간이며 300~450만원이 흔합니다. 배관 위치 유지 여부, 후드·쿡탑·빌트인 포함 여부가 가격을 가릅니다. 브랜드 한샘 유로급은 500~700만원대입니다."},{"processId":"kitchen","prompt":"같은 한샘 유로 라인인데 한 곳은 530, 다른 곳은 590만원입니다. 차이의 가장 흔한 원인은?","choices":["유로 라인이 서로 다른 제품","상판 업그레이드·수전·싱크볼·철거 포함 여부","모든 업체의 이윤이 20% 고정","고객 나이에 따른 할인"],"answerIndex":1,"explanation":"같은 라인이어도 상판 등급, 수전·싱크볼, 철거·시공비 포함 범위에서 60만원 정도 차이가 납니다. 견적서에 모델명과 옵션이 명시됐는지 확인하는 것이 핵심입니다."},{"processId":"kitchen","prompt":"엔지니어드스톤 상판 4m(m당 약 55만원)과 인조대리석 4m(m당 약 15만원)의 상판 차액은 대략?","choices":["약 20만원","약 80만원","약 160만원","약 400만원"],"answerIndex":2,"explanation":"m당 40만원 차이가 4m에 누적되어 약 160만원 차이가 납니다. 단가는 소재와 가공(이음새·싱크볼 컷)에서 달라집니다. 상판만 바꿔도 100만원 이상 차이 나는 이유입니다."},{"processId":"elec","prompt":"올수리에서 전기 공사(배선 재시공·분전반 교체·콘센트 증설) 25평 중급 총액은?","choices":["40~80만원","150~250만원","300~400만원","700~900만원"],"answerIndex":2,"explanation":"중급은 평당 12~16만원 수준으로 25평이면 300~400만원입니다. 변수는 콘센트·스위치 개수, 전용선 분리(인덕션·에어컨), 분전반 용량입니다. 조명 기구값은 별도인 경우가 많습니다."},{"processId":"elec","prompt":"인덕션을 새로 사면서 주방 전용선 증설을 뒤늦게 요청했습니다. 흔히 청구되는 추가 비용은?","choices":["5~10만원","50~100만원","300~400만원","500만원 이상"],"answerIndex":1,"explanation":"고전력 가전의 전용선 증설은 50~100만원 정도가 흔합니다. 벽 마감 후에는 재타공이 필요해 비용이 커집니다. 따라서 가전 선정 후 전기 설계를 확정해야 합니다."},{"processId":"sysac","prompt":"거실 1대 + 방 2대, 총 3대 시스템에어컨(제품+기본 설치)의 중급 구간은?","choices":["150~250만원","480~560만원","800~1,000만원","1,300만원 이상"],"answerIndex":1,"explanation":"2026년 자료에서 4대 450~650만원, 3대 중급은 500만원대가 일반적입니다. 가격은 실내기 타입(1way/4way), 배관 길이, 천장 마감과 전기 포함 여부로 갈립니다. 추가 배관·점검구로 50만원 이상 가산되기도 합니다."},{"processId":"sysac","prompt":"시스템에어컨 견적 450만원이 있는데 최종 정산에서 70만원이 더 나왔습니다. 가장 흔한 원인이 아닌 것은?","choices":["냉매배관 15m 초과분(m당 약 2만원)","점검구·철재 앵글·배수펌프","천장 단내림 KIT","실외기 색상 선택"],"answerIndex":3,"explanation":"추가금은 배관 길이, 점검구·앵글·배수펌프, 단내림 KIT처럼 현장 조건에서 생깁니다. 실외기 색상은 거의 비용과 무관합니다. 견적서에 포함 범위를 미리 못 박아야 합니다."},{"processId":"carp","prompt":"25평 중급 목공(천장 평탄 + 간접박스 + 문틀 교체)의 전형적 금액은?","choices":["80~150만원","250~350만원","550~750만원","1,500만원 이상"],"answerIndex":2,"explanation":"중급 목공은 평당 22~30만원으로 25평이면 550~750만원입니다. 변수는 천장 단차 개수, 간접조명 박스, 무몰딩 디테일입니다. '목공 일체'로만 쓰인 견적은 범위를 쪼개서 확인해야 합니다."},{"processId":"carp","prompt":"거실 우물천장 정리 + 간접조명 박스(목공+조명 배선)만 할 때, 시장 자료의 대략 범위는?","choices":["5~15만원","50~150만원","500~800만원","1,000만원 이상"],"answerIndex":1,"explanation":"우물천장 정리는 천장 규모와 다운라이트 개수에 따라 50~150만원대로 나옵니다. 인건비 비중이 높고 전기 연계 때문에 공정 순서 확인이 중요합니다."},{"processId":"floor","prompt":"25평 거실·방 바닥을 2.2T 모노륨 장판으로 시공(철거 보수 포함)하면?","choices":["30~60만원","125~200만원","350~500만원","700만원 이상"],"answerIndex":1,"explanation":"2.2T는 가장 흔한 두께로 평당 자재+시공 5~8만원 안팎입니다(보수 포함). 장판은 철거·바닥 보수 범위에 따라 달라집니다. 강마루는 이보다 2~3배 비쌉니다."},{"processId":"floor","prompt":"25평을 LX 지인 급 강마루(샌딩·부자재 포함)로 시공하면 중급 구간 총액은?","choices":["150~250만원","350~500만원","800~1,100만원","1,500만원 이상"],"answerIndex":1,"explanation":"강마루는 평당 14~20만원 수준이라 25평 350~500만원입니다. 자재는 6~9만원, 시공 3.5~5만원이 기본이고 샌딩·부자재가 추가됩니다. 광폭·원목 라인은 단가가 더 오릅니다."},{"processId":"floor","prompt":"'강마루 평당 8만원, 25평 총 200만원'이라는 견적의 가장 큰 의심 포인트는?","choices":["평당 단가가 기술적으로 불가능","샌딩·부자재·몰딩·철거가 빠져 있을 가능성","강마루는 장판보다 항상 저렴","색상이 2가지뿐"],"answerIndex":1,"explanation":"자재비만 평당 6~9만원인데 시공과 부자재를 포함해도 8만원은 너무 낮습니다. 샌딩·몰딩·걸레받이 등이 빠졌을 가능성이 큽니다. 포함 범위를 항목별로 확인하세요."},{"processId":"wall","prompt":"25평 올수리 도배 — 실크 벽지(천장 포함, 퍼티·초배 포함)의 중급 총액은?","choices":["30~60만원","110~160만원","225~312만원","600~800만원"],"answerIndex":2,"explanation":"올수리 기준 실크는 퍼티·초배·천장까지 포함하면 평당 9~12.5만원대입니다. 단순 벽지 교체 130~180만원은 상태 좋은 빈집 기준입니다. 기존 실크 제거와 보수가 있으면 상단에 가깝습니다."},{"processId":"wall","prompt":"24평 합지와 실크의 도배 비용 차이(시장 자료 기준)는 대략?","choices":["거의 차이 없음","30~50만원 이상","300~500만원","1,000만원"],"answerIndex":1,"explanation":"합지 80~130만원, 실크 130~180만원으로 차이는 30~50만원 이상입니다. 실크는 오염 세척이 가능하고 이음매가 깔끔합니다. 안방·거실만 실크로 믹스하면 비용을 줄일 수 있습니다."},{"processId":"demo","prompt":"59㎡(25평) 올철거 + 폐기물(2~3차) + 엘리베이터 보양을 포함한 철거 비용은?","choices":["50~100만원","300~400만원","700~900만원","1,200만원 이상"],"answerIndex":1,"explanation":"올철거 중급은 평당 12~16만원으로 25평 300~400만원입니다. 폐기물 톤수, 사다리차·양중, 욕실 방수층 철거 포함 여부가 변수입니다. '철거 일체' 한 줄 견적은 범위를 확인하세요."},{"processId":"plumb","prompt":"30년차 아파트 올수리에서 급수·배수 배관 전면 교체(위치 이동 없음)의 중급 구간은?","choices":["40~80만원","260~360만원","700~900만원","1,200만원"],"answerIndex":1,"explanation":"배관은 보이지 않아도 구축에서는 필수에 가깝고 중급 260~360만원입니다. 위치를 이동하면 배수 구배 때문에 바닥 높이 문제와 추가 비용이 생깁니다."},{"processId":"door","prompt":"방문 4개(ABS) + 3연동 중문 1세트를 설치하는 경우(문틀 포함) 가성비 총액은?","choices":["20~50만원","120~200만원","400~550만원","800만원"],"answerIndex":1,"explanation":"ABS 방문 개당 25~40만원, 3연동 중문 55~130만원이 일반적입니다. 문틀 교체 여부가 가장 큰 변수이며 필름으로 대체하면 비용이 줄어듭니다."},{"processId":"door","prompt":"3연동 중문의 온라인 시공 플랫폼 기준 평균 설치 금액은?","choices":["약 20만원","약 75만원","약 200만원","약 350만원"],"answerIndex":1,"explanation":"평균 75만원, 최저 55만원~최고 130만원 정도로 안내됩니다. 출장비·댐퍼 옵션이 따로 청구되기도 합니다. 문 형태(3연동/스윙)와 유리 사양이 변수입니다."},{"processId":"light","prompt":"거실·주방 간접조명(박스+LED바) 총 10m를 중급으로 시공(목공 제외 조명 배선 중심)하면 대략?","choices":["3~10만원","30~80만원","300~400만원","800만원"],"answerIndex":1,"explanation":"간접조명은 m당 3~8만원 구간이라 10m면 30~80만원입니다. 목공 박스와 전기 배선이 이중으로 들어가므로 누락·중복을 확인해야 합니다."},{"processId":"clean","prompt":"24평(59㎡) 입주청소의 2026년 시세는? (공급 평수 기준)","choices":["5~10만원","29~36만원","80~120만원","200만원"],"answerIndex":1,"explanation":"24평 평균 29~36만원으로 평당 1.2~1.5만원입니다. 평당 0.9만원 이하 초저가는 추가금·품질 저하 위험이 큽니다. 에어컨 내부 등은 별도 대당 3~10만원이 흔합니다."},{"processId":"furn","prompt":"신발장 + 붙박이장 총 25자(30cm 기준)를 사제 PB 멤브레인으로 맞출 때 가성비 총액은?","choices":["50~100만원","275~425만원","700~900만원","1,500만원 이상"],"answerIndex":1,"explanation":"자당 11~17만원이면 25자에 275~425만원입니다. 브랜드 시스템 가구는 자당 28~40만원까지 오릅니다. 자수 계산 기준을 서로 맞춰 비교해야 합니다."},{"processId":"tile","prompt":"현관 바닥 + 주방 벽 + 베란다 타일 일괄(중급, 포세린 600×600)의 대략 범위는?","choices":["20~50만원","160~260만원","500~700만원","1,000만원"],"answerIndex":1,"explanation":"타일은 면적이 작아도 시공 난이도가 높아 중급 160~260만원이 흔합니다. 변수는 타일 크기, 줄눈 등급(에폭시), 현관 단차 정리입니다. 욕실은 별도 공정입니다."},{"processId":"mgmt","prompt":"업체 견적서에 '기업이윤 10% + 부가세 10%'가 따로 적혀 있습니다. 순공사비 6,000만원이면 청구 총액은?","choices":["6,600만원","7,260만원","7,800만원","8,400만원"],"answerIndex":1,"explanation":"순공사비 6,000에 이윤 10%를 얹으면 6,600이고 여기에 부가세 10%를 더하면 7,260만원입니다. 이처럼 이윤·VAT가 곱해지는 구조를 이해해야 견적을 비교할 수 있습니다. VAT 별도 표기 관행도 확인하세요."},{"processId":"window","prompt":"2026-04 이후 관세 영향으로 샷시 단가가 30% 올랐다는 언급이 있습니다. 2025년에 550만원이던 같은 사양은 2026년에 대략?","choices":["550만원 그대로","약 600만원","약 715만원","약 1,100만원"],"answerIndex":2,"explanation":"30% 인상을 곱하면 약 715만원입니다. 다만 실제 인상폭은 사양·브랜드마다 달라 이 값은 상한에 가까운 추정입니다. 최신 견적 3곳을 받아 비교하세요."}]};
+</script>
+<script>
+(function(){
+"use strict";
+const GR=["budget","mid","premium"], GL={budget:"가성비",mid:"중급",premium:"고급"};
+const $=(s,r)=>(r||document).querySelector(s);
+function el(tag,attrs,...kids){
+  const e=document.createElement(tag);
+  if(attrs)for(const k in attrs){
+    const v=attrs[k];
+    if(k.startsWith("aria-")&&typeof v==="boolean"){e.setAttribute(k,String(v));continue}
+    if(v==null||v===false)continue;
+    if(k==="class")e.className=v;
+    else if(k==="text")e.textContent=v;
+    else if(k.startsWith("on"))e.addEventListener(k.slice(2),v);
+    else e.setAttribute(k,v===true?"":v);
+  }
+  for(const c of kids.flat()){ if(c==null||c===false)continue; e.append(c.nodeType?c:document.createTextNode(c)); }
+  return e;
+}
+const store={
+  get(k){try{return localStorage.getItem(k)}catch(e){return null}},
+  set(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+};
+function f(n){ // 만원 단위 숫자 표기
+  if(n>=10000){const v=n/10000;return (Math.round(v*100)/100)+"억"}
+  const r=Math.abs(n)<10?Math.round(n*10)/10:Math.round(n);
+  return r.toLocaleString("ko-KR");
+}
+const fr=(r)=>f(r[0])+"~"+f(r[1]);
+const UNITLBL=(u)=>u==="%"?"%":"만원/"+u;
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const PROC=DATA.processes, PM={}; PROC.forEach(p=>PM[p.id]=p);
+
+/* ---------- theme ---------- */
+const themeBtn=$("#themeBtn");
+function curDark(){
+  const t=document.documentElement.getAttribute("data-theme");
+  if(t)return t==="dark";
+  return window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches;
+}
+function paintTheme(){const d=curDark();themeBtn.textContent=d?"라이트로":"다크로";themeBtn.setAttribute("aria-pressed",d);}
+const savedTheme=store.get("ip.theme"); if(savedTheme)document.documentElement.setAttribute("data-theme",savedTheme);
+themeBtn.addEventListener("click",()=>{const n=curDark()?"light":"dark";document.documentElement.setAttribute("data-theme",n);store.set("ip.theme",n);paintTheme();});
+paintTheme();
+
+/* ---------- tabs ---------- */
+const TABS=["proc","quiz","est","mat"];
+function showTab(id,focus){
+  TABS.forEach(t=>{
+    const on=t===id; const b=$("#tab-"+t);
+    b.setAttribute("aria-selected",on);b.tabIndex=on?0:-1;
+    $("#p-"+t).hidden=!on;
+  });
+  store.set("ip.tab",id);
+  if(focus)$("#tab-"+id).focus();
+}
+$("#tablist").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(b)showTab(b.dataset.tab)});
+$("#tablist").addEventListener("keydown",e=>{
+  const i=TABS.indexOf(document.activeElement.dataset.tab); if(i<0)return;
+  let n=null; if(e.key==="ArrowRight")n=(i+1)%4; else if(e.key==="ArrowLeft")n=(i+3)%4; else if(e.key==="Home")n=0; else if(e.key==="End")n=3;
+  if(n!=null){e.preventDefault();showTab(TABS[n],true)}
+});
+
+/* ---------- 1. process cards ---------- */
+const unitScale={};
+const sk=p=>(p.unit==="평"&&p.grades.premium.range[1]<5)?"평소액":p.unit;
+(function(){
+  PROC.forEach(p=>{
+    const s=unitScale[sk(p)]||(unitScale[sk(p)]={lo:Infinity,hi:0});
+    GR.forEach(g=>{const r=p.grades[g].range;s.lo=Math.min(s.lo,r[0]);s.hi=Math.max(s.hi,r[1]);});
+  });
+  for(const u in unitScale){const s=unitScale[u];s.lo*=0.8;s.hi*=1.15;}
+})();
+function pos(u,v){const s=unitScale[u];return Math.max(0,Math.min(1,(Math.log(v)-Math.log(s.lo))/(Math.log(s.hi)-Math.log(s.lo))))}
+const CATS=["전체","골조·설비","마감","가전·가구"];
+const pst={cat:"전체",q:"",open:{}};
+function buildProc(){
+  const root=$("#p-proc");
+  root.append(
+    el("h2",{text:"공정별 가격 카드"}),
+    el("p",{class:"muted",text:"시공 순서대로 나열했습니다. 막대는 같은 단위끼리 공유하는 로그 눈금이라, 막대가 길고 오른쪽일수록 단가가 큽니다."}),
+    el("div",{class:"toolbar",style:"margin-top:12px",id:"pfilters"}),
+    el("div",{class:"toolbar"},el("input",{type:"search",id:"psearch",placeholder:"공정·자재 검색 (예: 강마루, 방수)","aria-label":"공정 검색"})),
+    el("ol",{class:"proc-list",id:"plist"}),
+    el("p",{class:"small",id:"pempty",hidden:true,text:"검색 결과가 없습니다."})
+  );
+  const pf=$("#pfilters");
+  CATS.forEach(c=>pf.append(el("button",{class:"chip","aria-pressed":c===pst.cat,"data-c":c,text:c,onclick:()=>{pst.cat=c;pf.querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-pressed",b.dataset.c===c));renderProc();}})));
+  $("#psearch").addEventListener("input",e=>{pst.q=e.target.value.trim().toLowerCase();renderProc();});
+  renderProc();
+}
+function procText(p){return [p.name,p.oneLiner,p.costDrivers.join(" "),GR.map(g=>p.grades[g].materialExample+" "+p.grades[g].note).join(" ")].join(" ").toLowerCase()}
+function renderProc(){
+  const list=$("#plist");list.textContent="";
+  let n=0;
+  PROC.forEach((p,idx)=>{
+    if(pst.cat!=="전체"&&p.category!==pst.cat)return;
+    if(pst.q&&!procText(p).includes(pst.q))return;
+    n++;
+    list.append(procCard(p,idx));
+  });
+  $("#pempty").hidden=n>0;
+}
+function procCard(p,idx){
+  const open=!!pst.open[p.id], did="d-"+p.id;
+  const isOv=!!p.overhead;
+  const bars=el("div",{class:"bars"});
+  GR.forEach(g=>{
+    const r=p.grades[g].range;
+    const a=pos(sk(p),r[0]),b=pos(sk(p),r[1]);
+    bars.append(el("div",{class:"brow"},
+      el("span",{class:"lab "+g,text:GL[g]}),
+      el("div",{class:"track",role:"img","aria-label":GL[g]+" "+fr(r)+" "+UNITLBL(p.unit)},el("div",{class:"band "+g,style:`left:${(a*100).toFixed(1)}%;width:${Math.max((b-a)*100,2).toFixed(1)}%`})),
+      el("span",{class:"val num",text:fr(r)})
+    ));
+  });
+  const s=unitScale[sk(p)];
+  const axis=el("div",{class:"axis"},el("span"),el("span",{class:"ax"},el("span",{text:f(s.lo)}),el("span",{text:f(s.hi)})),el("span",{text:UNITLBL(p.unit)}));
+  const q=p.qty25;
+  const conv=isOv?null:`25평 기준 환산 ${f(GR.map(g=>p.grades[g].range[0]*q)[0])}~${f(p.grades.premium.range[1]*q)}만원 (${GL.budget} 하단~${GL.premium} 상단)`;
+  const hasEst=p.sources.some(s=>s.kind==="추정");
+  const head=el("button",{class:"card-head","aria-expanded":open,"aria-controls":did,onclick:()=>toggle(p.id)},
+    el("div",{class:"card-title"},el("b",{text:p.name}),el("span",{class:"tag",text:(isOv?"공사비 대비 %":"단위: "+p.unit)}),
+      p.optionKey?el("span",{class:"tag est",text:"옵션 공정"}):null),
+    el("p",{class:"one",text:p.oneLiner}),
+    bars,axis,
+    el("div",{class:"meta"},
+      el("span",{class:"tag",text:"공기 "+p.days}),
+      el("span",{class:"meter","aria-label":"인건비 비중 "+Math.round(p.laborShare*100)+"%"},"인건비 ",el("i",null,el("b",{style:`width:${p.laborShare*100}%`})),Math.round(p.laborShare*100)+"%"),
+      conv?el("span",{class:"small num",text:conv}):null)
+  );
+  const detail=el("div",{class:"detail",id:did,hidden:!open},
+    el("div",{class:"dgrid"},
+      el("div",null,el("h3",{text:"가격을 가르는 변수"}),el("ul",null,p.costDrivers.map(x=>el("li",{text:x})))),
+      el("div",{class:"warn"},el("h3",{text:"바가지·누락 포인트"}),el("ul",null,p.gotchas.map(x=>el("li",{text:x})))),
+      el("div",{class:"save"},el("h3",{text:"아끼는 법"}),el("ul",null,p.savingTips.map(x=>el("li",{text:x}))))),
+    el("div",null,el("h3",{text:"등급별 자재·사양 예시"}),
+      el("div",{class:"dgrid"},GR.map(g=>el("div",{class:"gcard"},
+        el("span",{class:"tag "+g,text:GL[g]+" · "+fr(p.grades[g].range)+" "+UNITLBL(p.unit)}),
+        el("p",{style:"margin-top:6px;font-weight:650",text:p.grades[g].materialExample}),
+        el("p",{class:"small",text:p.grades[g].note}))))),
+    el("div",null,el("h3",{text:"출처"}),
+      el("div",{class:"srcs"},p.sources.map(s=>el("div",null,
+        el("span",{class:"tag "+(s.kind==="추정"?"est":""),text:s.kind}),
+        " ",s.url?el("a",{href:s.url,target:"_blank",rel:"noopener noreferrer",text:s.title}):el("span",{text:s.title}),
+        s.kind==="추정"?el("span",{class:"note-est",text:" — 직접 출처 없이 범위를 교차 보정한 값"}):null)))));
+  const exp=el("button",{class:"expand","aria-expanded":open,"aria-controls":did,onclick:()=>toggle(p.id)},el("span",{text:open?"접기":"자세히 보기"}),el("span",{"aria-hidden":"true",text:open?"−":"+"}));
+  return el("li",{class:"proc"+(idx===PROC.length-1?" last":"")},
+    el("div",{class:"rail",text:isOv?"전":String(p.orderIndex)}),
+    el("article",{class:"card"},head,exp,detail));
+}
+function toggle(id){pst.open[id]=!pst.open[id];const y=window.scrollY;renderProc();window.scrollTo(0,y);}
+buildProc();
+
+/* ---------- 2. quiz ---------- */
+const QZ={mode:"start",order:[],i:0,res:[],picked:null};
+const bestKey="ip.best";
+function qRoot(){return $("#p-quiz")}
+function startQuiz(subset){
+  const src=subset||DATA.quiz.map((x,i)=>Object.assign({idx:i},x));
+  QZ.order=shuffle(src).map(x=>{
+    const ch=x.choices.map((t,k)=>({t,ok:k===x.answerIndex}));
+    const sh=shuffle(ch);
+    return {idx:x.idx,processId:x.processId,prompt:x.prompt,choices:sh,explanation:x.explanation,orig:x};
+  });
+  QZ.i=0;QZ.res=[];QZ.picked=null;QZ.mode="run";QZ.full=!subset;
+  renderQuiz();
+}
+function renderQuiz(){
+  const r=qRoot();r.textContent="";
+  const w=el("div",{class:"qwrap"});r.append(w);
+  if(QZ.mode==="start"){
+    const best=store.get(bestKey);
+    w.append(el("div",{class:"panel"},
+      el("h2",{text:"가격 감각 퀴즈"}),
+      el("p",{class:"muted",text:`구체적 상황에서 알맞은 가격대를 고르세요. 총 ${DATA.quiz.length}문제, 매번 순서와 보기 위치가 섞입니다. 키보드 1~4로도 고를 수 있습니다.`}),
+      best?el("p",{style:"margin-top:10px",text:"최고 점수: "+best}):null,
+      el("div",{class:"row"},el("button",{class:"btn primary",onclick:()=>startQuiz()},"시작하기"))));
+    return;
+  }
+  if(QZ.mode==="end"){renderResult(w);return;}
+  const q=QZ.order[QZ.i],n=QZ.order.length;
+  const ans=QZ.picked!=null;
+  w.append(el("div",{class:"panel"},
+    el("div",{class:"small",style:"display:flex;justify-content:space-between"},el("span",{text:`${QZ.i+1} / ${n}`}),el("span",{text:`맞춘 수 ${QZ.res.filter(x=>x.ok).length}`})),
+    el("div",{class:"prog",role:"progressbar","aria-valuemin":0,"aria-valuemax":n,"aria-valuenow":QZ.i+(ans?1:0)},el("b",{style:`width:${((QZ.i+(ans?1:0))/n*100).toFixed(1)}%`})),
+    el("span",{class:"tag",text:PM[q.processId].name}),
+    el("p",{class:"prompt",text:q.prompt}),
+    el("div",{class:"choices",role:"group","aria-label":"보기"},q.choices.map((c,k)=>{
+      let cls="choice",res=null;
+      if(ans){ if(c.ok){cls+=" correct";res="정답"} else if(QZ.picked===k){cls+=" wrong";res="내 선택"} }
+      return el("button",{class:cls,disabled:ans,"data-k":k,onclick:()=>pick(k)},el("span",{class:"k",text:String(k+1)}),el("span",{text:c.t}),res?el("span",{class:"res",text:res}):null);
+    })),
+    ans?el("div",{class:"expl",role:"status"},el("b",{text:q.choices[QZ.picked].ok?"맞았습니다. ":"아쉽습니다. "}),q.explanation):null,
+    ans?el("div",{class:"row"},el("button",{class:"btn primary",id:"qnext",onclick:next},QZ.i+1<n?"다음 문제":"결과 보기")):null));
+  if(ans){const nb=$("#qnext");if(nb)nb.focus({preventScroll:false});}
+}
+function pick(k){
+  if(QZ.picked!=null)return;
+  const q=QZ.order[QZ.i];QZ.picked=k;
+  QZ.res.push({idx:q.idx,processId:q.processId,ok:q.choices[k].ok});
+  renderQuiz();
+}
+function next(){QZ.i++;QZ.picked=null;if(QZ.i>=QZ.order.length){QZ.mode="end";finish();}renderQuiz();window.scrollTo({top:0});}
+function finish(){
+  if(QZ.full){
+    const ok=QZ.res.filter(x=>x.ok).length,pct=Math.round(ok/QZ.res.length*100);
+    const prev=parseInt((store.get(bestKey)||"").match(/\((\d+)%\)/)?.[1]||"-1",10);
+    if(pct>prev)store.set(bestKey,`${ok}/${QZ.res.length} (${pct}%)`);
+  }
+}
+function renderResult(w){
+  const ok=QZ.res.filter(x=>x.ok).length,n=QZ.res.length,pct=Math.round(ok/n*100);
+  const by={};QZ.res.forEach(x=>{const b=by[x.processId]||(by[x.processId]={ok:0,n:0});b.n++;if(x.ok)b.ok++;});
+  const rows=Object.entries(by).map(([id,b])=>({id,name:PM[id].name.replace(/\(.*?\)/g,''),acc:b.ok/b.n,ok:b.ok,n:b.n})).sort((a,b)=>a.acc-b.acc||b.n-a.n);
+  const weak=rows.filter(r=>r.acc<0.6).slice(0,3).map(r=>r.name);
+  const wrong=QZ.res.filter(x=>!x.ok);
+  w.append(el("div",{class:"panel"},
+    el("h2",{text:"결과"}),
+    el("div",{class:"big num",text:`${ok} / ${n}`}),
+    el("p",{class:"muted",text:`정답률 ${pct}%` + (QZ.full&&store.get(bestKey)?` · 최고 ${store.get(bestKey)}`:"")}),
+    el("p",{style:"margin-top:10px;font-weight:650",text:weak.length?"약한 공정: "+weak.join(", "):"모든 공정에서 60% 이상 맞췄습니다."}),
+    el("div",{class:"acc"},rows.map(r=>el("div",{class:"accrow"},
+      el("span",{text:r.name}),
+      el("div",{class:"track",role:"img","aria-label":`${r.name} 정답률 ${Math.round(r.acc*100)}%`},el("b",{style:`width:${r.acc*100}%;background:${r.acc>=0.6?"var(--ok)":"var(--bad)"}`})),
+      el("span",{class:"num",text:`${r.ok}/${r.n}`})))),
+    el("div",{class:"row"},
+      wrong.length?el("button",{class:"btn primary",onclick:()=>startQuiz(wrong.map(x=>Object.assign({idx:x.idx},DATA.quiz[x.idx])))},`다시 풀기 (틀린 ${wrong.length}문제)`):null,
+      el("button",{class:"btn",onclick:()=>startQuiz()},"전체 다시 풀기"))));
+}
+document.addEventListener("keydown",e=>{
+  if($("#p-quiz").hidden||QZ.mode!=="run"||QZ.picked!=null)return;
+  if(e.target.matches("input,select,textarea"))return;
+  const k=parseInt(e.key,10); if(k>=1&&k<=4)pick(k-1);
+});
+renderQuiz();
+
+/* ---------- 3. estimator ---------- */
+const E=DATA.sampleEstimate;
+const ES={preset:"mid",py:25,opts:{balcony:false,window:false,sysac:false},semi:false,sort:{key:"amount",dir:-1}};
+const CATCOL={"골조·설비":"var(--c-struct)","마감":"var(--c-finish)","가전·가구":"var(--c-furn)","옵션":"var(--c-opt)","현장이윤":"var(--c-mgmt)"};
+function qtyAt(item,py){
+  const u=item.unit,q=item.qty;
+  if(u==="평")return py;
+  if(u==="자")return Math.max(1,Math.round(q*Math.pow(py/25,0.8)));
+  return q;
+}
+function calc(st){
+  const g=st.preset,r=st.py/25,lines=[];
+  const cut=E.semiSelf.laborCut[g];
+  const adj=(base,k,ls)=>{let a=base*Math.pow(r,k);if(st.semi)a*=1-ls*cut;return a};
+  E.items.forEach(it=>{
+    const amt=adj(it.base[g],it.k,it.laborShare);
+    const q=qtyAt(it,st.py);
+    lines.push({id:it.processId,name:it.name,amount:amt,cat:PM[it.processId].category,unit:it.unit,qty:q,unitPrice:amt/q});
+  });
+  E.options.forEach(o=>{
+    if(!st.opts[o.id])return;
+    const amt=adj(o.base[g],o.k,o.laborShare);
+    const p=PM[o.processId];
+    lines.push({id:o.id,name:o.label+" (옵션)",amount:amt,cat:"옵션",unit:p.unit,qty:p.qty25,unitPrice:amt/p.qty25});
+  });
+  const sub=lines.reduce((s,l)=>s+l.amount,0);
+  let ov=0;
+  if(!(st.semi&&E.semiSelf.removeOverhead)){ov=sub*E.overheadRate[g];lines.push({id:"mgmt",name:"현장관리·경비·이윤",amount:ov,cat:"현장이윤",unit:"%",qty:E.overheadRate[g]*100,unitPrice:E.overheadRate[g]*100});}
+  const total=sub+ov;
+  lines.forEach(l=>l.pct=l.amount/total*100);
+  return {lines,sub,ov,total,perPy:total/st.py};
+}
+window.__calc=(o)=>calc(Object.assign({},ES,o,{opts:Object.assign({balcony:false,window:false,sysac:false},o.opts||{})}));
+function buildEst(){
+  const r=$("#p-est");
+  r.append(
+    el("h2",{text:"견적서 해부"}),
+    el("p",{class:"muted",text:"59㎡(25평)를 기준으로 한 가상 견적입니다. 프리셋·평형·옵션을 바꿔 총액이 어디서 어떻게 움직이는지 보세요."}),
+    el("div",{class:"est-grid",style:"margin-top:14px"},
+      el("div",{class:"panel ctrls",id:"ectrls"}),
+      el("div",{id:"eout"})),
+    el("div",{class:"mini",id:"emini","aria-hidden":"true"},el("span",{id:"emt"}),el("span",{id:"emp"})));
+  const c=$("#ectrls");
+  const seg=el("div",{class:"seg3",role:"group","aria-label":"프리셋"});
+  E.presets.forEach(p=>seg.append(el("button",{"aria-pressed":p.id===ES.preset,"data-p":p.id,text:p.label,onclick:()=>{ES.preset=p.id;seg.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.p===p.id));renderEst();}})));
+  c.append(el("div",{class:"field"},el("div",{class:"lbl"},"프리셋"),seg));
+  const sl=el("input",{type:"range",min:20,max:34,step:1,value:ES.py,id:"epy","aria-label":"평형"});
+  const sv=el("span",{class:"num",id:"epyv",text:ES.py+"평"});
+  sl.addEventListener("input",()=>{ES.py=+sl.value;sv.textContent=ES.py+"평";renderEst();});
+  c.append(el("div",{class:"field"},el("label",{for:"epy"},el("span",{text:"평형 (공급면적)"}),sv),sl,el("p",{class:"small",text:"20~34평. 욕실·주방은 천천히, 도배·바닥은 거의 비례해 늘어납니다."})));
+  const sws=[["balcony","발코니 확장","본체 "+E.options[0].rangeNote+"만원"],["window","샷시 교체","+450~750만원"],["sysac","시스템에어컨 3대","+450~650만원"],["semi","반셀프 (직영)","인건비 15~25%↓ + 총괄 마진 제외"]];
+  sws.forEach(([k,t,s])=>{
+    const b=el("button",{class:"sw",role:"switch","aria-checked":false,onclick:()=>{ if(k==="semi")ES.semi=!ES.semi; else ES.opts[k]=!ES.opts[k]; b.setAttribute("aria-checked",k==="semi"?ES.semi:ES.opts[k]); renderEst();}},
+      el("span",{class:"t"},el("span",{style:"font-weight:650",text:t}),el("span",{text:s})),el("span",{class:"knob","aria-hidden":"true"}));
+    c.append(b);
+  });
+  c.append(el("details",null,el("summary",{text:"계산식 보기"}),el("p",{class:"small",text:E.scaler.formula+" "+E.scaler.note}),el("p",{class:"small",style:"margin-top:6px",text:E.semiSelf.note})));
+  renderEst();
+}
+function renderEst(){
+  const out=$("#eout");out.textContent="";
+  const R=calc(ES);
+  $("#emt").textContent="총 "+f(Math.round(R.total))+"만원 (VAT 별도)";$("#emp").textContent="평당 "+f(Math.round(R.perPy))+"만원";
+  const top3=R.lines.slice().sort((a,b)=>b.amount-a.amount).slice(0,3);
+  out.append(el("div",{class:"panel"},
+    el("div",{class:"total"},el("div",{class:"big num",text:f(Math.round(R.total))+"만원"}),el("span",{class:"muted",text:"VAT 별도"})),
+    el("p",{class:"small num",text:`VAT 10% 포함 약 ${f(Math.round(R.total*1.1))}만원 · 평당 ${f(Math.round(R.perPy))}만원 (VAT 별도)`}),
+    el("div",{class:"stack",role:"img","aria-label":"공정별 비중 누적 막대"},R.lines.map(l=>el("div",{style:`width:${l.pct}%;background:${CATCOL[l.cat]}`,title:`${l.name} ${f(Math.round(l.amount))}만원 (${l.pct.toFixed(1)}%)`},l.pct>=9.5?el("span",{text:l.name.replace(/\(.*\)/,"").replace(/현장관리·경비·이윤/,"이윤").trim().slice(0,5)}):null))),
+    el("div",{class:"legend"},Object.entries(CATCOL).filter(([k])=>R.lines.some(l=>l.cat===k)).map(([k,v])=>el("span",null,el("i",{style:`background:${v}`}),k))),
+    el("div",{class:"callout"},el("b",{text:"이 견적에서 가장 큰 3개"}),el("ol",null,top3.map(l=>el("li",null,l.name+" — ",el("b",{class:"num",text:f(Math.round(l.amount))+"만원"})," ("+l.pct.toFixed(1)+"%)")))))
+  );
+  // table
+  const key=ES.sort.key,dir=ES.sort.dir;
+  const rows=R.lines.slice().sort((a,b)=>{
+    const va=key==="name"?a.name:key==="pct"?a.pct:key==="unitPrice"?a.unitPrice:a.amount;
+    const vb=key==="name"?b.name:key==="pct"?b.pct:key==="unitPrice"?b.unitPrice:b.amount;
+    return (typeof va==="string"?va.localeCompare(vb,"ko"):va-vb)*dir;
+  });
+  const th=(k,t)=>el("th",{scope:"col","aria-sort":ES.sort.key===k?(dir>0?"ascending":"descending"):null},el("button",{onclick:()=>{ES.sort=ES.sort.key===k?{key:k,dir:-dir}:{key:k,dir:k==="name"?1:-1};renderEst();}},t+(ES.sort.key===k?(dir>0?" ▲":" ▼"):"")));
+  out.append(el("div",{class:"panel",style:"margin-top:14px"},
+    el("h3",{text:"항목별 내역"}),
+    el("div",{class:"scroll-x"},el("table",{class:"tbl"},
+      el("thead",null,el("tr",null,th("name","공정"),th("amount","금액"),th("pct","비중"),th("unitPrice","단위 단가"))),
+      el("tbody",null,rows.map(l=>el("tr",null,
+        el("td",{text:l.name}),el("td",{class:"num",text:f(Math.round(l.amount))}),el("td",{class:"num",text:l.pct.toFixed(1)+"%"}),
+        el("td",{class:"num",text:l.unit==="%"?l.unitPrice.toFixed(0)+"% (공사비 대비)":f(Math.round(l.unitPrice*10)/10)+" /"+l.unit})))),
+      el("tfoot",null,el("tr",null,el("td",{text:"합계 (VAT 별도)"}),el("td",{class:"num",text:f(Math.round(R.total))}),el("td",{class:"num",text:"100%"}),el("td",{class:"num",text:f(Math.round(R.perPy))+" /평"})))))));
+  // number line
+  const cases=DATA.cases.items;
+  const maxv=Math.max(10000,Math.ceil(R.total/1000)*1000+500);
+  const X=v=>(v/maxv*100).toFixed(2)+"%";
+  const nl=el("div",{class:"nl",role:"img","aria-label":"사례 대비 내 견적 수직선"});
+  nl.append(el("div",{class:"line"}));
+  for(let t=0;t<=maxv;t+=2000)nl.append(el("div",{class:"tick",style:`left:${X(t)}`,text:t.toLocaleString("ko-KR")}));
+  cases.forEach((c,i)=>{
+    if(c.range)nl.append(el("div",{class:"rng",style:`left:${X(c.range[0])};width:${((c.range[1]-c.range[0])/maxv*100).toFixed(2)}%`}));
+  });
+  const lastX=[-1,-1,-1,-1];
+  cases.map((c,i)=>({c,i})).sort((a,b)=>a.c.value-b.c.value).forEach(({c,i})=>{
+    const x=c.value/maxv*100; let lane=0; while(lane<3&&x-lastX[lane]<7)lane++; lane=Math.min(lane,3); lastX[lane]=x;
+    const top=68-lane*22;
+    nl.append(el("div",{class:"stem",style:`left:${X(c.value)};top:${top+20}px;height:${76-top-20}px`}));
+    nl.append(el("div",{class:"dot "+(c.kind==="2026"?"k2026":c.kind==="2025"?"k2025":"kb"),style:`left:${X(c.value)};top:${top}px`,title:`${c.label} ${f(c.value)}만원`,text:String(i+1)}));
+  });
+  nl.append(el("div",{class:"me",style:`left:${X(R.total)}`},el("span",{text:"내 견적 "+f(Math.round(R.total))})));
+  out.append(el("div",{class:"panel",style:"margin-top:14px"},
+    el("h3",{text:"같은 조건 사례 vs 내 견적"}),
+    el("p",{class:"small",text:DATA.cases.note+" 단위: 만원."}),
+    nl,
+    el("ul",{class:"cases",style:"margin-top:8px"},cases.map((c,i)=>el("li",null,el("span",{class:"n",style:`background:${c.kind==="2026"?"var(--g-mid)":c.kind==="2025"?"var(--ink3)":"var(--g-budget)"}`,text:String(i+1)}),`${c.label}: ${f(c.value)}만원`+(c.range?` (${fr(c.range)})`:""))))));
+}
+buildEst();
+
+/* ---------- 4. materials ---------- */
+const MS={cat:DATA.materials[0].id,same:false,budget:{}};
+DATA.materials.forEach(m=>MS.budget[m.id]=m.defaultBudget);
+function buildMat(){
+  const r=$("#p-mat");
+  r.append(el("h2",{text:"자재 등급표"}),
+    el("p",{class:"muted",text:"자재별로 단가, 내구성, 관리 부담, 어울리는 예산대를 비교합니다. 단가는 자재+시공 또는 해당 단위 기준입니다."}),
+    el("div",{class:"toolbar",style:"margin-top:12px",id:"mcats"}),
+    el("div",{id:"mout"}));
+  const mc=$("#mcats");
+  DATA.materials.forEach(m=>mc.append(el("button",{class:"chip","aria-pressed":m.id===MS.cat,"data-m":m.id,text:m.title,onclick:()=>{MS.cat=m.id;mc.querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===m.id));renderMat();}})));
+  renderMat();
+}
+function renderMat(){
+  const m=DATA.materials.find(x=>x.id===MS.cat),out=$("#mout");out.textContent="";
+  const hasNeed=m.rows.some(r=>r.need);
+  const bud=MS.budget[m.id];
+  const ctr=el("div",{class:"panel",style:"margin-bottom:12px"},
+    el("div",{style:"display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:center"},
+      el("div",null,el("h3",{text:m.title,style:"margin:0"}),el("p",{class:"small",text:m.unit+(m.note?" · "+m.note:"")})),
+      hasNeed?el("button",{class:"chip","aria-pressed":MS.same,onclick:()=>{MS.same=!MS.same;renderMat();}},"같은 돈이면?"):null));
+  if(hasNeed&&MS.same){
+    const sl=el("input",{type:"range",min:Math.max(10,Math.round(m.defaultBudget*0.2/10)*10),max:m.defaultBudget*3,step:m.defaultBudget>=200?10:5,value:bud,"aria-label":"예산"});
+    const sv=el("b",{class:"num",style:"white-space:nowrap",text:f(bud)+"만원"});
+    sl.addEventListener("input",()=>{MS.budget[m.id]=+sl.value;renderMat();const s=$("#mout input");if(s)s.focus();});
+    ctr.append(el("div",{class:"field",style:"margin-top:10px"},el("div",{class:"lbl"},el("span",{text:`이 항목에 쓸 수 있는 예산 (${m.needLabel} 기준)`}),sv),sl,
+      el("p",{class:"small",text:"각 등급을 중간 단가로 필요한 수량만큼 샀을 때 총액과 예산을 견줍니다."})));
+  }
+  out.append(ctr);
+  const tb=el("tbody");
+  m.rows.forEach(r=>{
+    const mid=(r.price[0]+r.price[1])/2;
+    let tr=el("tr");
+    let extra=null,cls="";
+    if(hasNeed&&MS.same){
+      if(r.need){
+        const tot=mid*r.need,cov=Math.min(1,bud/tot);
+        cls=bud>=tot?"hit":"miss";
+        extra=el("td",{"data-label":"필요 총액",class:"need"},
+          el("div",{class:"num",text:`${f(Math.round(tot))}만원 (${f(r.need)}${r.unit.replace("만원/","")})`}),
+          el("div",{class:"small",text:bud>=tot?"예산 안에서 전량 가능":`예산으로 ${Math.round(cov*100)}%만 충당`}),
+          el("div",{class:"cover"},el("b",{class:bud>=tot?"":"part",style:`width:${cov*100}%`})));
+      }else extra=el("td",{"data-label":"필요 총액",class:"small need",text:"해당 없음 (가산율)"});
+    }
+    tr=el("tr",{class:cls},
+      el("td",{class:"nm","data-label":"자재",text:r.name}),
+      el("td",{class:"num","data-label":"단가"},fr(r.price)+" "+(r.unit.startsWith("%")?"%":r.unit)),
+      el("td",{"data-label":"내구성"},r.durability?el("span",{class:"dots",role:"img","aria-label":"내구성 "+r.durability+"/5"},[1,2,3,4,5].map(i=>el("i",{class:i<=r.durability?"on":""}))):el("span",{class:"small",text:"-"})),
+      el("td",{"data-label":"관리 메모",text:r.maintenance}),
+      el("td",{"data-label":"예산대"},el("span",{class:"tag "+({"가성비":"budget","중급":"mid","고급":"premium"}[r.band]),text:r.band})),
+      extra);
+    tb.append(tr);
+  });
+  const head=el("tr",null,el("th",{text:"자재"}),el("th",{text:"단가"}),el("th",{text:"내구성"}),el("th",{text:"관리 메모"}),el("th",{text:"예산대"}),hasNeed&&MS.same?el("th",{text:"필요 총액"}):null);
+  out.append(el("div",{class:"scroll-x"},el("table",{class:"mtbl"},el("thead",null,head),tb)));
+}
+buildMat();
+
+/* ---------- footer ---------- */
+(function(){
+  $("#disc").textContent=DATA.disclaimer;
+  const seen={},ul=$("#srclist");let n=0;
+  PROC.forEach(p=>p.sources.forEach(s=>{
+    const key=s.url||s.title; if(seen[key])return; seen[key]=1; n++;
+    ul.append(el("li",null,el("span",{class:"tag "+(s.kind==="추정"?"est":""),text:s.kind})," ",s.url?el("a",{href:s.url,target:"_blank",rel:"noopener noreferrer",text:s.title}):el("span",{text:s.title})));
+  }));
+  $("#srcCount").textContent=n;
+})();
+
+/* ---------- sanity checks ---------- */
+function sanity(){
+  const T=(o)=>window.__calc(o).total;
+  const res=[];
+  const a=T({preset:"budget",py:25}),b=T({preset:"mid",py:25}),c=T({preset:"premium",py:25});
+  res.push(["고급 > 중급 > 가성비",c>b&&b>a,[a,b,c].map(Math.round)]);
+  const base=T({preset:"mid",py:25}),withB=T({preset:"mid",py:25,opts:{balcony:true}});
+  const d=withB-base;
+  res.push(["확장 on = +350~600(+이윤 범위) 이내",d>=350&&d<=600*1.14,Math.round(d)]);
+  const r25=window.__calc({preset:"mid",py:25}),r34=window.__calc({preset:"mid",py:34});
+  res.push(["34평 총액>25평, 평당은 더 낮음",r34.total>r25.total&&r34.perPy<r25.perPy,[Math.round(r25.total),Math.round(r34.total),Math.round(r25.perPy),Math.round(r34.perPy)]]);
+  res.forEach(([n,ok,v])=>(ok?console.info:console.error)(`[sanity] ${ok?"PASS":"FAIL"} ${n}`,v));
+  window.__sanity=res.map(x=>x[1]);
+}
+sanity();
+
+/* ---------- restore tab ---------- */
+const hp=location.hash.slice(1).split(","); 
+if(hp.includes("dark")||hp.includes("light")){document.documentElement.setAttribute("data-theme",hp.includes("dark")?"dark":"light");paintTheme();}
+const ht=hp.find(x=>TABS.includes(x)); const st=ht||store.get("ip.tab"); showTab(TABS.includes(st)?st:"proc");
+})();
+</script>
+</body>
+</html>
