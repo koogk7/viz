@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>특이점의 한가운데 — AI 투자 사이클 읽기</title>
+<style>
+:root{
+  --bg:#0f1216; --surf:#171b21; --surf2:#1e242c; --line:#2b333d;
+  --ink:#e8edf2; --ink2:#a8b3bf; --ink3:#6f7c89;
+  --rail:#d9a05b;   /* 철도 */
+  --ai:#5bb8d9;     /* AI */
+  --gap:#d9705b;    /* 갭·과투자 */
+  --calm:#7fb77e;   /* 확인됨·도달 */
+  --vio:#a98ad0;    /* 상실 */
+  --teal:#58b6a8;   /* 경탄 */
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.65 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",sans-serif;
+  padding:0 0 env(safe-area-inset-bottom,0px);-webkit-text-size-adjust:100%}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+header{padding:30px 0 18px;border-bottom:1px solid var(--line)}
+.kicker{font-size:11.5px;letter-spacing:.14em;color:var(--ink3);text-transform:uppercase}
+h1{margin:9px 0 10px;font-size:25px;line-height:1.3;letter-spacing:-.4px;font-weight:700}
+.sub{color:var(--ink2);font-size:14px;margin:0}
+.thesis{margin:16px 0 0;padding:13px 15px;background:var(--surf);border-left:3px solid var(--rail);
+  border-radius:0 7px 7px 0;font-size:14.5px;color:var(--ink)}
+.thesis b{color:var(--rail);font-weight:600}
+
+section{padding:30px 0;border-bottom:1px solid var(--line)}
+h2{margin:0 0 6px;font-size:18.5px;letter-spacing:-.2px;font-weight:650;display:flex;gap:9px;align-items:baseline}
+h2 .n{font-size:12px;color:var(--ink3);font-variant-numeric:tabular-nums;flex:none}
+.lede{margin:0 0 20px;color:var(--ink2);font-size:13.5px}
+
+/* chips */
+.chip{display:inline-block;font-size:10.5px;padding:2px 7px;border-radius:20px;
+  border:1px solid var(--line);color:var(--ink3);vertical-align:1px;white-space:nowrap}
+.chip.unv{border-style:dashed;border-color:#5a4a3a;color:#c79a6e}
+.chip.est{border-color:#3d4a55;color:#8fa3b3}
+.chip.ok{border-color:#3a5240;color:var(--calm)}
+
+/* 철도 레인 */
+.stage{background:var(--surf);border:1px solid var(--line);border-radius:10px;margin-bottom:9px;overflow:hidden}
+.stage>button{all:unset;display:block;width:100%;cursor:pointer;padding:13px 15px;box-sizing:border-box}
+.stage h3{margin:0;font-size:14.5px;font-weight:600;display:flex;align-items:center;gap:8px}
+.stage h3 .idx{width:19px;height:19px;border-radius:50%;background:var(--surf2);color:var(--ink3);
+  font-size:11px;display:grid;place-items:center;flex:none;font-variant-numeric:tabular-nums}
+.stage h3 .caret{margin-left:auto;color:var(--ink3);font-size:11px;transition:transform .18s}
+.stage[open] h3 .caret{transform:rotate(90deg)}
+.lanes{display:grid;gap:7px;margin-top:11px}
+.lane{display:grid;grid-template-columns:52px 1fr;gap:10px;align-items:start;font-size:12.5px}
+.lane .tag{font-size:10.5px;padding:2px 0;color:var(--ink3);text-align:right}
+.lane.r .tag{color:var(--rail)} .lane.a .tag{color:var(--ai)}
+.lane .val{color:var(--ink2)}
+.lane.now .val{color:var(--ink)}
+.stage .body{display:none;padding:0 15px 14px}
+.stage[open] .body{display:block}
+.nowbadge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:4px;
+  background:rgba(217,112,91,.17);color:var(--gap);border:1px solid rgba(217,112,91,.35);margin-left:6px}
+.voidbadge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:4px;
+  background:rgba(169,138,208,.14);color:var(--vio);border:1px solid rgba(169,138,208,.3);margin-left:6px}
+
+/* bars */
+.bars{display:grid;gap:14px;margin:4px 0 0}
+.bar .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:5px}
+.bar .nm{font-size:13px;color:var(--ink2)}
+.bar .vl{font-size:14px;font-weight:650}
+.track{height:13px;background:var(--surf2);border-radius:4px;overflow:hidden}
+.fill{height:100%;border-radius:4px;transition:width .5s cubic-bezier(.2,.7,.2,1)}
+.note{margin-top:7px;font-size:11.5px;color:var(--ink3)}
+.callout{margin-top:17px;padding:12px 14px;background:var(--surf);border:1px solid var(--line);
+  border-radius:9px;font-size:12.5px;color:var(--ink2)}
+.callout b{color:var(--ink);font-weight:600}
+
+/* map */
+.mapwrap{background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:12px 10px 6px}
+svg{display:block;width:100%;height:auto}
+.axlab{font-size:9px;fill:var(--ink3)}
+.ptlab{font-size:9.5px;fill:var(--ink)}
+.ptlab.dim{fill:var(--ink2)}
+.zone{font-size:9px;fill:var(--ink3)}
+
+/* sandwich */
+.sand{display:grid;gap:7px}
+.layer{padding:13px 15px;border-radius:9px;border:1px solid var(--line);background:var(--surf)}
+.layer .t{font-size:13.5px;font-weight:620;margin-bottom:3px}
+.layer .d{font-size:12.5px;color:var(--ink2)}
+.layer.mid{background:var(--surf2);border-style:dashed}
+.arrowrow{display:flex;justify-content:center;gap:40px;color:var(--ink3);font-size:11px;padding:1px 0}
+
+/* timeline */
+.tl{position:relative;padding-left:19px;margin:0}
+.tl:before{content:"";position:absolute;left:4px;top:5px;bottom:5px;width:1px;background:var(--line)}
+.tl li{list-style:none;position:relative;padding:0 0 13px}
+.tl li:before{content:"";position:absolute;left:-18.5px;top:6px;width:7px;height:7px;border-radius:50%;
+  background:var(--surf2);border:1.5px solid var(--ink3)}
+.tl li.hi:before{background:var(--ai);border-color:var(--ai)}
+.tl .d{font-size:11px;color:var(--ink3);font-variant-numeric:tabular-nums}
+.tl .x{font-size:13px;color:var(--ink)}
+
+/* speed */
+.speed{display:grid;grid-template-columns:1fr auto 1fr;gap:11px;align-items:center;
+  background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:15px 14px}
+.speed .box{text-align:center}
+.speed .box .k{font-size:10.5px;color:var(--ink3);margin-bottom:4px}
+.speed .box .v{font-size:16px;font-weight:680;letter-spacing:-.3px}
+.speed .box .u{font-size:11px;color:var(--ink2);margin-top:2px}
+.speed .mid{color:var(--ink3);font-size:15px}
+
+/* reaction */
+.react{display:grid;gap:9px}
+.react .row{display:grid;grid-template-columns:62px 1fr 34px;gap:9px;align-items:center;font-size:12.5px}
+.react .row .k{color:var(--ink2);text-align:right}
+.react .row .n{font-variant-numeric:tabular-nums;font-weight:620;font-size:13px}
+
+/* blanks */
+.blank{background:var(--surf);border:1px solid var(--line);border-left:3px solid var(--vio);
+  border-radius:0 9px 9px 0;padding:13px 15px;margin-bottom:9px}
+.blank .q{font-size:13.5px;font-weight:600;margin-bottom:4px}
+.blank .a{font-size:12.5px;color:var(--ink2)}
+
+footer{padding:24px 0 36px;color:var(--ink3);font-size:11.5px}
+footer a{color:var(--ink2)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 16px;font-size:11.5px;color:var(--ink3)}
+.legend span{display:flex;align-items:center;gap:5px}
+.sw{width:9px;height:9px;border-radius:2px;flex:none}
+@media (max-width:380px){ h1{font-size:22px} .speed{grid-template-columns:1fr;gap:8px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">AI Frontier Korea · EP 118</div>
+  <h1>특이점의 한가운데</h1>
+  <p class="sub">AI 투자 사이클 · 수학 쇼크 · 샌프란시스코 — 노정석 · 최승준 · 박종현 (2026-10-11 녹화)</p>
+  <div class="thesis">
+    <b>“철도 투자자들은 돈을 못 건졌고, 그 위에 우유 배달업을 만든 사람이 돈을 벌었다.”</b><br>
+    노선을 깔던 국면에서 노선 값을 번 사람은 없었다. AI는 지금 그 국면에 있다.
+  </div>
+</header>
+
+<section>
+  <h2><span class="n">01</span> 철도가 지나간 다섯 국면, AI는 첫 칸에 있다</h2>
+  <p class="lede">각 칸을 눌러 열어볼 수 있다. 철도는 100년, AI는 1~2년 단위라는 것이 영상의 전제다.</p>
+  <div class="legend">
+    <span><i class="sw" style="background:var(--rail)"></i>철도 (1825~)</span>
+    <span><i class="sw" style="background:var(--ai)"></i>AI (현재)</span>
+  </div>
+
+  <div class="stage" open>
+    <button onclick="tg(this)"><h3><i class="idx">1</i>노선 깔기 — 과투자<span class="nowbadge">AI 현재</span><span class="caret">▶</span></h3></button>
+    <div class="body">
+      <div class="lanes">
+        <div class="lane r"><div class="tag">철도</div><div class="val">1825 첫 공공 노선 → 1830 첫 상업 노선(리버풀–맨체스터) → 수십 년간 과투자</div></div>
+        <div class="lane a now"><div class="tag">AI</div><div class="val">Frontier Labs 경쟁, 전 세계 인프라 채권. 모델은 4개월짜리 재고 — 다음 신모델이 나오면 구형 가치가 사라진다.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <button onclick="tg(this)"><h3><i class="idx">2</i>거품 붕괴<span class="caret">▶</span></h3></button>
+    <div class="body">
+      <div class="lanes">
+        <div class="lane r"><div class="tag">철도</div><div class="val">투자자 손실 확정</div></div>
+        <div class="lane a"><div class="tag">AI</div><div class="val">미도달</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <button onclick="tg(this)"><h3><i class="idx">3</i>구조조정<span class="voidbadge">주체 공백</span><span class="caret">▶</span></h3></button>
+    <div class="body">
+      <div class="lanes">
+        <div class="lane r"><div class="tag">철도</div><div class="val">JP Morgan이 통합·구조조정을 주도</div></div>
+        <div class="lane a"><div class="tag">AI</div><div class="val">아직 등장하지 않았다 — “누가 AI판의 JP Morgan이 될 것인가”. 영상은 흐름만 제시하고 주체를 지목하지 않는다.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <button onclick="tg(this)"><h3><i class="idx">4</i>표준화 · 규제<span class="caret">▶</span></h3></button>
+    <div class="body">
+      <div class="lanes">
+        <div class="lane r"><div class="tag">철도</div><div class="val">표준화 → 규제</div></div>
+        <div class="lane a"><div class="tag">AI</div><div class="val">미도달. 표준화와 가격 하락 이후에야 다음 칸이 열린다.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <button onclick="tg(this)"><h3><i class="idx">5</i>그 위에 얹힌 가치 — 여기서 돈이 났다<span class="caret">▶</span></h3></button>
+    <div class="body">
+      <div class="lanes">
+        <div class="lane r"><div class="tag">철도</div><div class="val">신선식품 배달, 도시화 — 노선이 아니라 그 위의 사업</div></div>
+        <div class="lane a"><div class="tag">AI</div><div class="val">“앱 시장은 지금 아예 열리지도 않았다” (a16z·노정석 공통 진단)</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">02</span> 투자는 매출을 한참 앞서 있다</h2>
+  <p class="lede">2026년 기준. 가로 길이가 금액 비율이다.</p>
+  <div class="bars">
+    <div class="bar">
+      <div class="top"><span class="nm">빅테크 4사 capex <span class="chip ok">확인</span></span><span class="vl num" style="color:var(--gap)">7,250억 $</span></div>
+      <div class="track"><div class="fill" style="width:100%;background:var(--gap)"></div></div>
+      <div class="note">2026년 연말까지. 약 1,000조 원 — 한국 연간 GDP 수준.</div>
+    </div>
+    <div class="bar">
+      <div class="top"><span class="nm">AI 전체 매출 추정 <span class="chip est">추정</span></span><span class="vl num" style="color:var(--ai)">1,750억 $</span></div>
+      <div class="track"><div class="fill" style="width:24.1%;background:var(--ai)"></div></div>
+      <div class="note">neocloud 포함 합산. 화자가 “뭉뚱그린 수치, 틀릴 수 있다”고 양해를 구한 값.</div>
+    </div>
+    <div class="bar">
+      <div class="top"><span class="nm">OpenAI + Anthropic <span class="chip est">화자 추정</span></span><span class="vl num" style="color:var(--ink2)">약 650억 $</span></div>
+      <div class="track"><div class="fill" style="width:9%;background:#5c6b78"></div></div>
+      <div class="note">영상에서 400억·650억이 혼재. 실제 수치는 비공개. 650억 ≈ 100조 원 계산은 수치상 맞는다.</div>
+    </div>
+  </div>
+  <div class="callout">
+    <b>배수를 하나로 말하면 틀린다.</b> 영상에는 “거의 10배”와 “3~4분의 1”이 같이 나오는데, 앞은 OpenAI+Anthropic만 기준이고 뒤는 AI 전체 매출 1,750억 기준이다. 비교 대상이 달라서 배수가 다르다.<br><br>
+    인프라 투자의 부채 조달 비중을 “80% 이상”이라고 말하는 대목이 있지만 출처가 제시되지 않는다 <span class="chip unv">미확인</span>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">03</span> 지형도 — 얼마나 뒤처졌나 × 얼마나 물리적인가</h2>
+  <p class="lede">노정석이 쓴 2축 프레임을 그대로 다시 그린 것. 가로는 최전선과의 시간 격차, 세로는 도메인이 가상인지 물리인지.</p>
+  <div class="mapwrap">
+    <svg viewBox="0 0 360 300" role="img" aria-label="time gap과 domain gap 2축 지형도">
+      <!-- grid -->
+      <rect x="40" y="16" width="300" height="236" fill="none" stroke="#242c35"/>
+      <!-- RLVR boundary -->
+      <line x1="40" y1="108" x2="340" y2="108" stroke="#58b6a8" stroke-width="1.4" stroke-dasharray="6 4" opacity=".75"/>
+      <text class="zone" x="46" y="122" fill="#58b6a8">RLVR 경계 — 위쪽이 보상 신호 만들기 쉽다</text>
+      <text class="zone" x="46" y="38">가상 지식 산업 — 코딩 · 문서</text>
+      <!-- adoption frontier -->
+      <line x1="205" y1="16" x2="205" y2="252" stroke="#7fb77e" stroke-width="1.4" stroke-dasharray="6 4" opacity=".8"/>
+      <text class="zone" x="210" y="247" fill="#7fb77e">→ 이미 쓰는 집단</text>
+      <!-- frontier labs -->
+      <circle cx="315" cy="48" r="5" fill="#5bb8d9"/>
+      <text class="ptlab" x="340" y="38" text-anchor="end">Frontier Labs</text>
+      <text class="ptlab dim" x="340" y="63" text-anchor="end" font-size="8.5">OpenAI · Anthropic</text>
+      <!-- quasi frontier -->
+      <circle cx="238" cy="88" r="4.5" fill="#8fa3b3"/>
+      <text class="ptlab dim" x="212" y="82" font-size="8.5">Qwen · DeepSeek</text>
+      <text class="zone" x="212" y="101">2~6개월 격차</text>
+      <!-- domain verticals -->
+      <circle cx="140" cy="150" r="4.5" fill="#a98ad0"/>
+      <text class="ptlab dim" x="56" y="146" font-size="8.5">도메인 버티컬</text>
+      <text class="zone" x="56" y="159">법무 · 컨설팅 · 회계</text>
+      <!-- robotics -->
+      <circle cx="168" cy="212" r="4.5" fill="#d9a05b"/>
+      <text class="ptlab dim" x="56" y="208" font-size="8.5">로보틱스 · 현장</text>
+      <!-- axis labels -->
+      <text class="axlab" x="40" y="268">뒤처짐</text>
+      <text class="axlab" x="340" y="268" text-anchor="end">최전선 →</text>
+      <text class="axlab" x="34" y="24" text-anchor="end">가상</text>
+      <text class="axlab" x="34" y="250" text-anchor="end">물리</text>
+      <text class="axlab" x="190" y="286" text-anchor="middle">time gap</text>
+      <text class="axlab" x="12" y="140" text-anchor="middle" transform="rotate(-90 12 140)">domain gap</text>
+    </svg>
+  </div>
+  <div class="callout">
+    <b>코딩은 RLVR 경계 안쪽이라 먼저 자동화됐다.</b> 보상 신호를 만들기 쉬운 쪽이 먼저 넘어간다. 그리고 영상의 진단은 — 코딩은 이미 포화다. “들어올 사람은 다 들어왔다.”
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">04</span> 다음 유입이 오는지가 전부다</h2>
+  <p class="lede">a16z 인용 수치. 포화된 쪽과 아직 안 열린 쪽의 크기 차이.</p>
+  <div class="bars">
+    <div class="bar">
+      <div class="top"><span class="nm">코더 — 포화 <span class="chip ok">확인</span></span><span class="vl num" style="color:var(--ai)">3,000만</span></div>
+      <div class="track"><div class="fill" style="width:2%;background:var(--ai)"></div></div>
+      <div class="note">“들어올 사람은 다 들어왔다”</div>
+    </div>
+    <div class="bar">
+      <div class="top"><span class="nm">지식 노동자 — 미유입 <span class="chip ok">확인</span></span><span class="vl num" style="color:var(--gap)">15억</span></div>
+      <div class="track"><div class="fill" style="width:100%;background:var(--gap)"></div></div>
+      <div class="note">약 50배. 이들이 코더처럼 들어오면 시장이 기하급수적으로 커진다 — 투자 정당화의 유일한 논리다.</div>
+    </div>
+  </div>
+  <div class="callout">
+    <b>그런데 그 속도가 보이지 않는다.</b> OpenAI Work·Anthropic Work의 성장 지표를 회사들이 공개하지 않는다. 노정석의 해석은 “아직 안 크고 있다는 신호” — 지표가 아니라 해석이다.
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">05</span> 가치는 희소한 곳으로 간다</h2>
+  <p class="lede">기술도 자본도 희소하지 않다. 모델 레이어의 value capture는 위아래로 빠져나간다.</p>
+  <div class="sand">
+    <div class="layer">
+      <div class="t" style="color:var(--calm)">↑ 애플리케이션</div>
+      <div class="d">아직 열리지도 않은 시장. 철도 위의 우유 배달에 해당하는 자리.</div>
+    </div>
+    <div class="arrowrow"><span>▲</span></div>
+    <div class="layer mid">
+      <div class="t" style="color:var(--ink2)">모델 레이어</div>
+      <div class="d">가치가 위아래로 분산된다. 4개월이면 다음 모델이 나오는 재고.</div>
+    </div>
+    <div class="arrowrow"><span>▼</span></div>
+    <div class="layer">
+      <div class="t" style="color:var(--rail)">↓ 칩 · 인프라</div>
+      <div class="d">NVIDIA, 데이터센터. 지금 돈이 흐르는 자리.</div>
+    </div>
+  </div>
+  <div class="callout">
+    <b>두 종류의 희소성</b><br>
+    · 소비자 시장 — 공급은 무한히 늘어도 소비자 수는 제한적이다(인구 감소). 시선이 머무는 곳이 희소 자원.<br>
+    · 기업 시장 — 만드는 일은 더 이상 희소하지 않다. <b>맥락</b>과 <b>책임</b>이 쌓이는 곳으로 간다. “평가 지표가 확실하지 않은 불확실성 영역에서, 그럼에도 이쪽으로 가자고 결정하고 책임지고 실행을 끌어가는 사람” — 그게 AI 시대의 리더십이다.<br><br>
+    그리고 <b>브랜드</b>: 모두가 똑같은 재화를 공급해도 “저 사람이 믿을 만하다”가 value capture의 자리가 된다.<br><br>
+    대가는 <b>K-pop화</b> — 스타가 막대하게 벌고 연습생이 쌓인다. 시장은 커지지만 돈은 소수에게 간다.
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">06</span> 수학 쇼크 — 한 달 만에 바뀐 속도</h2>
+  <p class="lede">2026년 8월 말부터 10월 초까지.</p>
+  <ul class="tl">
+    <li><div class="d">08-28</div><div class="x">RL 훈련 재개</div></li>
+    <li class="hi"><div class="d">09-08</div><div class="x">Navier–Stokes 성과 발표 — 1만 agent, 88시간</div></li>
+    <li><div class="d">09-11</div><div class="x">필즈상 수상자들 성명</div></li>
+    <li><div class="d">09-21</div><div class="x">100개 이상 해결 → 자문단 검토 요청</div></li>
+    <li><div class="d">09-29</div><div class="x">자문단 권고 — “내부 미공개 모델로 먼저 해버리는 건 건강하지 않다”</div></li>
+    <li class="hi"><div class="d">10-06</div><div class="x">722편 논문 GitHub 공개 (이후 3건 철회)</div></li>
+  </ul>
+
+  <div class="speed" style="margin-top:4px">
+    <div class="box"><div class="k">9월 · Navier–Stokes</div><div class="v num" style="color:var(--vio)">1만 agent</div><div class="u num">× 88시간</div></div>
+    <div class="mid">→</div>
+    <div class="box"><div class="k">10월 · Pro Thinking</div><div class="v num" style="color:var(--teal)">1 agent</div><div class="u num">× 평균 3시간/문제</div></div>
+  </div>
+  <div class="note" style="margin-top:9px">최승준의 추측: Navier–Stokes에서 1만 agent가 남긴 고품질 풀이 궤적이 다음 학습 데이터가 됐을 것. <span class="chip est">추측</span></div>
+
+  <div class="callout">
+    <b>규모</b> — 출제 약 4,000개 미해결 문제 → 결과 372개 계열, 17개 분야, 전체 수학의 약 40%.<br><br>
+    <b>수학계는 갈렸다</b> (Proofs and Prompts 집계)
+    <div class="react" style="margin-top:11px">
+      <div class="row"><div class="k">경탄 · 흥분</div><div class="track"><div class="fill" style="width:100%;background:var(--teal)"></div></div><div class="n" style="color:var(--teal)">36</div></div>
+      <div class="row"><div class="k">상실 · 슬픔</div><div class="track"><div class="fill" style="width:61%;background:var(--vio)"></div></div><div class="n" style="color:var(--vio)">22</div></div>
+    </div>
+    <div class="note">그 외 — 낙관, 담담한 관망, 신진 연구자 우려, 검증 부담 호소, 무상 노동 거부.</div>
+  </div>
+
+  <div class="callout">
+    <b>OpenAI의 의도는 수학이 아니었다.</b> 공식 블로그 문구는 “기존 수학 평가에서 모델 성능이 포화 상태에 이르렀기 때문에 미해결 문제를 평가에 활용했다”. 최승준의 읽기로는 — 수학계를 위한 게 아니라 벤치마크 포화를 풀려고 평가 환경을 확장한 것, “수학을 제물 삼았다”.<br><br>
+    반대편에 François Chollet: 재귀적 자기개선을 해도 지능 폭발은 오지 않는다 — “과학 자체가 이미 그 구조인데, 투입이 기하급수적으로 늘어야 성취는 선형으로 간다.”
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">07</span> 샌프란시스코에서 본 것</h2>
+  <p class="lede">박종현의 현장 보고.</p>
+  <div class="callout" style="margin-top:0">
+    <b>“GPU 살 수만 있으면 다 팔 수 있어.”</b> 여러 inference 스타트업(YC 포함)의 공통 대답. 수요가 공급을 계속 초과한다.
+  </div>
+  <div class="callout">
+    <b>inference가 쪼개지고 있다</b><br>
+    · 로봇 VLA·world action model 전용 — 지연 시간이 관건<br>
+    · 영상 생성 모델 특화<br>
+    · 영화 제작사 전용 풀 패키지<br><br>
+    범용 LLM 추론 외에 도메인별 특수 추론 시장이 생기는 중.
+  </div>
+  <div class="callout">
+    <b>AI 영화 상영회에서 우는 관객을 봤다.</b> 이미 IMDb에 등재된 AI 제작 영화가 있고(중국계 중심), 마이크로 드라마 포맷이 인기다. 제작사들은 AI 사용을 공식적으로 말하지 않지만 “안 쓰는 데가 없다”는 분위기.
+  </div>
+  <div class="callout">
+    <b>로보틱스는 배치 단계로 넘어갔다.</b> Generalist·Physical Intelligence·1X 창업자들의 공통 메시지는 “deploy하고 있다, scale-up하고 있다”. 승부는 데이터 확보 — Physical Intelligence는 산업 현장에 최대한 많이 배치해 데이터를 모으고, Generalist는 전 세계 공장을 기반으로 모은다.
+  </div>
+</section>
+
+<section style="border-bottom:none">
+  <h2><span class="n">08</span> 영상이 답하지 못한 세 칸</h2>
+  <p class="lede">제기됐지만 닫히지 않은 것. 여기가 다음에 생각할 자리다.</p>
+  <div class="blank">
+    <div class="q">1. 주기가 빨라진 만큼 적응도 빨라졌나</div>
+    <div class="a">AI는 1~2년, 철도는 100년이라고 했다. 그런데 “일하는 방식이 바뀌는 속도”도 같이 빨라졌는지는 증명하지 않는다. 증기기관이 작은 모터가 되기까지 수십 년 걸린 비유를 AI에 그대로 쓸 수 있는가.</div>
+  </div>
+  <div class="blank">
+    <div class="q">2. 누가 AI판의 JP Morgan인가</div>
+    <div class="a">자본시장 물음표 → 통합 → 표준화라는 흐름은 제시했지만 주체를 지목하지 않는다.</div>
+  </div>
+  <div class="blank">
+    <div class="q">3. 교육에는 무슨 함의가 있나</div>
+    <div class="a">교육은 실험의 실패 비용이 크다 — 학생의 발달 시간은 되돌릴 수 없다. 그래서 알아차리기 위한 샘플을 빠르게 늘릴 수 없다. “AI가 교육에 무슨 함의가 있는지 모르겠다”는 채로 영상이 끝난다.</div>
+  </div>
+</section>
+
+<footer>
+  수치는 자막 전문과 대조해 표기했다 — <span class="chip ok">확인</span> 자막에서 직접 확인 · <span class="chip est">추정</span> 화자가 추정이라 밝힌 값 · <span class="chip unv">미확인</span> 출처가 제시되지 않은 주장.<br><br>
+  출처: <a href="https://www.youtube.com/watch?v=IUDl4bD1UMA">AI Frontier Korea EP 118</a> (노정석 · 최승준 · 박종현, 2026-10-11 녹화)
+</footer>
+
+</div>
+<script>
+function tg(b){var s=b.parentNode;if(s.hasAttribute('open'))s.removeAttribute('open');else s.setAttribute('open','');}
+</script>
+</body>
+</html>
