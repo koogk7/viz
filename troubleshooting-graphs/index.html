@@ -88,6 +88,17 @@ svg text{font-family:inherit}
  .ck{font-size:16px;margin-bottom:16px}.src{font-size:14px}
  .nav{gap:4px}.nav button{width:10px;height:10px}
 }
+.four{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-content:center;min-height:0}
+.four .col{border:1px solid var(--line);border-radius:10px;padding:8px 10px 10px;min-width:0}
+.four .col h3{font-size:17px;margin:0 0 2px;color:var(--a1)}
+.four .col p{font-size:15px;line-height:1.45;margin:6px 0 0}
+.four .col p b{color:var(--a2)}
+.strip{font-size:18px;border-left:4px solid var(--a3);padding:6px 14px;margin:12px 0 0}
+.strip em{font-style:normal;color:#4aa8ff;font-weight:700}
+.pts.sm{font-size:20px}.pts.sm li{margin-bottom:14px}.pts.sm b{min-width:3.4em}
+.src2{font-size:13px;color:var(--mut);margin:6px 0 0;overflow-wrap:anywhere}
+.src2 b{color:var(--fg)}
+@media (max-width:699px){.four{display:block}.four .col{margin-bottom:10px}.pts.sm{font-size:16px}.strip{font-size:15px}.src2{font-size:13px}}
 </style>
 </head>
 <body>
@@ -247,6 +258,39 @@ svg text{font-family:inherit}
 <li><b>순간</b>장애 전파 경로를 따라갈 때</li>
 <li class="trap"><b>함정</b>간선 지연·순환 호출도 확인</li></ul></div>
 <p class="tools">도구 예: Kiali · Jaeger DAG · Datadog Service Map</p>
+</section>
+
+<section class="slide" id="c1">
+<h2>시나리오: 배포 후 P99가 올랐다</h2>
+<div class="four">
+<div class="col"><h3>① 시계열</h3><figure data-chart="sc-ts" data-nocap></figure><p><b>본 것</b> 14:03부터 P99만 80→600ms, P50은 평평<br><b>→ 다음 질문</b> 꼬리만 느린가? 분포는?</p></div>
+<div class="col"><h3>② 히스토그램</h3><figure data-chart="sc-hist" data-nocap></figure><p><b>본 것</b> 80ms·600ms 봉우리 2개(쌍봉)<br><b>→ 다음 질문</b> 느린 요청 1건은 어디서 느린가?</p></div>
+<div class="col"><h3>③ 트레이스 워터폴</h3><figure data-chart="sc-wf" data-nocap></figure><p><b>본 것</b> serialize 스팬 420ms<br><b>→ 다음 질문</b> 그 안에서 CPU는 어디로 가나?</p></div>
+<div class="col"><h3>④ 플레임 그래프</h3><figure data-chart="sc-flame" data-nocap></figure><p><b>본 것</b> 꼭대기 json.Marshal 42%<br><b>→ 다음 질문</b> 14:00 배포에서 무엇이 바뀌었나?</p></div>
+</div>
+<p class="strip"><b>원인</b> 응답 DTO에 중첩 객체 추가 → 직렬화 비용 증가 · <b>수정 후</b> 차등 플레임에서 serialize가 <em>파랑(감소)</em></p>
+<p class="tools">가상 시나리오 · 수치는 하나의 이야기로 맞춘 예시</p>
+</section>
+
+<section class="slide" id="c2">
+<h2>Cloudflare 2019 — 정규식 하나가 CPU를 100%로</h2>
+<div class="body"><div class="fig"><figure data-chart="cf" data-cap="포스트모템 서술을 바탕으로 재구성한 모식도"></figure></div>
+<ul class="pts sm"><li><b>증상</b>전 세계 엣지 CPU 소진, 502 급증</li><li><b>그래프</b>PoP CPU 사용률 시계열(UTC)</li><li><b>원인</b>WAF 규칙 정규식의 역추적 폭주</li><li><b>교훈</b>규칙도 단계 배포, CPU 보호 장치 유지</li></ul></div>
+<p class="src2"><b>확인한 사실</b> 13:42 자동 배포 → 약 13:45 첫 호출 → 14:00 WAF 원인 확인 → 14:07 WAF 전역 중단 → 14:09 정상화. 라이브 CPU 데이터와 strace로 확인 · <b>출처</b> blog.cloudflare.com/details-of-the-cloudflare-outage-on-july-2-2019/ · 장애 2019-07-02, 글 2019-07-12</p>
+</section>
+
+<section class="slide" id="c3">
+<h2>Discord 2020 — 2분마다 튀는 지연의 정체는 GC</h2>
+<div class="body"><div class="fig"><figure data-chart="dc" data-cap="포스트모템 서술을 바탕으로 재구성한 모식도"></figure></div>
+<ul class="pts sm"><li><b>증상</b>약 2분마다 지연·CPU 스파이크</li><li><b>그래프</b>Read States 응답시간·시스템 CPU</li><li><b>원인</b>GC가 거대한 LRU 캐시 전체를 스캔</li><li><b>교훈</b>주기가 일정하면 런타임 타이머부터</li></ul></div>
+<p class="src2"><b>확인한 사실</b> Go는 최소 2분마다 GC 강제 · 캐시를 줄이면 스파이크는 줄지만 P99 지연 증가 · Rust 이식 후 스파이크 소멸 · <b>출처</b> discord.com/blog/why-discord-is-switching-from-go-to-rust · 2020-02-04</p>
+</section>
+
+<section class="slide" id="c4">
+<h2>Netflix 2016 — 흩어진 비용을 모으니 25%가 보였다</h2>
+<div class="body"><div class="fig"><figure data-chart="nf" data-cap="포스트모템 서술을 바탕으로 재구성한 모식도"></figure></div>
+<ul class="pts sm"><li><b>증상</b>위·아래로 봐도 뚜렷한 핫스팟 없음</li><li><b>그래프</b>패키지 기준 스택 재구성 플레임</li><li><b>원인</b>레거시 메서드 호출이 샘플 25%</li><li><b>교훈</b>플래그로 끄자 하루 1,300만 분 CPU 절감</li></ul></div>
+<p class="src2"><b>확인한 사실</b> 해당 패키지 샘플 30%→필터 후 44% · 메서드 25%, 비활성화 후 패키지 18% · <b>출처</b> netflixtechblog.com/saving-13-million-computational-minutes-per-day-with-flame-graphs-d95633b6d01f · Mike Huang·Brendan Gregg, 2016-04-11</p>
 </section>
 
 <section class="slide" id="s16">
@@ -582,11 +626,89 @@ function miniHist(){var s='';for(var v=0;v<800;v+=25){var c=10000*(0.973*pdf(v+1
 function miniWf(){var d=[[0,150,0],[10,30,1],[45,35,1],[80,35,1],[118,40,1,1]],s='';d.forEach(function(a,i){s+='<rect class="'+(a[3]?'f3':'f1')+'" x="'+(5+a[0])+'" y="'+(6+i*14)+'" width="'+a[1]+'" height="9" rx="2"/>';});return svg(160,80,s);}
 function miniFlame(){var f=drawRects(toRects(TREE),{W:150,rh:11,x0:5,y0:4,mini:true});return svg(160,80,f.s);}
 
+
+/* ---------- case slides ---------- */
+var TREE_SC=nd('root',100,[nd('main',100,[
+ nd('handle',92,[nd('serialize',42,[nd('json.Marshal',42)]),nd('db.query',20,[nd('driver.exec',16,[nd('net.write',9)])]),nd('regex.match',14,[nd('backtrack',10,[nd('step',6,[nd('alloc',3)])])]),nd('auth.check',9),nd('log.write',7)]),
+ nd('gc',8)])]);
+function lbl(x,y,t,cls,a){return T(x,y,t,cls||'tx',a);}
+function renderScTs(){
+ var r=rng(5),X=40,W=244,H=170,Y=14,p99=[],p50=[];
+ for(var i=0;i<N;i++){p99.push(i<13?80+noise(r,6):Math.min(600,80+(i-12)*173)+(i>15?noise(r,30):0));p50.push(80+noise(r,4));}
+ var s=panel(0,X,Y,W,H,[{v:p99,c:'s3'},{v:p50,c:'s1'}],0,800,'',{yminL:'0',ymaxL:'800'});
+ var dx=px(X,W,10);
+ s+='<line class="dep" x1="'+dx+'" x2="'+dx+'" y1="'+Y+'" y2="'+(Y+H)+'"/>';
+ s+=lbl(dx-3,Y+70,'배포 14:00','nt','end');
+ [[0,'13:50','start'],[30,'14:20','middle'],[60,'14:50','end']].forEach(function(a){s+=lbl(px(X,W,a[0]),Y+H+15,a[1],'tx',a[2]);});
+ s+=lbl(X+W-4,Y+30,'P99','nt','end')+lbl(X+W-4,Y+H-8,'P50','tx','end');
+ return svg(300,214,s);}
+function renderScHist(){
+ var X=18,Y=24,W=262,H=162,bw=25,s='';
+ function xs(v){return X+v/800*W;}function ys(c){return Y+H-Math.log10(Math.max(c,1))/4*H;}
+ for(var v=0;v<800;v+=bw){var c=10000*(0.973*pdf(v+bw/2,80,18)+0.027*pdf(v+bw/2,600,60))*bw;if(c<1)continue;var y=ys(c);
+  s+='<rect class="f1" fill-opacity=".75" x="'+(xs(v)+1)+'" y="'+y+'" width="'+(W/800*bw-1.5)+'" height="'+(Y+H-y)+'"/>';}
+ s+='<line class="ax" x1="'+X+'" x2="'+(X+W)+'" y1="'+(Y+H)+'" y2="'+(Y+H)+'"/>';
+ [0,400,800].forEach(function(v){s+=lbl(xs(v),Y+H+15,v+'ms','tx',v==800?'end':v==0?'start':'middle');});
+ s+='<line class="s3" stroke-width="2" x1="'+xs(600)+'" x2="'+xs(600)+'" y1="'+Y+'" y2="'+(Y+H)+'"/>'+lbl(xs(600)-4,Y+10,'P99','nt','end');
+ s+='<line class="s1" stroke-width="2" x1="'+xs(80)+'" x2="'+xs(80)+'" y1="'+Y+'" y2="'+(Y+H)+'"/>'+lbl(xs(80)+4,Y+10,'P50','nt');
+ s+=lbl(X,Y-8,'건수(로그)','tx');
+ return svg(300,214,s);}
+function renderScWf(){
+ var sp=[['api',0,600,''],['auth',10,30,''],['db',45,80,'d'],['serialize',140,420,'x'],['log',570,25,'']];
+ var X=62,W=222,RH=36,Y=22,s='';
+ [0,200,400,600].forEach(function(t){var x=X+t/600*W;s+='<line class="ax" x1="'+x+'" x2="'+x+'" y1="'+Y+'" y2="'+(Y+sp.length*RH)+'" stroke-dasharray="2 4"/>'+lbl(x,Y-6,t+'ms','tx',t==600?'end':'middle');});
+ sp.forEach(function(p,i){var y=Y+i*RH,c=p[3]=='x'?'f3':p[3]=='d'?'f2':'f1';
+  s+=lbl(X-6,y+RH/2+4,p[0],'tx','end')+'<rect class="'+c+'" x="'+(X+p[1]/600*W)+'" y="'+(y+4)+'" width="'+Math.max(2,p[2]/600*W)+'" height="'+(RH-8)+'" rx="3"/>';
+  if(p[2]>=300&&p[0]!='api')s+='<text x="'+(X+p[1]/600*W+6)+'" y="'+(y+RH/2+4)+'" style="font-size:11px;fill:#111">'+p[2]+'ms</text>';});
+ return svg(300,214,s);}
+function renderScFlame(){
+ var rs=toRects(TREE_SC),W=286,rh=24,top=40,f=drawRects(rs,{W:W,rh:rh,x0:7,y0:top}),p=f.pos['json.Marshal'],s=f.s;
+ s+='<rect x="'+p.x+'" y="'+p.y+'" width="'+(p.w-1)+'" height="'+(rh-1)+'" fill="none" stroke="var(--a2)" stroke-width="2.2" rx="2"/>';
+ s+=note(p.x+4,4,['병목 42%'],p.x+p.w/2,p.y-1);
+ return svg(300,top+f.h+6,s);}
+function renderCf(){
+ var r=rng(21),X=70,W=560,cpu=[],e=[];
+ for(var i=0;i<N;i++){var u=i<12?0:i<38?1:0;
+  cpu.push(i<12?24+noise(r,3):i<38?Math.min(97,24+(i-11)*45)+(i>14?noise(r,2):0):Math.max(26,97-(i-37)*35)+noise(r,2));
+  e.push(i<12?3+Math.abs(noise(r,2)):i<38?Math.min(70,3+(i-11)*30)+(i>14?noise(r,5):0):Math.max(3,70-(i-37)*35));}
+ var s=panel(0,X,28,W,110,[{v:cpu,c:'s3'}],0,100,'PoP CPU 사용률',{yminL:'0%',ymaxL:'100%'});
+ s+=panel(0,X,168,W,90,[{v:e,c:'s2'}],0,100,'HTTP 502 오류(상대 크기)',{yminL:'낮음',ymaxL:'높음'});
+ [[12,'13:42 규칙 배포'],[37,'14:07 WAF 전역 중단']].forEach(function(a,k){var x=px(X,W,a[0]);
+  s+='<line class="dep" x1="'+x+'" x2="'+x+'" y1="22" y2="258"/>'+lbl(x+(k?-4:5),20,a[1],'nt',k?'end':'start');});
+ [[0,'13:30'],[30,'14:00'],[60,'14:30']].forEach(function(a){s+=lbl(px(X,W,a[0]),276,a[1],'tx','middle');});
+ s+=note(px(X,W,16),66,['CPU가 거의 100%로 붙음'],px(X,W,26),28+110*(1-.97)+2);
+ return svg(710,288,s);}
+function renderDc(){
+ var r=rng(8),X=70,W=560,lat=[],cpu=[];
+ for(var i=0;i<N;i++){var d=(i-6)%12,sp=(i>=6&&d>=0&&d<3)?[1,.7,.3][d]:0;lat.push(20+noise(r,2)+sp*70);cpu.push(35+noise(r,2.5)+sp*45);}
+ var s=panel(0,X,28,W,110,[{v:lat,c:'s3'}],0,100,'응답시간',{yminL:'낮음',ymaxL:'높음'});
+ s+=panel(0,X,168,W,90,[{v:cpu,c:'s2'}],0,100,'시스템 CPU',{yminL:'낮음',ymaxL:'높음'});
+ [0,2,4,6,8,10].forEach(function(m){s+=lbl(px(X,W,m*6),276,m+'분','tx','middle');});
+ s+='<line class="nl" x1="'+px(X,W,18)+'" y1="16" x2="'+px(X,W,30)+'" y2="16" marker-start="@AR@" marker-end="@AR@"/>'+lbl(px(X,W,24),11,'약 2분 간격','nt','middle');
+ s+=note(px(X,W,33),60,['스파이크가 주기적으로 반복'],px(X,W,31),44);
+ return svg(710,288,s);}
+function renderNf(){
+ var r=rng(33),M='#d946ef',s='',rh=20,Y0=236;
+ s+=lbl(10,18,'① 원본: 같은 패키지 비용이 여러 탑에 흩어짐','tt');
+ var hs=[6,8,5,7,4,6];
+ hs.forEach(function(n,t){var x=10+t*56,hl=1+Math.floor(r()*(n-2));
+  for(var d=0;d<n;d++){var y=Y0-(d+1)*rh,m=(d==hl);
+   s+='<rect x="'+x+'" y="'+y+'" width="52" height="'+(rh-1)+'" rx="2" fill="'+(m?M:warm('t'+t+'d'+d))+'"/>';}});
+ s+=note(40,32,['프레임워크 호출 사이에 흩어져 안 보임'],10+3*56+26,Y0-4*rh);
+ s+=lbl(370,18,'② 패키지 기준으로 스택을 다시 모음','tt');
+ var X=370;
+ s+='<rect x="'+X+'" y="'+(Y0-rh)+'" width="200" height="'+(rh-1)+'" rx="2" fill="'+M+'"/>'+lbl(X+6,Y0-rh+14,'해당 패키지','fl');
+ s+='<rect x="'+(X+201)+'" y="'+(Y0-rh)+'" width="129" height="'+(rh-1)+'" rx="2" fill="#6b7280"/>'+'<text x="'+(X+207)+'" y="'+(Y0-rh+14)+'" style="font-size:12px;fill:#fff">OTHER</text>';
+ s+='<rect x="'+X+'" y="'+(Y0-2*rh)+'" width="110" height="'+(rh-1)+'" rx="2" fill="'+M+'"/>'+'<rect x="'+(X+111)+'" y="'+(Y0-2*rh)+'" width="50" height="'+(rh-1)+'" rx="2" fill="'+warm('mb')+'"/>'+'<rect x="'+(X+162)+'" y="'+(Y0-2*rh)+'" width="38" height="'+(rh-1)+'" rx="2" fill="'+warm('mc')+'"/>';
+ s+='<rect x="'+X+'" y="'+(Y0-3*rh)+'" width="100" height="'+(rh-1)+'" rx="2" fill="'+M+'" stroke="var(--a2)" stroke-width="2.4"/>'+'<text x="'+(X+5)+'" y="'+(Y0-3*rh+14)+'" style="font-size:12px;fill:#fff">레거시 메서드</text>';
+ s+=note(X+130,100,['한 덩어리로 모이자 폭이 보임'],X+60,Y0-3*rh-1);
+ s+=lbl(10,Y0+20,'가로 = 샘플 비중 · 자홍 = 검색에 일치한 프레임 · 모양만 재현','tx');
+ return svg(710,Y0+30,s);}
 /* ---------- renderer table ---------- */
-var R={red:renderRed,use:renderUse,hist:renderHistogram,percentiles:renderPercentiles,heatmap:renderHeatmap,waterfall:renderWaterfall,flame:renderFlame,icicle:renderIcicle,flamechart:renderFlameChart,calltree:renderCallTree,sunburst:renderSunburst,diff:renderDiff,offcpu:renderOffCpu,servicemap:renderServiceMap,flow:renderFlow,'mini-line':miniLine,'mini-hist':miniHist,'mini-wf':miniWf,'mini-flame':miniFlame};
+var R={"sc-ts":renderScTs,"sc-hist":renderScHist,"sc-wf":renderScWf,"sc-flame":renderScFlame,cf:renderCf,dc:renderDc,nf:renderNf,red:renderRed,use:renderUse,hist:renderHistogram,percentiles:renderPercentiles,heatmap:renderHeatmap,waterfall:renderWaterfall,flame:renderFlame,icicle:renderIcicle,flamechart:renderFlameChart,calltree:renderCallTree,sunburst:renderSunburst,diff:renderDiff,offcpu:renderOffCpu,servicemap:renderServiceMap,flow:renderFlow,'mini-line':miniLine,'mini-hist':miniHist,'mini-wf':miniWf,'mini-flame':miniFlame};
 Array.prototype.forEach.call(document.querySelectorAll('figure[data-chart]'),function(f){
  var fn=R[f.getAttribute('data-chart')];if(!fn){f.textContent='?';return;}
- f.innerHTML=fn()+(f.hasAttribute('data-nocap')?'':'<figcaption>예시 데이터</figcaption>');});
+ f.innerHTML=fn()+(f.hasAttribute('data-nocap')?'':'<figcaption>'+(f.getAttribute('data-cap')||'예시 데이터')+'</figcaption>');});
 
 /* ---------- slide engine ---------- */
 var deck=document.getElementById('deck'),slides=document.querySelectorAll('.slide'),nav=document.getElementById('nav'),cur=0,total=slides.length;
