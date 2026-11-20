@@ -2,582 +2,692 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>돈의 크기 감각</title>
 <meta name="color-scheme" content="light dark">
-<title>크기 감각 — 돈 · 석유</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
-  :root{
-    --bg:#F2F4F6; --card:#FFFFFF; --line:#E5E8EB;
-    --tx:#191F28; --tx2:#4E5968; --dim:#8B95A1;
-    --blue:#3182F6; --blue-bg:#E8F3FF; --red:#F04452; --green:#02B262; --oil:#0E8FB8;
-    --purple:#7F5AF0; --red-bg:#FFEEF0; --oil-bg:#E3F4FA;
-    --chip:#F2F4F6; --inp:#FFFFFF; --seg-track:#E5E8EB; --seg-on:#FFFFFF; --inner:#F2F4F6;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --bg:#17171C; --card:#202027; --line:#2C2C35;
-      --tx:#E5E8EB; --tx2:#B0B8C1; --dim:#8B95A1;
-      --blue:#4593FC; --blue-bg:#1B2A41; --red-bg:#3A1D22; --oil-bg:#12303C;
-      --chip:#2C2C35; --inp:#17171C; --seg-track:#2C2C35; --seg-on:#43434F; --inner:#17171C;
-    }
-  }
-  :root[data-theme="dark"]{
-    --bg:#17171C; --card:#202027; --line:#2C2C35;
-    --tx:#E5E8EB; --tx2:#B0B8C1; --dim:#8B95A1;
-    --blue:#4593FC; --blue-bg:#1B2A41; --red-bg:#3A1D22; --oil-bg:#12303C;
-    --chip:#2C2C35; --inp:#17171C; --seg-track:#2C2C35; --seg-on:#43434F; --inner:#17171C;
-  }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  body{margin:0;background:var(--bg);color:var(--tx);
-    font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",Roboto,sans-serif;
-    font-size:15px;line-height:1.5;-webkit-text-size-adjust:100%}
-  button{font-family:inherit;color:inherit}
-  .wrap{max-width:480px;margin:0 auto;padding:22px 20px calc(60px + env(safe-area-inset-bottom))}
-  h1{font-size:17px;font-weight:800;margin:0 0 2px;letter-spacing:-.02em}
-  .sub{color:var(--dim);font-size:13px;margin-bottom:16px;letter-spacing:-.01em}
-  .tnum{font-variant-numeric:tabular-nums}
-
-  /* 세그먼트 컨트롤 */
-  .seg{display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:3px;background:var(--seg-track);border-radius:14px}
-  .seg button{border:0;background:transparent;color:var(--dim);border-radius:11px;padding:10px 6px;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:-.01em}
-  .seg button.on{background:var(--seg-on);color:var(--tx);font-weight:700}
-  .seg button:active{transform:scale(.97)}
-  .seg.small button{padding:7px 6px;font-size:13px;border-radius:11px}
-  #tabs{margin-bottom:12px}
-
-  .card{background:var(--card);border-radius:20px;padding:18px;margin:12px 0}
-  label,.lab{display:block;color:var(--dim);font-size:13px;margin-bottom:8px;font-weight:600}
-  .inputrow{display:flex;gap:8px;margin-top:10px}
-  input[type=number]{flex:1;min-width:0;background:var(--inp);border:1px solid var(--line);color:var(--tx);
-    border-radius:14px;padding:13px 14px;font-size:20px;font-weight:700;-webkit-appearance:none;appearance:none;
-    font-family:inherit;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
-  select{background:var(--inp);border:1px solid var(--line);color:var(--tx);border-radius:14px;padding:0 12px;
-    font-size:16px;font-weight:700;font-family:inherit;max-width:44%}
-  input:focus,select:focus{outline:none;border-color:var(--blue)}
-  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
-  .chip{background:var(--chip);border:0;color:var(--tx2);border-radius:999px;padding:8px 13px;font-size:13px;font-weight:500;cursor:pointer}
-  .chip:active{transform:scale(.97)}
-  .chip.on{background:var(--blue-bg);color:var(--blue);font-weight:700}
-  .chip.oilc.on{background:var(--oil-bg);color:var(--oil)}
-
-  .headline{font-size:13px;color:var(--dim);font-weight:600;margin-bottom:2px}
-  .big{font-size:34px;font-weight:800;letter-spacing:-.02em;color:var(--tx);font-variant-numeric:tabular-nums;line-height:1.2;word-break:keep-all}
-  .big.oilbig{color:var(--oil)}
-  .tr{font-size:16px;font-weight:600;color:var(--tx2);font-variant-numeric:tabular-nums;letter-spacing:-.01em;margin-top:2px}
-  .tr:empty{display:none}
-  .warn{display:inline-block;margin-top:10px;background:var(--red-bg);color:var(--red);font-size:13px;font-weight:700;padding:5px 11px;border-radius:999px}
-
-  .fxrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:2px 6px;margin:10px 0 4px;color:var(--dim);font-size:13px;font-weight:500}
-  .fxrow input{flex:none;width:92px;font-size:15px;font-weight:700;padding:7px 10px;border-radius:12px}
-  .fxrow .fxsrc{color:var(--tx2);font-weight:600}
-  .fxrow button{margin-left:auto;border:0;background:var(--chip);color:var(--tx2);border-radius:999px;width:32px;height:32px;font-size:16px;line-height:1;cursor:pointer;flex:none}
-  .fxrow button:active{transform:scale(.97)}
-  .fxrow button.spin{opacity:.5}
-
-  /* 사다리 */
-  .ladder{position:relative;margin:26px 6px 22px 8px;border-left:2px solid var(--line)}
-  .ticks{position:absolute;inset:0}
-  .dot{position:absolute;left:-6px;width:10px;height:10px;margin-bottom:-5px;border-radius:50%;background:var(--dim);border:2px solid var(--card);box-sizing:content-box;margin-left:-2px;width:10px}
-  .dot{width:8px;height:8px;margin-bottom:-6px;margin-left:-1px}
-  .dot.tier-me{background:var(--dim)} .dot.tier-corp{background:var(--blue)}
-  .dot.tier-market{background:var(--purple)} .dot.tier-nation{background:var(--green)} .dot.tier-oil{background:var(--oil)}
-  .lbl{position:absolute;left:16px;right:112px;height:18px;margin-bottom:-9px;line-height:18px;display:flex;gap:6px;font-size:12.5px;white-space:nowrap;overflow:hidden;z-index:2}
-  .lbl .n{color:var(--tx2);font-weight:600;overflow:hidden;text-overflow:ellipsis;min-width:0}
-  .lbl .a{color:var(--dim);flex:none;font-variant-numeric:tabular-nums}
-  .you{position:absolute;left:0;right:0;height:0}
-  .you .pin{position:absolute;left:-9px;top:-8px;width:16px;height:16px;border-radius:50%;background:var(--blue);border:3px solid var(--card);box-sizing:border-box;z-index:6}
-  .you .tag{position:absolute;right:0;top:-12px;background:var(--blue);color:#fff;font-weight:800;font-size:13px;line-height:24px;padding:0 10px;border-radius:999px;white-space:nowrap;font-variant-numeric:tabular-nums;z-index:6}
-  .you.oilyou .pin{background:var(--oil)} .you.oilyou .tag{background:var(--oil)}
-
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-  .cmp{background:var(--card);border-radius:16px;padding:14px 15px}
-  .card .cmp{background:var(--inner)}
-  .cmp .k{font-size:13px;color:var(--dim);margin-bottom:3px;letter-spacing:-.01em}
-  .cmp .v{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
-  .cmp .v small{font-size:12px;color:var(--dim);font-weight:600}
-  .sec-t{font-size:14px;color:var(--tx);font-weight:700;margin:22px 2px 8px;letter-spacing:-.01em}
-  .note{color:var(--dim);font-size:12px;margin-top:16px;line-height:1.6}
-  .pct{color:var(--tx2)} .mult{color:var(--blue)}
-  [hidden]{display:none!important}
+:root{--bg:#F2F4F6;--card:#FFFFFF;--line:#E5E8EB;--tx:#191F28;--tx2:#4E5968;--dim:#8B95A1;--blue:#3182F6;--blue-bg:#E8F3FF;--red:#F04452;--red-bg:#FFEEF0;--green:#02B262;--green-bg:#E6F8EF;--on-blue:#fff;--life:#8B95A1;--corp:#3182F6;--nation:#02B262}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17171C;--card:#202027;--line:#2C2C35;--tx:#E5E8EB;--tx2:#B0B8C1;--dim:#8B95A1;--blue:#4593FC;--blue-bg:#1B2A41;--red:#F25B67;--red-bg:#3A1E22;--green:#1DBF78;--green-bg:#17322A;--on-blue:#0E1116}}
+:root[data-theme="dark"]{--bg:#17171C;--card:#202027;--line:#2C2C35;--tx:#E5E8EB;--tx2:#B0B8C1;--dim:#8B95A1;--blue:#4593FC;--blue-bg:#1B2A41;--red:#F25B67;--red-bg:#3A1E22;--green:#1DBF78;--green-bg:#17322A;--on-blue:#0E1116}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--tx);font-family:-apple-system,"Apple SD Gothic Neo","Pretendard",sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;line-height:1.45}
+.wrap{max-width:480px;margin:0 auto;padding:18px 20px calc(28px + env(safe-area-inset-bottom))}
+body.shot .wrap{width:430px;max-width:430px;margin:0}
+body.shot.w360 .wrap{width:360px;max-width:360px}
+h1{font-size:20px;font-weight:800;letter-spacing:-0.01em}
+.lede{font-size:13px;color:var(--dim);margin:4px 0 14px}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button:active{transform:scale(.97)}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--line);border-radius:999px;padding:4px;margin-bottom:16px}
+.seg button{min-height:44px;border-radius:999px;font-size:15px;font-weight:700;color:var(--dim)}
+.seg button[aria-selected="true"]{background:var(--card);color:var(--tx)}
+.card{background:var(--card);border-radius:20px;padding:18px}
+.input{width:100%;background:var(--card);color:var(--tx);border:1.5px solid var(--blue);border-radius:14px;padding:14px 16px;font:inherit;font-size:20px;font-weight:700;min-height:56px;appearance:none;-webkit-appearance:none}
+.input::placeholder{color:var(--dim);font-weight:600}
+.help{font-size:12px;color:var(--dim);margin:8px 2px 10px;line-height:1.5}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{min-height:44px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:700;background:var(--card);color:var(--tx2);border:1px solid var(--line);display:inline-flex;align-items:center}
+.big{font-size:34px;font-weight:800;letter-spacing:-0.02em;line-height:1.2;word-break:keep-all;overflow-wrap:anywhere}
+.sub{word-break:keep-all;font-size:15px;color:var(--tx2);margin-top:6px;font-weight:600;overflow-wrap:anywhere}
+.fine{font-size:12px;color:var(--dim)}
+.link{font-size:12px;color:var(--blue);font-weight:600;min-height:44px;padding:0;text-align:left}
+.hint{color:var(--tx2);font-size:15px;font-weight:600;line-height:1.5}
+.fxrow{display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;font-size:12px;color:var(--dim);border-top:1px solid var(--line);margin-top:12px;padding-top:6px;min-height:50px}
+.fxrow input{width:76px;min-height:36px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit;font-size:14px;font-weight:700;text-align:right;padding:0 8px}
+.fxrow .refresh{min-width:44px;min-height:44px;font-size:18px;color:var(--blue);display:inline-flex;align-items:center;justify-content:center}
+.fxrow .refresh.spin{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.cell{background:var(--card);border-radius:16px;padding:12px 10px;font-size:12px;color:var(--tx2);line-height:1.45}
+.cell b{display:block;font-size:14px;color:var(--tx);margin-bottom:4px}
+.cell.on{background:var(--blue-bg);color:var(--blue)}.cell.on b{color:var(--blue)}
+.cell .v{display:block;margin-top:4px;font-weight:700;color:var(--tx)}.cell.on .v{color:var(--blue)}
+.note{font-size:12px;color:var(--dim);margin:8px 2px 0}
+.sec{font-size:13px;font-weight:700;color:var(--dim);margin:22px 2px 8px}
+.list{padding:6px 18px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);font-size:15px}
+.row:last-child{border:0}
+.row .rl{min-width:0;display:flex;flex-direction:column;gap:2px;color:var(--tx2)}
+.row b{font-weight:700;text-align:right;flex:0 0 auto;max-width:48%;overflow-wrap:anywhere}
+.row small{font-size:12px;color:var(--dim);line-height:1.4}
+.row small a{color:var(--dim);text-decoration:underline;text-underline-offset:2px}
+.more{min-height:44px;font-size:14px;color:var(--blue);font-weight:600;padding:0 2px;margin-top:4px}
+.ladder-card{margin-top:12px;padding:14px 12px}
+.ladder-t{font-size:13px;font-weight:700;color:var(--dim);margin:0 4px 10px}
+.ladder{position:relative}
+.ladder .axis{position:absolute;left:86px;top:0;bottom:0;width:2px;background:var(--line);border-radius:1px}
+.ladder .tk{position:absolute;left:0;width:70px;transform:translateY(-50%);text-align:right;font-size:11px;font-weight:700;color:var(--tx2);line-height:1.2}
+.ladder .tk small{display:block;font-size:10px;color:var(--dim);font-weight:500}
+.ladder .tick{position:absolute;left:82px;width:10px;height:1px;background:var(--dim)}
+.ladder .dot{position:absolute;width:10px;height:10px;border-radius:50%;transform:translate(-50%,-50%);left:87px}
+.ladder .gd{position:absolute;left:92px;width:13px;height:1px;opacity:.6}
+.ladder .lb{position:absolute;left:110px;right:0;transform:translateY(-50%);font-size:12px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--tx2)}
+.ladder .lb b{color:var(--tx);font-weight:700}
+.ladder .lb .bu{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.ladder .lb.pin{color:var(--blue);font-weight:800;font-size:13px;z-index:2}
+.ladder .lb.pin span{background:var(--blue-bg);border-radius:999px;padding:3px 9px;display:inline-block}
+.ladder .dot.pin{width:12px;height:12px;z-index:2;box-shadow:0 0 0 3px var(--blue-bg)}
+.farbox{border-top:1px solid var(--line)}
+.farbox .more{margin:0;width:100%;text-align:left}
+body.focus-ladder header,body.focus-ladder .seg,body.focus-ladder #view-conv>:not(#sensewrap),body.focus-ladder #sensewrap>:not(#ladderwrap){display:none}
+body.focus-ladder .wrap{padding-top:12px}
+.legend{display:flex;gap:12px;font-size:11px;color:var(--dim);margin:10px 4px 0;flex-wrap:wrap}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+/* 훈련 */
+.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;border-radius:16px;background:var(--blue);color:var(--on-blue);font-size:16px;font-weight:800}
+.btn.ghost{background:var(--card);color:var(--tx);border:1px solid var(--line)}
+.stack{display:grid;gap:10px}
+.t-big{font-size:26px;font-weight:800;letter-spacing:-0.02em;line-height:1.3}
+.prog{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:13px;font-weight:700;color:var(--tx2)}
+.prog .bar{flex:1;height:8px;border-radius:999px;background:var(--line);overflow:hidden}
+.prog .bar i{display:block;height:100%;background:var(--blue);border-radius:999px}
+.qtype{display:inline-block;font-size:12px;font-weight:700;color:var(--blue);background:var(--blue-bg);border-radius:999px;padding:3px 10px;margin-bottom:10px}
+.prompt{font-size:22px;font-weight:800;line-height:1.35;letter-spacing:-0.01em;overflow-wrap:anywhere;word-break:keep-all}
+.choices{display:grid;gap:10px;margin:16px 0 12px}
+.ch{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:56px;padding:12px 16px;border-radius:16px;background:var(--card);border:1.5px solid var(--line);font-size:17px;font-weight:700;text-align:left;overflow-wrap:anywhere}
+.ch .tg{flex:0 0 auto;font-size:12px;font-weight:800;border-radius:999px;padding:3px 9px}
+.ch.ok{background:var(--green-bg);border-color:var(--green)}.ch.ok .tg{background:var(--green);color:#fff}
+.ch.bad{background:var(--red-bg);border-color:var(--red)}.ch.bad .tg{background:var(--red);color:#fff}
+.ch:disabled{cursor:default}.ch:disabled:active{transform:none}
+.ch.dim{opacity:.6}
+.explain{word-break:keep-all;font-size:15px;line-height:1.6;color:var(--tx2)}
+.explain .verdict{display:block;font-size:17px;font-weight:800;margin-bottom:6px}
+.explain .verdict.ok{color:var(--green)}.explain .verdict.bad{color:var(--red)}
+.explain b{color:var(--tx)}
+.rec{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--tx2);margin:14px 0 18px}
+.rec b{color:var(--tx)}
+.badge{display:inline-block;background:var(--blue-bg);color:var(--blue);font-weight:800;font-size:13px;border-radius:999px;padding:4px 12px;margin-top:8px}
+.wrong{word-break:keep-all;border-top:1px solid var(--line);padding:12px 0;font-size:14px;color:var(--tx2)}
+.wrong:first-child{border:0}
+.wrong b{color:var(--tx)}
+.wrong .q{font-weight:700;color:var(--tx);margin-bottom:4px}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>크기 감각</h1>
-  <div class="sub">뉴스·시장의 숫자가 어느 척도의 얼마인지 — 로그 사다리 위 위치와 앵커 대비 배율로</div>
-
-  <div class="seg" id="tabs">
-    <button type="button" class="on" id="tabMoneyBtn">💰 돈의 크기</button>
-    <button type="button" id="tabOilBtn">🛢️ 석유 배럴</button>
-  </div>
-
-  <!-- ========== 돈 탭 ========== -->
-  <div id="tabMoney">
-    <div class="card">
-      <div class="lab">금액 입력</div>
-      <div class="seg small" id="curSeg">
-        <button type="button" class="on" id="curW">₩ 원화</button>
-        <button type="button" id="curU">$ 달러</button>
-      </div>
-      <div class="inputrow">
-        <input type="number" id="amt" value="1" min="0" step="any" inputmode="decimal" aria-label="금액">
-        <select id="unit" aria-label="단위">
-          <option value="1">원</option><option value="10000">만원</option>
-          <option value="100000000">억원</option><option value="1000000000000" selected>조원</option>
-        </select>
-      </div>
-      <div class="chips" id="chips"></div>
-    </div>
-    <div class="card">
-      <div class="headline">입력액</div>
-      <div class="big" id="won">₩1조</div>
-      <div class="tr" id="usd"></div>
-      <div class="tr" id="fxline"></div>
-      <div class="warn" id="warn" hidden>⚠ billion = 십억, 억 아님</div>
-      <div class="ladder" id="ladder" style="height:480px"></div>
-    </div>
-    <div class="fxrow" id="fxrow">
-      <span>환율 $1 =</span>
-      <input type="number" id="fx" min="0" step="any" inputmode="decimal" aria-label="환율 (원 per 달러)">
-      <span>원 ·</span><span class="fxsrc" id="fxsrc"></span>
-      <button type="button" id="fxbtn" aria-label="환율 다시 조회">↻</button>
-    </div>
-
-    <div class="sec-t">⏱ 시간으로</div>
-    <div class="grid">
-      <div class="cmp"><div class="k">하루 100만원씩 쓰면</div><div class="v" id="t1">—</div></div>
-      <div class="cmp"><div class="k">하루 1억원씩 쓰면</div><div class="v" id="t2">—</div></div>
-    </div>
-    <div class="sec-t">👥 1인당 · 실물</div>
-    <div class="grid">
-      <div class="cmp"><div class="k">전 국민(5,100만) 나누면</div><div class="v" id="pc">—</div></div>
-      <div class="cmp"><div class="k">최저임금 연봉(2,500만)</div><div class="v" id="wage">—</div></div>
-      <div class="cmp"><div class="k">서울 아파트(10억)</div><div class="v" id="apt">—</div></div>
-      <div class="cmp"><div class="k">로또 1등(20억)</div><div class="v" id="lotto">—</div></div>
-    </div>
-    <div class="sec-t">🏦 은행 예금 이자</div>
-    <div class="card" style="margin-top:2px">
-      <label for="rate">연이자율 (%)</label>
-      <input type="number" id="rate" value="4" min="0" step="0.1" inputmode="decimal" style="width:100%;font-size:17px;padding:11px 14px">
-      <div class="grid" style="margin-top:12px">
-        <div class="cmp"><div class="k">세전 연이자</div><div class="v" id="iy0">—</div></div>
-        <div class="cmp"><div class="k">세후 연이자 <small>(−15.4%)</small></div><div class="v" id="iy1">—</div></div>
-        <div class="cmp"><div class="k">세전 월이자</div><div class="v" id="im0">—</div></div>
-        <div class="cmp"><div class="k">세후 월이자</div><div class="v" id="im1">—</div></div>
-      </div>
-    </div>
-    <div class="sec-t">⚖️ 큰 척도 대비</div>
-    <div class="grid" id="ratios"></div>
-    <div class="note" id="foot"></div>
-  </div>
-
-  <!-- ========== 석유 탭 ========== -->
-  <div id="tabOil" hidden>
-    <div class="card">
-      <div class="lab">배럴 수 입력</div>
-      <div class="inputrow" style="margin-top:0">
-        <input type="number" id="oamt" value="1" min="0" step="any" inputmode="decimal" aria-label="배럴 수">
-        <select id="ounit" aria-label="단위">
-          <option value="1">배럴</option><option value="10000">만 배럴</option>
-          <option value="1000000" selected>백만 배럴</option><option value="100000000">억 배럴</option>
-        </select>
-      </div>
-      <div style="margin-top:14px"><label for="oil-price" id="oilpricelab">유가 (US$/배럴) · 직접 입력 (기본 $75)</label>
-        <input type="number" id="oil-price" value="75" min="0" step="1" inputmode="decimal" style="width:100%;font-size:17px;padding:11px 14px">
-      </div>
-      <div class="chips" id="ochips"></div>
-    </div>
-    <div class="card">
-      <div class="headline">입력량</div>
-      <div class="big oilbig" id="obbl">100만 배럴</div>
-      <div class="tr" id="olit"></div>
-      <div class="tr" id="ousd"></div>
-      <div class="ladder" id="oladder" style="height:410px"></div>
-    </div>
-    <div class="fxrow">
-      <span>환율 $1 = <b class="tnum" id="ofx"></b>원 · <span class="fxsrc" id="ofxsrc"></span></span>
-      <span style="margin-left:auto">변경은 돈의 크기 탭에서</span>
-    </div>
-    <div class="sec-t">🔄 환산 · 실물</div>
-    <div class="grid">
-      <div class="cmp"><div class="k">리터(1배럴=159L)</div><div class="v" id="oL">—</div></div>
-      <div class="cmp"><div class="k">자동차 주유(탱크 50L)</div><div class="v" id="ocar">—</div></div>
-      <div class="cmp"><div class="k">초대형 유조선 VLCC(200만 배럴)</div><div class="v" id="ovlcc">—</div></div>
-      <div class="cmp"><div class="k">달러 가치(유가×배럴)</div><div class="v" id="oval">—</div></div>
-    </div>
-    <div class="sec-t">🌍 흐름 대비 (생산·소비)</div>
-    <div class="grid">
-      <div class="cmp"><div class="k">전 세계 하루 소비(1억 배럴/일)</div><div class="v" id="oworld">—</div></div>
-      <div class="cmp"><div class="k">한국 하루 원유수입(270만/일)</div><div class="v" id="okr">—</div></div>
-      <div class="cmp"><div class="k">사우디 하루 생산(900만/일)</div><div class="v" id="osaudi">—</div></div>
-      <div class="cmp"><div class="k">미국 전략비축유 SPR(3.5억)</div><div class="v" id="ospr">—</div></div>
-    </div>
-    <div class="note" id="ofoot"></div>
-  </div>
-  <pre id="selftest" hidden></pre>
+<header>
+<h1>돈의 크기 감각</h1>
+<p class="lede">뉴스에 나오는 큰 금액을 바로 번역하고, 짧은 퀴즈로 감각을 길러요.</p>
+</header>
+<div class="seg" role="tablist" aria-label="화면 선택">
+<button type="button" role="tab" id="tab-conv" aria-selected="true" aria-controls="view-conv">바꾸기</button>
+<button type="button" role="tab" id="tab-train" aria-selected="false" aria-controls="view-train">훈련</button>
 </div>
 
+<main id="view-conv" role="tabpanel" aria-labelledby="tab-conv">
+<label class="sr" for="q">금액 입력</label>
+<input id="q" class="input" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="예: 1000억 달러">
+<div class="help">이렇게 넣어도 돼요 · $100B · 100 billion · 133조원</div>
+<div class="chips" id="chips"></div>
+<div class="card" id="anscard">
+<div id="ansbody" aria-live="polite"></div>
+<div class="fxrow" id="fxrow">
+<span>환율 $1 =</span>
+<label class="sr" for="fx">1달러당 원화 환율</label>
+<input id="fx" type="text" inputmode="decimal" autocomplete="off">
+<span>원 ·</span><span id="fxlabel"></span>
+<button type="button" class="refresh" id="fxrefresh" aria-label="환율 다시 조회">↻</button>
+</div>
+</div>
+<div class="strip" id="rules"></div>
+<div class="note">billion은 「억」이 아니라 「10억」이에요.</div>
+<div id="sensewrap" hidden>
+<div class="sec">감 잡기</div>
+<div class="card list" id="sense"></div>
+<button type="button" class="more" id="more" aria-expanded="false">더 보기 ›</button>
+<div id="ladderwrap" hidden></div>
+</div>
+</main>
+
+<main id="view-train" role="tabpanel" aria-labelledby="tab-train" hidden></main>
+</div>
 <script>
 (function(){
-  var POP=51000000;
-  var el=function(id){return document.getElementById(id)};
-  var nf=function(n){return n.toLocaleString("en-US")};
-  function n1(x,d){return Number(x.toFixed(d)).toLocaleString("en-US",{maximumFractionDigits:d});}
+'use strict';
+/* ================= 상수 · 앵커 ================= */
+var DEFAULT_FX=1331, FX_ASOF='2026-11-20';
+var POP={n:51075282, asof:'2026-10', src:'행정안전부 주민등록 인구통계', url:'https://jumin.mois.go.kr/'};
+/* 값은 anchors-sources.md 에 출처·확인 방법을 적어 두었어요. krw=원화 고유값, usd=달러 고유값 */
+var ANCHORS=[
+ {id:'minwage',kind:'life',label:'최저임금으로 1년 일한 연봉',short:'최저임금 연봉',krw:25882560,asof:'2026년',src:'고용노동부 고시(시급 10,320원×209시간×12)',url:'https://www.fnnews.com/news/202508050835520534'},
+ {id:'seoulapt',kind:'life',label:'서울 아파트 평균 매매가',short:'서울 아파트 평균',krw:1.607e9,asof:'2026년 8월',src:'KB부동산 8월 주택가격동향',url:'https://www.heraldk.com/article/2026082318212445104'},
+ {id:'lotto',kind:'life',label:'로또 1등 평균 당첨금',short:'로또 1등 평균',krw:2.06e9,asof:'2025년',src:'동행복권 판매액 통계(언론 보도)',url:'https://www.reportera.co.kr/news/lotto-sales-record-high-prize-money-all-time-low/'},
+ {id:'unicorn',kind:'corp',label:'유니콘 기업의 기준 가치',short:'유니콘 기준',usd:1e9,asof:'정의',src:'유니콘 = 기업가치 10억 달러 이상 비상장사',url:'https://techcrunch.com/2013/11/02/welcome-to-the-unicorn-club/'},
+ {id:'samsungrev',kind:'corp',label:'삼성전자 1년 매출',short:'삼성전자 매출',krw:3.336e14,asof:'2025년',src:'삼성전자 2025년 4분기 실적 발표',url:'https://news.samsung.com/kr/%EC%82%BC%EC%84%B1%EC%A0%84%EC%9E%90-2025%EB%85%84-4%EB%B6%84%EA%B8%B0-%EC%8B%A4%EC%A0%81-%EB%B0%9C%ED%91%9C'},
+ {id:'samsungcap',kind:'corp',label:'삼성전자 시가총액',short:'삼성전자 시총',usd:9.0e11,asof:'2026-11-20',src:'companiesmarketcap.com',url:'https://companiesmarketcap.com/'},
+ {id:'applerev',kind:'corp',label:'애플 1년 매출',short:'애플 매출',usd:4.16e11,asof:'2025 회계연도',src:'Apple 10-K',url:'https://s2.q4cdn.com/470004039/files/doc_earnings/2025/q4/filing/10K-Q4-2025-as-filed.pdf'},
+ {id:'nvidiacap',kind:'corp',label:'엔비디아 시가총액',short:'엔비디아 시총',usd:3.5e12,asof:'2026-11-20',src:'companiesmarketcap.com',url:'https://companiesmarketcap.com/'},
+ {id:'hyundairev',kind:'corp',label:'현대자동차 1년 매출',short:'현대차 매출',krw:1.8625e14,asof:'2025년',src:'현대자동차 2025년 경영실적',url:'https://www.hyundaimotorgroup.com/ko/news/hyundai-motor-company-2025-earnings-announcement'},
+ {id:'krbudget',kind:'nation',label:'한국 정부 1년 예산',short:'한국 정부 예산',krw:7.279e14,asof:'2026년',src:'국회 확정 2026년 예산(총지출)',url:'https://www.hankyung.com/article/2025120296791'},
+ {id:'krdefense',kind:'nation',label:'한국 국방 예산',short:'한국 국방 예산',krw:6.586e13,asof:'2026년',src:'국방부 2026년 국방예산 확정',url:'https://www.etoday.co.kr/news/view/2532283'},
+ {id:'krgdp',kind:'nation',label:'한국 GDP(1년 경제 규모)',short:'한국 GDP',krw:2.6767e15,asof:'2025년',src:'한국은행 국민계정(잠정)',url:'https://www.ddaily.co.kr/page/view/2026060914331870445'},
+ {id:'usoutlay',kind:'nation',label:'미국 연방정부 1년 지출',short:'미국 정부 지출',usd:7.01e12,asof:'2025 회계연도',src:'미 재무부 월별 재정보고서(MTS)',url:'https://www.fiscal.treasury.gov/files/reports-statements/mts/mts0925.pdf'},
+ {id:'usgdp',kind:'nation',label:'미국 GDP(1년 경제 규모)',short:'미국 GDP',usd:3.08e13,asof:'2025년',src:'세계은행(미국 BEA 기준)',url:'https://api.worldbank.org/v2/country/USA/indicator/NY.GDP.MKTP.CD?format=json&date=2025'},
+ {id:'usdebt',kind:'nation',label:'미국 국가부채',short:'미국 국가부채',usd:4.07e13,asof:'2026-11-18',src:'미 재무부 Debt to the Penny',url:'https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/'},
+ {id:'worldgdp',kind:'nation',label:'세계 GDP(1년 경제 규모)',short:'세계 GDP',usd:1.18e14,asof:'2025년',src:'세계은행 GDP 통계',url:'https://api.worldbank.org/v2/country/WLD/indicator/NY.GDP.MKTP.CD?format=json&date=2025'}
+];
+var KIND_NAME={life:'생활',corp:'기업',nation:'나라'};
 
-  /* ===== URL 파라미터 ===== */
-  var QS={};
-  location.search.replace(/^\?/,"").split("&").forEach(function(kv){
-    if(!kv) return; var p=kv.split("=");
-    try{QS[decodeURIComponent(p[0])]=decodeURIComponent((p[1]||"").replace(/\+/g," "));}catch(e){}
-  });
-  if(QS.theme==="dark"||QS.theme==="light") document.documentElement.setAttribute("data-theme",QS.theme);
-  var OFFLINE=QS.offline==="1";
-
-  /* ===== 환율 (FX) ===== */
-  var DEF_FX=1335, DEF_ASOF="2026-10-31", FXKEY="msl.fx";
-  var FX=DEF_FX, fxSrc="def", fxAsof=DEF_ASOF, fxNote="";
-  function md(s){return s?String(s).slice(5,10):""}
-  function fxLabel(){
-    var s=fxSrc==="auto"?"자동("+md(fxAsof)+")":fxSrc==="cache"?"캐시("+md(fxAsof)+")":fxSrc==="manual"?"직접 입력":"기본값";
-    return s+fxNote;
+/* ================= 숫자 포맷 ================= */
+function comma(n){return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
+function trimNum(n,dec){return String(Number(n.toFixed(dec)));}
+var KO_UNITS=[[1e16,'경'],[1e12,'조'],[1e8,'억'],[1e4,'만']];
+/* 유효숫자 digits자리(기본 3)로 반올림해 한국식으로 읽는다. unit이 있으면 뒤에 붙인다(큰 수는 공백 포함). */
+function fmtKo(n,unit,digits){
+  digits=digits||3; unit=unit||'';
+  if(!(n>0)) return '0'+unit;
+  if(n<1) return String(Number(n.toPrecision(2)))+unit;
+  if(n<1e4) return comma(n)+unit;
+  var v=Number(n.toPrecision(digits)), rest=v, parts=[];
+  for(var i=0;i<KO_UNITS.length;i++){
+    var u=KO_UNITS[i][0], q=Math.floor(rest/u+1e-9);
+    if(q>0){parts.push(comma(q)+KO_UNITS[i][1]); rest-=q*u;}
   }
-  function fxStr(){return nf(Math.round(FX))}
-  function readCache(){
-    try{var c=JSON.parse(localStorage.getItem(FXKEY)||"null");
-      if(c&&c.rate>0){FX=c.rate;fxSrc="cache";fxAsof=c.asof||"";return true;}}catch(e){}
-    return false;
-  }
-  function fetchFx(){
-    if(OFFLINE) return Promise.reject(new Error("offline"));
-    var ac=new AbortController(), to=setTimeout(function(){ac.abort()},3000);
-    return fetch("https://open.er-api.com/v6/latest/USD",{signal:ac.signal,cache:"no-store"})
-      .then(function(r){clearTimeout(to); if(!r.ok) throw new Error("http "+r.status); return r.json();})
-      .then(function(j){
-        var rate=j&&j.rates&&j.rates.KRW; if(!(rate>0)) throw new Error("no KRW");
-        var d=new Date(j.time_last_update_utc);
-        var asof=isNaN(d.getTime())?new Date().toISOString().slice(0,10):d.toISOString().slice(0,10);
-        rate=Math.round(rate*100)/100;
-        try{localStorage.setItem(FXKEY,JSON.stringify({rate:rate,asof:asof,fetchedAt:Date.now()}));}catch(e){}
-        return {rate:rate,asof:asof};
-      }, function(e){clearTimeout(to); throw e;});
-  }
-  function syncFx(){
-    var f=el("fx"); if(document.activeElement!==f) f.value=String(FX);
-    el("fxsrc").textContent=fxLabel();
-    el("ofx").textContent=fxStr(); el("ofxsrc").textContent=fxLabel();
-  }
-
-  /* ===== 공용 포맷 ===== */
-  function human(n,unit){
-    if(n>=1e8) return n1((n/1e8),n>=1e9?0:1)+"억"+unit;
-    if(n>=1e4) return n1((n/1e4),n>=1e5?0:1)+"만"+unit;
-    if(n>=1) return Math.round(n).toLocaleString()+unit;
-    return n1(n,2)+unit;
-  }
-  function multStr(a,b){
-    var r=a/b;
-    if(r>=1) return '<span class="mult">'+(r>=100?Math.round(r).toLocaleString():n1(r,r>=10?0:1))+'배</span>';
-    if(r<0.001) return '<span class="pct">0.1% 미만</span>';
-    return '<span class="pct">'+(r*100>=10?n1((r*100),0):n1((r*100),1))+'%</span>';
-  }
-  function W(a){return a.won!=null?a.won:a.usd*FX}
-
-  // 원화: 정밀 한국식 (₩5,607조 / ₩1조 / ₩450억 …)
-  function fmtWon(w){
-    if(w<1e4) return "₩"+Math.round(w).toLocaleString();
-    w=Math.round(w);
-    var jo=Math.floor(w/1e12), eok=Math.floor((w%1e12)/1e8), man=Math.floor((w%1e8)/1e4), s="";
-    if(jo>0) s+=jo.toLocaleString()+"조 "; if(eok>0) s+=eok.toLocaleString()+"억 ";
-    if(jo===0 && man>0) s+=man.toLocaleString()+"만 "; if(!s) s=Math.round(w).toLocaleString()+" ";
-    return "₩"+s.trim();
-  }
-  // 원화: 짧게 (3자리 유효숫자 수준) — 라벨·환산 줄용
-  function fmtWonShort(w){
-    var v;
-    if(w>=1e12){ v=w/1e12; return "₩"+(v>=100?nf(Math.round(v)):String(Number(v.toPrecision(3))))+"조"; }
-    if(w>=1e8){ v=w/1e8; return "₩"+(v>=100?nf(Math.round(v)):String(Number(v.toPrecision(3))))+"억"; }
-    if(w>=1e4){ v=w/1e4; return "₩"+(v>=100?nf(Math.round(v)):String(Number(v.toPrecision(3))))+"만"; }
-    return "₩"+nf(Math.round(w));
-  }
-  // 달러: $1.2K / $391M / $4.2T (유효숫자 3, 끝 0 제거)
-  var USD_U=[[1e12,"T"],[1e9,"B"],[1e6,"M"],[1e3,"K"]];
-  function fmtUsdShort(d){
-    if(d<1e3) return "$"+(d<10?Number(d.toFixed(2)):Math.round(d));
-    var i=0; while(i<USD_U.length-1 && d<USD_U[i][0]) i++;
-    var r=Number((d/USD_U[i][0]).toPrecision(3));
-    if(r>=1000 && i>0){ i--; r=Number((d/USD_U[i][0]).toPrecision(3)); }
-    return "$"+r+USD_U[i][1];
-  }
-  // 달러를 한국식 만·억·조로 읽기: 4조 2,000억 달러
-  function fmtUsdKo(d,sig){
-    if(sig) d=Number(d.toPrecision(sig));
-    if(d<1) return n1(d,2)+" 달러";
-    d=Math.round(d);
-    var jo=Math.floor(d/1e12), eok=Math.floor((d%1e12)/1e8), man=Math.floor((d%1e8)/1e4), s="";
-    if(jo>0) s+=nf(jo)+"조 "; if(eok>0) s+=nf(eok)+"억 ";
-    if(jo===0 && man>0) s+=nf(man)+"만 ";
-    if(!s) s=nf(d)+" ";
-    return s.trim()+" 달러";
-  }
-  function years(w,per){var d=w/per; if(d<1)return"하루 안"; if(d<365)return Math.round(d).toLocaleString()+"일";
-    var y=d/365; return (y>=100?Math.round(y).toLocaleString():n1(y,1))+"년";}
-
-  /* ===== 사다리 (라벨 겹침 방지: 점은 실제 위치, 라벨만 위로 밀어냄) ===== */
-  function buildLadder(id,arr,lmin,lmax,tier,H){
-    var T=el(id).querySelector(".ticks"); T.innerHTML="";
-    var items=arr.map(function(a){return {a:a,y:(Math.log10(a.w)-lmin)/(lmax-lmin)*H};})
-      .sort(function(p,q){return p.y-q.y;});
-    var GAP=17,i;
-    items.forEach(function(it,k){it.ly=k?Math.max(it.y,items[k-1].ly+GAP):it.y;});
-    if(items.length && items[items.length-1].ly>H){
-      items[items.length-1].ly=H;
-      for(i=items.length-2;i>=0;i--) items[i].ly=Math.min(items[i].ly,items[i+1].ly-GAP);
+  if(Math.round(rest)>0) parts.push(comma(rest));
+  return parts.join(' ')+(unit?' '+unit:'');
+}
+/* 규칙 칸·보기용 짧은 표기: 10 미만은 소수 1자리, 이상은 정수 */
+function fmtCompact(n){
+  if(n<1e4) return n>=1?comma(n):String(Number(n.toPrecision(2)));
+  for(var i=0;i<KO_UNITS.length;i++){
+    var u=KO_UNITS[i][0], name=KO_UNITS[i][1];
+    if(n>=u){
+      var v=n/u, r=v<10?Number(v.toFixed(1)):Math.round(v);
+      if(r>=10000&&i>0) return fmtCompact(r*u);
+      return (r<10?String(r):comma(r))+name;
     }
-    items.forEach(function(it){
-      var d=document.createElement("i"); d.className="dot tier-"+(it.a.t||tier); d.style.bottom=it.y+"px";
-      var l=document.createElement("div"); l.className="lbl"; l.style.bottom=it.ly+"px";
-      l.innerHTML='<span class="n">'+it.a.l+'</span><span class="a">'+it.a.amt+'</span>';
-      T.appendChild(d); T.appendChild(l);
+  }
+  return comma(n);
+}
+function fmtUsdKo(usd){return fmtKo(usd,'달러');}
+var SHORT=[[1e12,'T'],[1e9,'B'],[1e6,'M'],[1e3,'K']];
+function fmtUsdShort(usd){
+  for(var i=0;i<SHORT.length;i++){
+    if(usd>=SHORT[i][0]){
+      var v=Number(Number((usd/SHORT[i][0]).toPrecision(3)).toFixed(2));
+      if(v>=1000&&i>0) return '$1'+SHORT[i-1][1];
+      return '$'+v+SHORT[i][1];
+    }
+  }
+  return '$'+(usd>=1?comma(usd):String(Number(usd.toFixed(2))));
+}
+function sig(n,d){return Number(n.toPrecision(d));}
+function foldText(r){
+  if(r>=1e4) return '약 '+fmtKo(r,'',2)+' 배';
+  if(r>=100) return '약 '+comma(sig(r,2))+'배';
+  if(r>=10) return '약 '+Math.round(r)+'배';
+  return '약 '+trimNum(r,1)+'배';
+}
+function ratioText(r){
+  if(r>=1.5) return foldText(r);
+  if(r>=0.67) return '비슷해요 · '+trimNum(r,1)+'배';
+  if(r>=0.1) return '약 1/'+Math.round(1/r);
+  if(r>=0.001){var p=r*100; return '약 '+(p<1?trimNum(p,1):Math.round(p))+'%';}
+  return '0.1%도 안 돼요';
+}
+function durationText(days){
+  if(days<1) return '하루도 안 돼요';
+  if(days<60) return '약 '+Math.round(days)+'일';
+  if(days<730) return '약 '+Math.round(days/30.4)+'개월';
+  var y=days/365;
+  if(y<10) return '약 '+trimNum(y,1)+'년';
+  if(y<100) return '약 '+Math.round(y)+'년';
+  return '약 '+comma(sig(y,2))+'년';
+}
+
+/* ================= 파서 ================= */
+var EN={thousand:1e3,k:1e3,million:1e6,mn:1e6,m:1e6,billion:1e9,bn:1e9,b:1e9,trillion:1e12,tn:1e12,t:1e12};
+var SMALL={'십':10,'백':100,'천':1e3}, BIG={'만':1e4,'억':1e8,'조':1e12,'경':1e16};
+function parseMoney(text,defaultCur){
+  var FAIL={ok:false};
+  if(typeof text!=='string') return FAIL;
+  var s=text.toLowerCase().replace(/,/g,''), usd=false, krw=false;
+  s=s.replace(/us\$|\$|usd|dollars?|달러|불/g,function(){usd=true;return ' ';});
+  s=s.replace(/₩|krw|won|원/g,function(){krw=true;return ' ';});
+  if(usd&&krw) return FAIL;
+  s=s.trim();
+  if(!s) return FAIL;
+  var re=/\s*(?:(\d+(?:\.\d+)?)|(trillion|billion|million|thousand|tn|bn|mn)|([kmbt])|([십백천만억조경]))/y;
+  var total=0,sec=0,cur=null,pos=0,m;
+  while(pos<s.length){
+    re.lastIndex=pos; m=re.exec(s);
+    if(!m){ if(/^\s*$/.test(s.slice(pos))) break; return FAIL; }
+    pos=re.lastIndex;
+    if(m[1]!==undefined){ if(cur!==null) return FAIL; cur=parseFloat(m[1]); }
+    else if(m[2]||m[3]){ if(cur===null) return FAIL; total+=cur*EN[m[2]||m[3]]; cur=null; }
+    else if(SMALL[m[4]]){ sec+=(cur===null?1:cur)*SMALL[m[4]]; cur=null; }
+    else { var v=sec+(cur===null?0:cur); if(v===0) v=1; total+=v*BIG[m[4]]; sec=0; cur=null; }
+  }
+  total+=sec+(cur===null?0:cur);
+  if(!(total>0)||!isFinite(total)||total>1e22) return FAIL;
+  var c=usd?'USD':krw?'KRW':(defaultCur==='KRW'?'KRW':'USD');
+  return {ok:true,cur:c,amount:total,curExplicit:usd||krw};
+}
+
+/* ================= 변환 모델 ================= */
+function toUSD(p,fx){return p.cur==='USD'?p.amount:p.amount/fx;}
+function toKRW(p,fx){return p.cur==='KRW'?p.amount:p.amount*fx;}
+function convertModel(text,defaultCur,fx){
+  var p=parseMoney(text,defaultCur);
+  if(!p.ok) return {ok:false};
+  var usd=toUSD(p,fx), krw=toKRW(p,fx), big, sub;
+  if(p.cur==='USD'){ big='약 '+fmtKo(krw,'원'); sub='= '+fmtUsdShort(usd)+' · '+fmtUsdKo(usd); }
+  else { big='약 '+fmtKo(usd,'달러'); sub='= '+fmtUsdShort(usd)+' · '+fmtKo(krw,'원'); }
+  return {ok:true,p:p,usd:usd,krw:krw,big:big,sub:sub};
+}
+function ruleIndex(usd){ if(usd<1e6) return -1; if(usd<1e9) return 0; if(usd<1e12) return 1; return 2; }
+function rulesData(fx){
+  return [
+   {en:'million',ko:'100만 달러',v:'≈ '+fmtCompact(1e6*fx)+' 원'},
+   {en:'billion',ko:'10억 달러',v:'≈ '+fmtCompact(1e9*fx)+' 원'},
+   {en:'trillion',ko:'1조 달러',v:'≈ '+fmtCompact(1e12*fx)+' 원'}];
+}
+
+/* ================= 감 잡기 ================= */
+function anchorUSD(a,fx){return a.usd!==undefined?a.usd:a.krw/fx;}
+function anchorKRW(a,fx){return a.krw!==undefined?a.krw:a.usd*fx;}
+function anchorDisplay(a,fx){return a.krw!==undefined?'약 '+fmtKo(a.krw,'원'):'약 '+fmtKo(a.usd,'달러');}
+function calcRows(usd,fx){
+  var krw=usd*fx, per=krw/POP.n;
+  var cap={id:'percap',kind:'calc',label:'국민 1인당',value:'약 '+fmtKo(per,'원'),sub:'한국 인구 약 '+fmtKo(POP.n,'명',3)+'(주민등록 '+POP.asof+')으로 나누면'};
+  var base=krw>=1e8?1e8:1e5, baseName=base===1e8?'1억 원':'10만 원';
+  var day={id:'perday',kind:'calc',label:'하루 '+baseName+'씩 쓰면',value:durationText(krw/base),sub:'하루 '+baseName+'씩 쓸 때 걸리는 시간'};
+  return {cap:cap,day:day,primary:krw>=1e12?cap:day,secondary:krw>=1e12?day:cap};
+}
+function anchorRows(usd,anchors,fx){
+  return anchors.map(function(a){
+    var r=usd/anchorUSD(a,fx);
+    return {id:a.id,kind:a.kind,anchor:a,r:r,dist:Math.abs(Math.log10(r)),label:a.label,value:ratioText(r)};
+  }).sort(function(x,y){return x.dist-y.dist;});
+}
+/* 기본 3줄(가장 비슷한 앵커 + 다른 종류 앵커 + 계산형) 과 나머지 */
+function buildRows(usd,anchors,fx){
+  var rows=anchorRows(usd,anchors,fx), c=calcRows(usd,fx), top=[];
+  if(rows.length){
+    top.push(rows[0]);
+    var second=rows.filter(function(r){return r.kind!==rows[0].kind;})[0]||rows[1];
+    if(second) top.push(second);
+  }
+  top.push(c.primary);
+  var left=rows.filter(function(r){return top.indexOf(r)<0;});
+  var rest=left.filter(function(r){return r.r>=0.001&&r.r<=1000;});
+  var far=left.filter(function(r){return r.r<0.001||r.r>1000;});
+  rest.push(c.secondary);
+  return {top:top,rest:rest,far:far};
+}
+function pickTop3(usd,anchors,fx){return buildRows(usd,anchors,fx).top;}
+
+/* ================= 로그 사다리 ================= */
+var LAD={lo:7,hi:18,perDecade:68,pad:14,minGap:22};
+var TICK_KO={7:'1,000만',8:'1억',9:'10억',10:'100억',11:'1,000억',12:'1조',13:'10조',14:'100조',15:'1,000조',16:'1경',17:'10경',18:'100경'};
+function ladderY(krw){
+  var e=Math.log10(krw), out=0;
+  if(e>LAD.hi){e=LAD.hi;out=1;} else if(e<LAD.lo){e=LAD.lo;out=-1;}
+  return {y:LAD.pad+(LAD.hi-e)*LAD.perDecade,out:out};
+}
+function layoutLabels(ys,minGap,fixed){
+  var n=ys.length, out=new Array(n), i;
+  var idx=ys.map(function(y,k){return k;}).sort(function(a,b){return ys[a]-ys[b];});
+  if(fixed!==undefined&&fixed>=0){
+    /* 핀 라벨은 제자리. 핀 위쪽 앵커는 위로, 아래쪽 앵커는 아래로 밀어 핀 주변을 비운다 */
+    var fy=ys[fixed], above=idx.filter(function(k){return k!==fixed&&ys[k]<fy;}).reverse(), below=idx.filter(function(k){return k!==fixed&&ys[k]>=fy;});
+    out[fixed]=fy; var prev=fy, min=fy;
+    above.forEach(function(k){var c=Math.min(ys[k],prev-minGap); out[k]=c; prev=c; if(c<min)min=c;});
+    prev=fy;
+    below.forEach(function(k){var c=Math.max(ys[k],prev+minGap); out[k]=c; prev=c;});
+    if(min>=4) return out;
+  }
+  var p=-Infinity;
+  idx.forEach(function(k){
+    if(k===fixed){out[k]=ys[k];return;}
+    var c=Math.max(ys[k],p+minGap);
+    if(fixed!==undefined&&fixed>=0&&c>ys[fixed]-minGap&&c<ys[fixed]+minGap) c=ys[fixed]+minGap;
+    out[k]=c; p=c;
+  });
+  return out;
+}
+function ladderModel(usd,anchors,fx){
+  var items=anchors.map(function(a){var k=anchorKRW(a,fx), p=ladderY(k); return {kind:a.kind,name:a.short,val:fmtCompact(k),y:p.y,out:p.out};});
+  var krw=usd*fx, pp=ladderY(krw);
+  items.push({kind:'pin',name:'지금',val:fmtCompact(krw),y:pp.y,out:pp.out});
+  var ly=layoutLabels(items.map(function(i){return i.y;}),LAD.minGap,items.length-1);
+  items.forEach(function(it,i){it.ly=ly[i];it.pushed=ly[i]-it.y>1;});
+  var height=LAD.pad*2+(LAD.hi-LAD.lo)*LAD.perDecade;
+  var maxLy=Math.max.apply(null,ly)+LAD.pad; if(maxLy>height) height=maxLy;
+  var ticks=[]; for(var e=LAD.hi;e>=LAD.lo;e--) ticks.push({e:e,y:LAD.pad+(LAD.hi-e)*LAD.perDecade,ko:TICK_KO[e],usd:fmtUsdShort(Math.pow(10,e)/fx)});
+  return {items:items,ticks:ticks,height:height};
+}
+
+/* ================= 훈련 ================= */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function rint(rng,n){return Math.floor(rng()*n);}
+function choice(rng,arr){return arr[rint(rng,arr.length)];}
+function shuffle(arr,rng){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=rint(rng,i+1),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+var UNIT_MULT={million:1e6,billion:1e9,trillion:1e12};
+var UNIT_KO={million:'100만',billion:'10억',trillion:'1조'};
+var UNIT_NUMS=[1,2,3,4,5,6,7,8,9,10,12,15,20,25,30,40,50,60,70,80,90,100,150,200,250,300,400,500,600,700,800,900];
+function engUnit(v){
+  var u=v>=1e12?['trillion',1e12]:v>=1e9?['billion',1e9]:v>=1e6?['million',1e6]:['thousand',1e3];
+  var q=Number((v/u[1]).toPrecision(6));
+  return (q>=1000?comma(q):String(q))+' '+u[0];
+}
+function finalize(type,prompt,correct,wrongs,rng,explain,extra){
+  var seen={}; seen[correct]=1; var ws=[];
+  wrongs.forEach(function(w){if(!seen[w]&&ws.length<3){seen[w]=1;ws.push(w);}});
+  var all=shuffle([correct].concat(ws),rng), q={type:type,prompt:prompt,choices:all,answerIndex:all.indexOf(correct),explain:explain};
+  for(var k in extra) q[k]=extra[k];
+  return q;
+}
+function qUnit(rng){
+  var n=choice(rng,UNIT_NUMS), unit=choice(rng,['million','billion','trillion']), val=n*UNIT_MULT[unit];
+  if(rng()<0.6){
+    var ans=fmtKo(val), cand=mults(rng).filter(function(m){return val*m>=1e4;});
+    if(unit==='billion'&&val*0.1>=1e4) cand.unshift(0.1); /* billion=억 착각을 항상 먼저 */
+    var wr=cand.map(function(m){return fmtKo(val*m);});
+    return finalize('unit',n+' '+unit+'은 한국식으로?',ans,wr,rng,
+      unit+' = '+UNIT_KO[unit]+' → '+n+' '+unit+' = '+fmtKo(val,'달러')+'예요.',{rule:true,kind:'forward',val:val});
+  }
+  var ans2=engUnit(val), c2=mults(rng).filter(function(m){var v=val*m;return v>=1e3&&v<=1e16;}).map(function(m){return engUnit(val*m);});
+  return finalize('unit',fmtKo(val,'달러')+'를 영어 단위로?',ans2,c2,rng,
+    fmtKo(val,'달러')+' = '+ans2+'이에요. '+unit+' = '+UNIT_KO[unit]+'이라서 '+fmtKo(val)+' ÷ '+UNIT_KO[unit]+' = '+n+'이에요.',{rule:true,kind:'reverse',val:val});
+}
+function mults(rng){return shuffle([10,0.1],rng).concat(shuffle([100,0.01],rng),shuffle([1000,0.001],rng));}
+function niceAmount(rng,e0,e1){return choice(rng,[1,2,3,5,7])*Math.pow(10,e0+rint(rng,e1-e0+1));}
+function qConvert(rng,fx){
+  var tip='규칙: 10억 달러 ≈ '+fmtCompact(1e9*fx)+' 원.';
+  if(rng()<0.6){
+    var usd=niceAmount(rng,8,12), krw=usd*fx, ans=fmtCompact(krw)+' 원';
+    var wr=mults(rng).map(function(m){return krw*m;}).filter(function(v){return v>=1e8&&v<1e19;}).map(function(v){return fmtCompact(v)+' 원';});
+    return finalize('convert',fmtKo(usd,'달러')+'는 원화로 대략?',ans,wr,rng,
+      '1달러가 약 '+comma(fx)+'원이라서 '+fmtKo(usd,'달러')+' × '+comma(fx)+' ≈ '+ans+'이에요. '+tip,{rule:false,kind:'forward',usd:usd,krw:krw});
+  }
+  var k2=niceAmount(rng,10,14), u2=k2/fx, ans2=fmtCompact(u2)+' 달러';
+  var wr2=mults(rng).map(function(m){return u2*m;}).filter(function(v){return v>=1e6;}).map(function(v){return fmtCompact(v)+' 달러';});
+  return finalize('convert',fmtKo(k2,'원')+'은 달러로 대략?',ans2,wr2,rng,
+    fmtKo(k2,'원')+' ÷ '+comma(fx)+'원 ≈ '+ans2+'예요. '+tip,{rule:false,kind:'reverse',usd:u2,krw:k2});
+}
+function qCompare(rng,fx,anchors){
+  var a,b,i,pair=null;
+  for(i=0;i<80;i++){
+    a=choice(rng,anchors); b=choice(rng,anchors);
+    if(a.id===b.id) continue;
+    var ua=anchorUSD(a,fx), ub=anchorUSD(b,fx);
+    var rr=Math.max(ua,ub)/Math.min(ua,ub);
+    if(rr>=1.3&&rr<=30){pair=[a,b];break;}
+  }
+  if(!pair){
+    var s=anchors.slice().sort(function(x,y){return anchorUSD(x,fx)-anchorUSD(y,fx);});
+    for(i=0;i+2<s.length&&!pair;i++){var q2=anchorUSD(s[i+2],fx)/anchorUSD(s[i],fx); if(q2>=1.3&&q2<=30) pair=[s[i],s[i+2]];}
+    if(!pair) pair=[s[0],s[1]];
+  }
+  a=pair[0]; b=pair[1];
+  var big=anchorUSD(a,fx)>=anchorUSD(b,fx)?a:b, small=big===a?b:a, ratio=anchorUSD(big,fx)/anchorUSD(small,fx);
+  var ex=big.label+'('+anchorDisplay(big,fx)+', '+big.asof+')이 '+small.label+'('+anchorDisplay(small,fx)+', '+small.asof+')보다 커요. '+foldText(ratio)+' 차이예요.';
+  return finalize('compare','어느 쪽이 더 클까요?',big.label,[small.label],rng,ex,{rule:false,bigId:big.id,smallId:small.id,ratio:ratio});
+}
+function makeQuestion(type,rng,fx,anchors){
+  anchors=anchors||ANCHORS; fx=fx||DEFAULT_FX;
+  if(type==='unit') return qUnit(rng);
+  if(type==='convert') return qConvert(rng,fx);
+  return qCompare(rng,fx,anchors);
+}
+var TYPE_NAME={unit:'단위',convert:'환산',compare:'비교'};
+function newGame(rng,fx,anchors){
+  var types=shuffle(['unit','unit','unit','convert','convert','convert','convert','compare','compare','compare'],rng);
+  return {qs:types.map(function(t){return makeQuestion(t,rng,fx,anchors);}),idx:0,picks:[],phase:'q'};
+}
+function pick(g,i){
+  var q=g.qs[g.idx];
+  if(g.phase!=='q'||!(i>=0&&i<q.choices.length)) return g;
+  return {qs:g.qs,idx:g.idx,picks:g.picks.concat([i]),phase:'answered'};
+}
+function advance(g){
+  if(g.phase!=='answered') return g;
+  if(g.idx+1>=g.qs.length) return {qs:g.qs,idx:g.idx,picks:g.picks,phase:'done'};
+  return {qs:g.qs,idx:g.idx+1,picks:g.picks,phase:'q'};
+}
+function summarize(g){
+  var score=0,streak=0,best=0,wrong=[],by={unit:0,convert:0,compare:0};
+  g.qs.forEach(function(q,i){
+    if(g.picks[i]===undefined) return;
+    if(g.picks[i]===q.answerIndex){score++;streak++;if(streak>best)best=streak;}
+    else{streak=0;wrong.push({i:i,q:q,pick:g.picks[i]});by[q.type]++;}
+  });
+  var worst=null,mx=0; ['unit','convert','compare'].forEach(function(t){if(by[t]>mx){mx=by[t];worst=t;}});
+  return {score:score,total:g.qs.length,bestStreak:best,wrong:wrong,by:by,worst:worst};
+}
+function adviceFor(s){
+  if(!s.worst) return '모두 맞혔어요! 큰 금액이 이제 낯설지 않을 거예요.';
+  if(s.worst==='unit') return '단위를 많이 헷갈렸어요. 아래 규칙 3칸을 한 번 더 봐요.';
+  if(s.worst==='convert') return '환산은 1달러를 1,300원쯤으로 어림해서 자릿수부터 맞춰 보세요.';
+  return '크기 순서는 바꾸기 탭의 「더 보기」 사다리에서 한눈에 볼 수 있어요.';
+}
+function updateRecord(rec,score,streak){
+  rec=rec||{};
+  var prev=rec.best||0, plays=(rec.plays||0)+1;
+  return {rec:{best:Math.max(prev,score),bestStreak:Math.max(rec.bestStreak||0,streak),plays:plays},newBest:score>prev&&plays>1};
+}
+
+var api={DEFAULT_FX:DEFAULT_FX,FX_ASOF:FX_ASOF,POP:POP,ANCHORS:ANCHORS,KIND_NAME:KIND_NAME,parseMoney:parseMoney,fmtKo:fmtKo,fmtCompact:fmtCompact,fmtUsdKo:fmtUsdKo,fmtUsdShort:fmtUsdShort,ratioText:ratioText,foldText:foldText,durationText:durationText,convertModel:convertModel,ruleIndex:ruleIndex,rulesData:rulesData,anchorUSD:anchorUSD,anchorKRW:anchorKRW,anchorDisplay:anchorDisplay,buildRows:buildRows,pickTop3:pickTop3,ladderModel:ladderModel,layoutLabels:layoutLabels,LAD:LAD,mulberry32:mulberry32,makeQuestion:makeQuestion,newGame:newGame,pick:pick,advance:advance,summarize:summarize,adviceFor:adviceFor,updateRecord:updateRecord,TYPE_NAME:TYPE_NAME,comma:comma};
+if(typeof document==='undefined'){ globalThis.MSL=api; return; }
+
+/* ================= DOM ================= */
+var $=function(id){return document.getElementById(id);};
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+var params=new URLSearchParams(location.search);
+var th=params.get('theme'); if(th==='dark'||th==='light') document.documentElement.setAttribute('data-theme',th);
+if(params.get('focus')==='ladder') document.body.classList.add('focus-ladder');
+if(params.get('shot')==='1'){document.body.classList.add('shot'); if(params.get('w')==='360')document.body.classList.add('w360');}
+
+var FX=DEFAULT_FX, fxMode='default', fxAsof=FX_ASOF, fxFailed=false;
+var curPref=lsGet('msl2.cur')==='KRW'?'KRW':'USD';
+var moreOpen=params.get('more')==='1', farOpen=false;
+var G=null, demo=params.get('demo');
+
+function md(iso){return iso&&iso.length>=10?iso.slice(5,10):iso;}
+function readFxCache(){
+  try{var c=JSON.parse(lsGet('msl2.fx')||'null'); if(c&&c.rate>0){FX=c.rate;fxMode='cache';fxAsof=c.asof||FX_ASOF;}}catch(e){}
+}
+function fxLabel(){
+  if(fxMode==='manual') return '직접 입력';
+  if(fxMode==='auto') return '자동('+md(fxAsof)+')';
+  if(fxMode==='cache') return '저장값('+md(fxAsof)+')';
+  return '기본값('+md(FX_ASOF)+')';
+}
+function fetchFx(){
+  var ac=new AbortController(), to=setTimeout(function(){ac.abort();},3000);
+  return fetch('https://open.er-api.com/v6/latest/USD',{signal:ac.signal,cache:'no-store'}).then(function(r){
+    clearTimeout(to); if(!r.ok) throw new Error('http');
+    return r.json();
+  }).then(function(j){
+    var rate=j&&j.rates&&j.rates.KRW; if(!(rate>0)) throw new Error('no KRW');
+    var d=new Date(j.time_last_update_utc), asof=isNaN(d.getTime())?new Date().toISOString().slice(0,10):d.toISOString().slice(0,10);
+    rate=Math.round(rate*100)/100;
+    lsSet('msl2.fx',JSON.stringify({rate:rate,asof:asof,fetchedAt:Date.now()}));
+    return {rate:rate,asof:asof};
+  },function(e){clearTimeout(to);throw e;});
+}
+function applyAuto(r){FX=r.rate;fxAsof=r.asof;fxMode='auto';fxFailed=false;syncFx();renderConv();}
+function syncFx(){
+  var f=$('fx'); if(document.activeElement!==f) f.value=String(FX);
+  $('fxlabel').textContent=fxFailed?'조회 실패 · '+fxLabel():fxLabel();
+}
+
+/* ----- 바꾸기 탭 ----- */
+var EXAMPLES=['1000억 달러','$4.2T','300 million','50조원','10억원'];
+function rulesHTML(usd){
+  var on=usd===null?-1:ruleIndex(usd);
+  return rulesData(FX).map(function(c,i){return '<div class="cell'+(i===on?' on':'')+'"><b>'+c.en+'</b>'+c.ko+'<span class="v">'+c.v+'</span></div>';}).join('');
+}
+function renderRules(m){$('rules').innerHTML=rulesHTML(m?m.usd:null);}
+function renderAnswer(m){
+  var b=$('ansbody');
+  if(!m){ b.innerHTML='<div class="hint">숫자와 단위를 같이 적어 주세요. 예: 1000억 달러</div>'; return; }
+  var h='<div class="big">'+esc(m.big)+'</div><div class="sub">'+esc(m.sub)+'</div>';
+  if(!m.p.curExplicit){
+    h+=curPref==='USD'?'<button type="button" class="link" id="curtoggle">달러로 읽었어요 · 원으로 바꾸기</button>':'<button type="button" class="link" id="curtoggle">원으로 읽었어요 · 달러로 바꾸기</button>';
+  }
+  b.innerHTML=h;
+}
+function senseRowHTML(r,expanded){
+  var sub='';
+  if(expanded){
+    if(r.anchor){var a=r.anchor; sub='<small>'+esc(anchorDisplay(a,FX))+' · '+esc(a.asof)+' · <a href="'+esc(a.url)+'" target="_blank" rel="noopener noreferrer">'+esc(a.src)+'</a></small>';}
+    else if(r.sub) sub='<small>'+esc(r.sub)+'</small>';
+  }
+  return '<div class="row"><div class="rl"><span>'+esc(r.label)+'</span>'+sub+'</div><b>'+esc(r.value)+'</b></div>';
+}
+function ladderHTML(m){
+  var L=ladderModel(m.usd,ANCHORS,FX), colors={life:'var(--life)',corp:'var(--corp)',nation:'var(--nation)',pin:'var(--blue)'};
+  var h='<div class="card ladder-card" id="ladder"><div class="ladder-t">크기 사다리 <span class="fine">(위로 갈수록 커요 · 10배마다 눈금)</span></div><div class="ladder" style="height:'+L.height+'px"><div class="axis"></div>';
+  L.ticks.forEach(function(t){h+='<div class="tick" style="top:'+t.y+'px"></div><div class="tk" style="top:'+t.y+'px">'+t.ko+'원<small>'+t.usd+'</small></div>';});
+  L.items.forEach(function(it){
+    var c=colors[it.kind], pin=it.kind==='pin';
+    h+='<div class="gd" style="top:'+it.y+'px;background:'+c+'"></div>';
+    h+='<div class="dot'+(pin?' pin':'')+'" style="top:'+it.y+'px;background:'+c+'"></div>';
+    var txt=pin?'<span>지금 '+esc(it.val)+(it.out?' · 범위 밖':'')+'</span>':'<i class="bu" style="background:'+c+'"></i><b>'+esc(it.name)+'</b> '+esc(it.val);
+    h+='<div class="lb'+(pin?' pin':'')+'" style="top:'+it.ly+'px">'+txt+'</div>';
+  });
+  h+='</div><div class="legend"><span><i style="background:var(--life)"></i>생활</span><span><i style="background:var(--corp)"></i>기업</span><span><i style="background:var(--nation)"></i>나라</span><span>눈금은 원화, 아래 작은 글씨는 달러</span></div></div>';
+  return h;
+}
+function renderSense(m){
+  var wrap=$('sensewrap');
+  if(!m){wrap.hidden=true;return;}
+  wrap.hidden=false;
+  var rows=buildRows(m.usd,ANCHORS,FX);
+  var list=moreOpen?rows.top.concat(rows.rest):rows.top, farHTML='';
+  if(moreOpen&&rows.far.length){
+    if(farOpen) list=list.concat(rows.far);
+    farHTML='<div class="farbox"><button type="button" class="more" id="farbtn" aria-expanded="'+(farOpen?'true':'false')+'">'+(farOpen?'너무 차이 나는 비교 접기 ‹':'너무 차이 나는 비교 '+rows.far.length+'개 더 보기 ›')+'</button></div>';
+  }
+  $('sense').innerHTML=list.map(function(r){return senseRowHTML(r,moreOpen);}).join('')+farHTML;
+  var btn=$('more'); btn.textContent=moreOpen?'접기 ‹':'더 보기 ›'; btn.setAttribute('aria-expanded',moreOpen?'true':'false');
+  var lw=$('ladderwrap'); lw.hidden=!moreOpen; lw.innerHTML=moreOpen?ladderHTML(m):'';
+}
+function renderConv(){
+  var m=convertModel($('q').value,curPref,FX);
+  var mm=m.ok?m:null;
+  renderAnswer(mm); renderRules(mm); renderSense(mm); syncFx();
+}
+function setParam(k,v){
+  try{var u=new URL(location.href); if(v===null||v==='') u.searchParams.delete(k); else u.searchParams.set(k,v); history.replaceState(null,'',u.toString());}catch(e){}
+}
+
+/* ----- 훈련 탭 ----- */
+function loadRec(){try{return JSON.parse(lsGet('msl2.train')||'null')||{best:0,bestStreak:0,plays:0};}catch(e){return {best:0,bestStreak:0,plays:0};}}
+var resultInfo=null;
+function renderTrain(){
+  var v=$('view-train'), h='';
+  if(!G){
+    var r=loadRec();
+    h='<div class="card"><div class="t-big">10문제 · 1분이면 돼요</div><div class="sub">단위 3 · 환산 4 · 비교 3문제를 섞어서 풀어요. 타이머는 없어요.</div>'+
+      '<div class="rec">'+(r.plays?'<span>최고 기록 <b>'+r.best+'/10</b></span><span>연속 정답 최고 <b>'+r.bestStreak+'</b></span><span>플레이 <b>'+r.plays+'회</b></span>':'<span>아직 기록이 없어요. 첫 판을 해 봐요.</span>')+'</div>'+
+      '<button type="button" class="btn" data-act="start">시작하기</button></div>';
+  } else if(G.phase==='done'){
+    var s=summarize(G);
+    h='<div class="card"><div class="fine">결과</div><div class="t-big">10문제 중 '+s.score+'개</div>'+
+      '<div class="sub">연속 정답 최고 '+s.bestStreak+'</div>'+(resultInfo&&resultInfo.newBest?'<span class="badge">최고 기록 갱신!</span>':'')+
+      '</div><div class="card" style="margin-top:10px"><div class="explain"><b>'+esc(adviceFor(s))+'</b></div></div>';
+    if(s.worst==='unit') h+='<div class="strip">'+rulesHTML(null)+'</div><div class="note">billion은 「억」이 아니라 「10억」이에요.</div>';
+    if(s.wrong.length){
+      h+='<div class="sec">틀린 문제 다시 보기</div><div class="card" style="padding:6px 18px">'+s.wrong.map(function(w){
+        return '<div class="wrong"><div class="q">'+(w.i+1)+'. '+esc(w.q.prompt)+'</div>내 답 '+esc(w.q.choices[w.pick])+' · 정답 <b>'+esc(w.q.choices[w.q.answerIndex])+'</b><br>'+esc(w.q.explain)+'</div>';
+      }).join('')+'</div>';
+    }
+    h+='<div class="stack" style="margin-top:16px"><button type="button" class="btn" data-act="start">한 판 더</button><button type="button" class="btn ghost" data-act="tobar">바꾸기로</button></div>';
+  } else {
+    var q=G.qs[G.idx], answered=G.phase==='answered', pickI=G.picks[G.idx], n=G.qs.length;
+    h='<div class="prog" role="status"><span>'+(G.idx+1)+'/'+n+'</span><div class="bar"><i style="width:'+((G.idx+(answered?1:0))/n*100)+'%"></i></div></div>'+
+      '<div class="card"><span class="qtype">'+TYPE_NAME[q.type]+'</span><div class="prompt">'+esc(q.prompt)+'</div><div class="choices">';
+    q.choices.forEach(function(c,i){
+      var cls='ch', tag='';
+      if(answered){
+        if(i===q.answerIndex){cls+=' ok';tag='<span class="tg">정답</span>';}
+        else if(i===pickI){cls+=' bad';tag='<span class="tg">내 답</span>';}
+        else cls+=' dim';
+      }
+      h+='<button type="button" class="'+cls+'" data-act="pick" data-i="'+i+'"'+(answered?' disabled':'')+'><span>'+esc(c)+'</span>'+tag+'</button>';
     });
-  }
-
-  /* ===== 돈 탭 ===== */
-  // {l, usd?, won?, t} — USD 네이티브는 usd로 저장, W()가 런타임 환산
-  var ANCH=[
-    {l:"최저임금 연봉", won:2.5e7, t:"me"},{l:"서울 아파트(중위)", won:1e9, t:"me"},
-    {l:"유니콘 $1B", usd:1e9, t:"corp"},{l:"토스 밸류", won:9e12, t:"corp"},
-    {l:"삼성전자 시총", won:4.5e14, t:"corp"},{l:"애플 매출 $391B", usd:391e9, t:"corp"},
-    {l:"한국 GDP", won:2.5e15, t:"nation"},{l:"엔비디아 $4T", usd:4e12, t:"market"},
-    {l:"미국 국채 $31.5T", usd:31.5e12, t:"nation"}
-  ];
-  var RAT=[
-    {l:"한국 GDP", won:2.5e15},{l:"한국 1년 예산", won:6.6e14},
-    {l:"삼성 매출(300조)", won:3e14},{l:"삼성 시총(450조)", won:4.5e14},
-    {l:"미국 국방비($900B)", usd:900e9},{l:"미국 GDP($29T)", usd:29e12},
-    {l:"미국 국채($31.5T)", usd:31.5e12}
-  ];
-  var PRESETS=[
-    {l:"$1M", usd:1e6},{l:"$1B", usd:1e9},{l:"$1T", usd:1e12},
-    {l:"연매출 10억", won:1e9},{l:"100억", won:1e10},{l:"1000억", won:1e11},{l:"1조원", won:1e12},
-    {l:"토스 밸류(9조)", won:9e12},{l:"네이버 매출(11조)", won:1.1e13},{l:"쿠팡 매출(40조)", won:4e13},
-    {l:"한국 국방(60조)", won:6e13},{l:"한국 복지(250조)", won:2.5e14},{l:"삼성 매출(300조)", won:3e14},
-    {l:"삼성 시총(450조)", won:4.5e14},{l:"애플 매출($391B)", usd:391e9},{l:"한국 예산(660조)", won:6.6e14},
-    {l:"미국 국방비($900B)", usd:900e9},{l:"엔비디아($4T)", usd:4e12},{l:"미국 GDP($29T)", usd:29e12},
-    {l:"미국 국채($31.5T)", usd:31.5e12}
-  ];
-  var M_H=480, LMIN=Math.log10(1e7), LMAX=Math.log10(6e16);
-  var cur="won";
-  var UNITS={
-    won:[["원",1],["만원",1e4],["억원",1e8],["조원",1e12]],
-    usd:[["$",1],["K (천)",1e3],["M (백만)",1e6],["B (십억)",1e9],["T (조)",1e12]]
-  };
-  function setCur(c,u){
-    cur=c; var s=el("unit");
-    s.innerHTML=UNITS[c].map(function(x){return '<option value="'+x[1]+'">'+x[0]+'</option>';}).join("");
-    s.value=String(u||(c==="usd"?1e9:1e12));
-    el("curW").classList.toggle("on",c==="won"); el("curU").classList.toggle("on",c==="usd");
-  }
-  function pickUnit(v,list){for(var i=0;i<list.length;i++) if(v>=list[i]) return list[i]; return list[list.length-1];}
-  function fmtAmt(x){return String(Number(x.toFixed(4)))}
-  function setWon(w){
-    setCur("won",pickUnit(w,[1e12,1e8,1e4,1]));
-    var u=parseFloat(el("unit").value); el("amt").value=fmtAmt(w/u); renderMoney();
-  }
-  function setUsd(d,r){
-    setCur("usd",pickUnit(d,[1e12,1e9,1e6,1e3,1]));
-    var u=parseFloat(el("unit").value); el("amt").value=r?String(Number((d/u).toPrecision(3))):fmtAmt(d/u); renderMoney();
-  }
-  function readMoney(){
-    var a=parseFloat(el("amt").value)||0, u=parseFloat(el("unit").value);
-    if(cur==="usd"){var d=a*u; return {d:d,w:d*FX};}
-    var w=a*u; return {w:w,d:w/FX};
-  }
-  function buildMoneyLadder(){
-    buildLadder("ladder",ANCH.map(function(a){var w=W(a);
-      return {l:a.l,w:w,t:a.t,amt:fmtWonShort(w).replace("₩","")};}),LMIN,LMAX,"me",M_H);
-  }
-  function renderMoney(){
-    var m=readMoney(), w=m.w, d=m.d, unitV=parseFloat(el("unit").value);
-    if(cur==="usd"){
-      el("won").textContent=fmtUsdShort(d);
-      el("usd").textContent="= "+fmtUsdKo(d);
-      el("fxline").textContent="= "+fmtWonShort(w)+" · 환율 "+fxStr();
-    }else{
-      el("won").textContent=fmtWon(w);
-      el("usd").textContent="≈ US"+fmtUsdShort(d)+" = "+fmtUsdKo(d,3);
-      el("fxline").textContent="환율 "+fxStr();
+    h+='</div>';
+    if(answered){
+      var ok=pickI===q.answerIndex;
+      h+='<div class="explain"><span class="verdict '+(ok?'ok':'bad')+'">'+(ok?'맞았어요':'아쉬워요')+'</span>'+esc(q.explain)+'</div>';
     }
-    el("warn").hidden=!((d>=1e9&&d<1e12)||(cur==="usd"&&unitV===1e9));
-    var p=Math.max(0,Math.min(1,(Math.log10(Math.max(w,1))-LMIN)/(LMAX-LMIN)));
-    el("mYou").style.bottom=(p*M_H)+"px";
-    el("mYouTag").textContent=cur==="usd"?fmtUsdShort(d):fmtWon(w);
-    el("t1").innerHTML=years(w,1e6); el("t2").innerHTML=years(w,1e8);
-    el("pc").innerHTML=fmtWon(w/POP).replace("₩","")+"원";
-    el("wage").innerHTML=human(w/2.5e7,"명")+' <small>1년치</small>';
-    el("apt").innerHTML=human(w/1e9,"채"); el("lotto").innerHTML=human(w/2e9,"번");
-    var R=el("ratios"); R.innerHTML="";
-    RAT.forEach(function(a){var x=document.createElement("div");x.className="cmp";
-      x.innerHTML='<div class="k">'+a.l+' 대비</div><div class="v">'+multStr(w,W(a))+'</div>';R.appendChild(x);});
-    document.querySelectorAll("#chips .chip").forEach(function(c,i){
-      var cw=W(PRESETS[i]); c.classList.toggle("on",Math.abs(cw-w)<=Math.max(1,w*1e-9));});
-    // 은행 예금 이자 (세후 = 세전 × (1-0.154), 이자소득세 15.4%)
-    var rate=(parseFloat(el("rate").value)||0)/100, iy0=w*rate, iy1=iy0*0.846;
-    el("iy0").innerHTML=fmtWon(iy0).replace("₩",""); el("iy1").innerHTML=fmtWon(iy1).replace("₩","");
-    el("im0").innerHTML=fmtWon(iy0/12).replace("₩",""); el("im1").innerHTML=fmtWon(iy1/12).replace("₩","");
-    el("foot").innerHTML="※ 대략값(환율 ₩"+fxStr()+" · 인구 5,100만 · 이자소득세 15.4%). 핵심은 <b>자릿수와 앵커 대비 배율</b>.";
+    h+='</div>';
+    if(answered) h+='<div style="margin-top:12px"><button type="button" class="btn" data-act="next">'+(G.idx+1>=n?'결과 보기':'다음')+'</button></div>';
   }
-  (function(){var L=el("ladder");
-    L.innerHTML='<div class="ticks"></div>';
-    var you=document.createElement("div");you.className="you";you.id="mYou";
-    you.innerHTML='<span class="pin"></span><span class="tag" id="mYouTag"></span>';L.appendChild(you);})();
-  var C=el("chips");
-  PRESETS.forEach(function(p){var b=document.createElement("button");b.type="button";b.className="chip";b.textContent=p.l;
-    b.onclick=function(){ if(p.usd!=null) setUsd(p.usd); else setWon(p.won); };C.appendChild(b);});
-  el("amt").addEventListener("input",renderMoney); el("unit").addEventListener("change",renderMoney);
-  el("rate").addEventListener("input",renderMoney);
-  el("curW").onclick=function(){ if(cur==="won") return; var w=readMoney().w; if(w>0) setWon(w); else {setCur("won");renderMoney();} };
-  el("curU").onclick=function(){ if(cur==="usd") return; var m=readMoney(); if(m.w>0) setUsd(m.d,true); else {setCur("usd");renderMoney();} };
+  v.innerHTML=h;
+}
+function startGame(){G=newGame(Math.random,FX,ANCHORS);resultInfo=null;renderTrain();window.scrollTo(0,0);}
+function onDone(){
+  var s=summarize(G), u=updateRecord(loadRec(),s.score,s.bestStreak);
+  lsSet('msl2.train',JSON.stringify(u.rec)); resultInfo=u;
+}
+function demoGame(kind){
+  var g=newGame(mulberry32(11),FX,ANCHORS), i;
+  if(kind==='answered'){
+    for(i=0;i<2;i++){g=pick(g,g.qs[g.idx].answerIndex);g=advance(g);}
+    var q=g.qs[g.idx]; g=pick(g,(q.answerIndex+1)%q.choices.length);
+  } else {
+    for(i=0;i<10;i++){var qq=g.qs[g.idx], wrong=(i===3||i===6); g=pick(g,wrong?(qq.answerIndex+1)%qq.choices.length:qq.answerIndex); g=advance(g);}
+    var s=summarize(g); resultInfo={newBest:true};
+  }
+  return g;
+}
 
-  /* ===== 석유 탭 ===== */
-  var O_H=410;
-  var OANCH=[
-    {l:"1만 배럴", w:1e4, t:"oil"},
-    {l:"유조선 VLCC 1척", w:2e6, t:"oil"},
-    {l:"사우디 하루 생산", w:9e6, t:"oil"},
-    {l:"전세계 하루 소비", w:1e8, t:"oil"},
-    {l:"미국 SPR(전략비축)", w:3.5e8, t:"oil"},
-    {l:"전세계 연간 소비", w:3.65e10, t:"oil"}
-  ];
-  var OPRE=[
-    {l:"1만 배럴", w:1e4},{l:"OPEC+ 감산(100만/일)", w:1e6},{l:"유조선 1척(200만)", w:2e6},
-    {l:"한국 하루수입(270만)", w:2.7e6},{l:"사우디 하루생산(900만)", w:9e6},
-    {l:"전세계 하루소비(1억)", w:1e8},{l:"미국 SPR(3.5억)", w:3.5e8}
-  ];
-  var OLMIN=0, OLMAX=Math.log10(3.65e10);
-  function fmtBbl(b){
-    if(b>=1e8) return n1((b/1e8),b>=1e9?1:2)+"억 배럴";
-    if(b>=1e4) return n1((b/1e4),b>=1e6?0:1)+"만 배럴";
-    return Math.round(b).toLocaleString()+" 배럴";
+/* ----- 탭 전환 · 이벤트 ----- */
+function showTab(name,silent){
+  var train=name==='train';
+  $('view-conv').hidden=train; $('view-train').hidden=!train;
+  $('tab-conv').setAttribute('aria-selected',train?'false':'true'); $('tab-train').setAttribute('aria-selected',train?'true':'false');
+  if(train) renderTrain();
+  if(!silent) setParam('tab',train?'train':null);
+}
+document.addEventListener('click',function(e){
+  var t=e.target.closest?e.target.closest('button'):null; if(!t) return;
+  if(t.id==='tab-conv') return showTab('conv');
+  if(t.id==='tab-train') return showTab('train');
+  if(t.id==='curtoggle'){curPref=curPref==='USD'?'KRW':'USD';lsSet('msl2.cur',curPref);return renderConv();}
+  if(t.id==='more'){moreOpen=!moreOpen;return renderConv();}
+  if(t.id==='farbtn'){farOpen=!farOpen;return renderConv();}
+  if(t.id==='fxrefresh'){
+    t.classList.add('spin');t.disabled=true;
+    fetchFx().then(function(r){t.classList.remove('spin');t.disabled=false;applyAuto(r);},function(){t.classList.remove('spin');t.disabled=false;fxFailed=true;syncFx();});
+    return;
   }
-  function fmtUsdRaw(d){
-    if(d>=1e12) return "US$"+n1((d/1e12),2)+"T"; if(d>=1e8) return "$"+n1((d/1e8),1)+"억 (US$"+n1((d/1e9),1)+"B)";
-    if(d>=1e4) return "$"+n1((d/1e4),1)+"만"; return "$"+Math.round(d).toLocaleString();
-  }
-  function renderOil(){
-    var b=(parseFloat(el("oamt").value)||0)*parseFloat(el("ounit").value);
-    var price=parseFloat(el("oil-price").value)||0;
-    var lit=b*159, usd=b*price, won=usd*FX;
-    el("obbl").textContent=fmtBbl(b);
-    el("olit").textContent="= "+ (lit>=1e8?n1((lit/1e8),1)+"억 L":lit>=1e4?n1((lit/1e4),0)+"만 L":Math.round(lit).toLocaleString()+" L");
-    el("ousd").textContent="≈ "+fmtUsdRaw(usd)+" (₩"+ (won>=1e12?n1((won/1e12),2)+"조":won>=1e8?n1((won/1e8),0)+"억":Math.round(won).toLocaleString()) +")";
-    var p=Math.max(0,Math.min(1,(Math.log10(Math.max(b,1))-OLMIN)/(OLMAX-OLMIN)));
-    el("oYou").style.bottom=(p*O_H)+"px"; el("oYouTag").textContent=fmtBbl(b);
-    el("oL").innerHTML=(lit>=1e8?n1((lit/1e8),1)+"억":lit>=1e4?n1((lit/1e4),0)+"만":Math.round(lit).toLocaleString())+" <small>L</small>";
-    el("ocar").innerHTML=human(lit/50,"대");
-    el("ovlcc").innerHTML=(b/2e6>=1?human(b/2e6,"척"):multStr(b,2e6));
-    el("oval").innerHTML=fmtUsdRaw(usd);
-    el("oworld").innerHTML=(b/1e8>=1? human(b/1e8,"일치") : multStr(b,1e8));
-    el("okr").innerHTML=(b/2.7e6>=1? human(b/2.7e6,"일치") : multStr(b,2.7e6));
-    el("osaudi").innerHTML=(b/9e6>=1? human(b/9e6,"일치") : multStr(b,9e6));
-    el("ospr").innerHTML=multStr(b,3.5e8);
-    document.querySelectorAll("#ochips .chip").forEach(function(c){c.classList.toggle("on",Math.abs(parseFloat(c.dataset.w)-b)<1);});
-    el("ofoot").innerHTML="※ 1배럴=159L(약 42갤런). 유가·생산량은 대략값(유가 기본 $75, 수동 유지). 전세계 하루소비 ~1억 배럴/일이 핵심 앵커.";
-  }
-  (function(){var L=el("oladder");
-    L.innerHTML='<div class="ticks"></div>';
-    OANCH.forEach(function(a){a.amt=fmtBbl(a.w).replace(" 배럴","");});
-    buildLadder("oladder",OANCH,OLMIN,OLMAX,"oil",O_H);
-    var you=document.createElement("div");you.className="you oilyou";you.id="oYou";
-    you.innerHTML='<span class="pin"></span><span class="tag" id="oYouTag"></span>';L.appendChild(you);})();
-  var OC=el("ochips");
-  OPRE.forEach(function(p){var b=document.createElement("button");b.type="button";b.className="chip oilc";b.textContent=p.l;b.dataset.w=p.w;
-    b.onclick=function(){setBbl(p.w);};OC.appendChild(b);});
-  function setBbl(b){var u=b>=1e8?1e8:b>=1e6?1e6:b>=1e4?1e4:1;el("ounit").value=String(u);
-    el("oamt").value=(b/u%1===0?b/u:n1((b/u),2));renderOil();}
-  el("oamt").addEventListener("input",renderOil); el("ounit").addEventListener("change",renderOil);
-  el("oil-price").addEventListener("input",renderOil);
+  if(t.classList.contains('chip')){$('q').value=t.textContent;setParam('q',t.textContent);return renderConv();}
+  var act=t.getAttribute('data-act');
+  if(act==='start') return startGame();
+  if(act==='pick'){G=pick(G,Number(t.getAttribute('data-i')));return renderTrain();}
+  if(act==='next'){G=advance(G);if(G.phase==='done')onDone();return renderTrain();}
+  if(act==='tobar') return showTab('conv');
+});
+$('q').addEventListener('input',function(){setParam('q',$('q').value);renderConv();});
+$('fx').addEventListener('input',function(){
+  var v=parseFloat($('fx').value.replace(/,/g,''));
+  if(v>0&&isFinite(v)){FX=v;fxMode='manual';fxFailed=false;$('fxlabel').textContent=fxLabel();renderConv();}
+});
+$('fx').addEventListener('blur',syncFx);
 
-  /* ===== 환율 UI / 전체 갱신 ===== */
-  function renderAll(){ buildMoneyLadder(); syncFx(); renderMoney(); renderOil(); }
-  function applyAuto(res){ FX=res.rate; fxSrc="auto"; fxAsof=res.asof; fxNote=""; renderAll(); }
-  el("fx").addEventListener("input",function(){
-    var v=parseFloat(el("fx").value);
-    if(!(v>0)) return;
-    FX=v; fxSrc="manual"; fxNote=""; renderAll();
-  });
-  el("fx").addEventListener("change",function(){ el("fx").value=String(FX); });
-  el("fxbtn").onclick=function(){
-    var b=el("fxbtn"); b.classList.add("spin"); b.disabled=true;
-    fetchFx().then(function(res){ b.classList.remove("spin"); b.disabled=false; applyAuto(res); },
-      function(){ b.classList.remove("spin"); b.disabled=false; fxNote=" · 조회 실패"; syncFx(); });
-  };
-
-  /* ===== 탭 전환 ===== */
-  function show(which){
-    var money=which==="money";
-    el("tabMoney").hidden=!money; el("tabOil").hidden=money;
-    el("tabMoneyBtn").classList.toggle("on",money);
-    el("tabOilBtn").classList.toggle("on",!money);
-  }
-  el("tabMoneyBtn").onclick=function(){show("money")};
-  el("tabOilBtn").onclick=function(){show("oil")};
-
-  /* ===== 초기화: 기본값/캐시로 즉시 렌더 → 도착하면 갱신 ===== */
-  setCur("won",1e12);
-  if(QS.c==="usd"||QS.c==="won"){
-    var UM={"$":1,K:1e3,M:1e6,B:1e9,T:1e12,"원":1,"만":1e4,"억":1e8,"조":1e12};
-    var uk=QS.u?(UM[QS.u]||UM[QS.u.toUpperCase()]):null;
-    setCur(QS.c,uk);
-    if(QS.v!=null && QS.v!=="") el("amt").value=QS.v;
-  }
-  if(!QS.selftest) readCache();
-  renderAll();
-  if(QS.tab==="oil") show("oil");
-
-  if(QS.selftest){ runSelfTest(); }
-  else{
-    fetchFx().then(function(res){ if(fxSrc!=="manual") applyAuto(res); },function(){});
-  }
-
-  /* ===== 자체 검증 (?selftest=1 일 때만 동작, 평소엔 비활성) ===== */
-  function runSelfTest(){
-    var out=[];
-    function log(k,v){out.push(k+" => "+v);}
-    function ratio(label){var r=document.querySelectorAll("#ratios .cmp"),i;
-      for(i=0;i<r.length;i++) if(r[i].querySelector(".k").textContent.indexOf(label)===0) return r[i].querySelector(".v").textContent; return "?";}
-    function tickBottom(label){var r=document.querySelectorAll("#ladder .lbl .n"),i;
-      for(i=0;i<r.length;i++) if(r[i].textContent.indexOf(label)>=0) return r[i].parentNode.style.bottom+" / dot "+r[i].parentNode.previousSibling.style.bottom; return "?";}
-    function snap(tag){
-      log(tag+" | big",el("won").textContent); log(tag+" | line2",el("usd").textContent);
-      log(tag+" | line3",el("fxline").textContent); log(tag+" | warn",el("warn").hidden?"hidden":"SHOWN");
-      log(tag+" | 한국GDP대비",ratio("한국 GDP")); log(tag+" | 엔비디아 lbl",tickBottom("엔비디아"));
-    }
-    function enter(c,v,u){setCur(c,u); el("amt").value=v; renderMoney();}
-    FX=DEF_FX; fxSrc="def"; fxAsof=DEF_ASOF; fxNote=""; renderAll();
-    log("FX label (default)",el("fxsrc").textContent+" / input="+el("fx").value);
-    enter("usd","4.2",1e12); snap("[$4.2T @1335]");
-    enter("usd","391",1e9);  snap("[$391B @1335]");
-    enter("won","1",1e12);   snap("[₩1조 @1335]");
-    el("fx").value="1400"; el("fx").dispatchEvent(new Event("input"));
-    log("FX label (manual)",el("fxsrc").textContent+" / input="+el("fx").value);
-    enter("usd","4.2",1e12); snap("[$4.2T @1400]");
-    enter("usd","391",1e9);  snap("[$391B @1400]");
-    enter("won","1",1e12);   snap("[₩1조 @1400]");
-    log("oil ousd @1400 (1M bbl,$75)",(function(){el("oamt").value="1";el("ounit").value="1000000";renderOil();return el("ousd").textContent;})());
-    log("oil ofx label",el("ofx").textContent+" / "+el("ofxsrc").textContent);
-    enter("won","1",1e12); el("curU").click(); log("switch ₩1조→$",el("amt").value+" / unit="+el("unit").selectedOptions[0].text+" / big="+el("won").textContent);
-    el("curW").click(); log("switch $→₩",el("amt").value+" / unit="+el("unit").selectedOptions[0].text+" / big="+el("won").textContent);
-    enter("usd","4.2",1e12); el("curW").click(); log("switch $4.2T→₩",el("amt").value+" / unit="+el("unit").selectedOptions[0].text+" / big="+el("won").textContent);
-    enter("won","5607",1e12); log("pc @₩5607조",el("pc").textContent);
-    log("ratio ₩1조/GDP",(enter("won","1",1e12),ratio("한국 GDP")));
-    log("oil olit/ousd",el("olit").textContent+" | "+el("ousd").textContent+" | oval="+el("oval").textContent+" | obbl="+el("obbl").textContent);
-    log("fmtUsdShort",[1234,391e6,4.2e12,999.6e6,5].map(fmtUsdShort).join(" , "));
-    log("fmtUsdKo",[4.2e12,391e9,749063670,1e6].map(function(x){return fmtUsdKo(x);}).join(" , "));
-    log("localStorage msl.fx",String(localStorage.getItem(FXKEY)));
-    FX=DEF_FX; fxSrc="def"; renderAll(); enter("won","1",1e12);
-    var pre=el("selftest"); pre.textContent=out.join("\n");
-  }
+/* ----- 초기화 ----- */
+$('chips').innerHTML=EXAMPLES.map(function(x){return '<button type="button" class="chip">'+esc(x)+'</button>';}).join('');
+$('q').value=params.get('q')||'';
+readFxCache();
+renderConv();
+if(params.get('tab')==='train'){
+  if(demo==='answered'||demo==='result') G=demoGame(demo);
+  showTab('train',true);
+}
+if(params.get('shot')!=='1'&&typeof fetch==='function'){
+  fetchFx().then(function(r){if(fxMode!=='manual')applyAuto(r);},function(){});
+}
 })();
 </script>
 </body>
